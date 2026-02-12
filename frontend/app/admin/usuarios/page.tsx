@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminHeader from "../components/AdminHeader";
 
-export default function AdminPedidos() {
+export default function AdminUsuarios() {
   const router = useRouter();
 
   useEffect(() => {
@@ -33,14 +33,14 @@ export default function AdminPedidos() {
           boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
           textAlign: "center"
         }}>
-          <div style={{ fontSize: "64px", marginBottom: "20px" }}>🛒</div>
+          <div style={{ fontSize: "64px", marginBottom: "20px" }}>👥</div>
           <h2 style={{
             fontSize: "28px",
             fontWeight: "700",
             color: "#1f2937",
             marginBottom: "16px"
           }}>
-            Gerenciamento de Pedidos
+            Gerenciamento de Usuários
           </h2>
           <p style={{
             fontSize: "16px",
@@ -53,7 +53,7 @@ export default function AdminPedidos() {
             fontSize: "14px",
             color: "#9ca3af"
           }}>
-            Aqui você poderá visualizar e gerenciar todos os pedidos realizados na loja.
+            Aqui você poderá gerenciar usuários administradores e clientes do sistema.
           </p>
         </div>
       </div>

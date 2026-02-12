@@ -1,15 +1,127 @@
 const express = require("express");
 const cors = require("cors");
 const pool = require("./db");
+const multer = require("multer");
+const path = require("path");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const app = express();
+const JWT_SECRET = "emporio-bothanico-secret-key-2026";
 
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + "-" + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (extname && mimetype) {
+      cb(null, true);
+    } else {
+      cb(new Error("Apenas imagens são permitidas!"));
+    }
+  }
+});
 
 
 app.get("/", (req, res) => {
   res.send("API Loja rodando 🚀");
+});
+
+// ========== AUTENTICAÇÃO ==========
+
+// Middleware para verificar token
+const verificarToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ error: "Token não fornecido" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.id;
+    req.userEmail = decoded.email;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: "Token inválido" });
+  }
+};
+
+// Login
+app.post("/auth/login", async (req, res) => {
+  try {
+    const { email, senha } = req.body;
+
+    const result = await pool.query(
+      "SELECT * FROM usuarios WHERE email = $1",
+      [email]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: "Email ou senha incorretos" });
+    }
+
+    const usuario = result.rows[0];
+    const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
+
+    if (!senhaCorreta) {
+      return res.status(401).json({ error: "Email ou senha incorretos" });
+    }
+
+    const token = jwt.sign(
+      { id: usuario.id, email: usuario.email, nome: usuario.nome },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      token,
+      usuario: {
+        id: usuario.id,
+        email: usuario.email,
+        nome: usuario.nome,
+        tipo: usuario.tipo
+      }
+    });
+  } catch (error) {
+    console.error("Erro no login:", error);
+    res.status(500).json({ error: "Erro ao fazer login" });
+  }
+});
+
+// Verificar token (para validar sessão)
+app.get("/auth/verificar", verificarToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, email, nome, tipo FROM usuarios WHERE id = $1",
+      [req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: "Usuário não encontrado" });
+    }
+
+    res.json({ usuario: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao verificar token" });
+  }
 });
 
 // 🔥 BUSCAR PRODUTOS DO BANCO
@@ -49,14 +161,14 @@ app.post("/produtos", async (req, res) => {
       RETURNING *`,
       [
         nome,
-        descricao,
+        descricao || null,
         preco,
-        custo,
-        sku,
-        peso_kg,
-        altura_cm,
-        largura_cm,
-        comprimento_cm
+        custo || null,
+        sku || null,
+        peso_kg || null,
+        altura_cm || null,
+        largura_cm || null,
+        comprimento_cm || null
       ]
     );
 
@@ -231,8 +343,8 @@ app.get("/admin/pedidos/:id", async (req, res) => {
     res.status(500).send("Erro detalhe pedido");
   }
 });
-// atualizar status 
-app.get("/admin/dashboard", async (req, res) => {
+// Dashboard
+app.get("/admin/dashboard", verificarToken, async (req, res) => {
   try {
 
     const totalVendas = await pool.query(`
@@ -338,37 +450,99 @@ app.get("/admin/dashboard/vendas-30dias", async (req, res) => {
 });
 
 // listar produto
-app.get("/admin/produtos", async (req, res) => {
+app.get("/admin/produtos", verificarToken, async (req, res) => {
   const result = await pool.query(
     "SELECT * FROM produtos ORDER BY id DESC"
   );
   res.json(result.rows);
 });
-///criar produto
 
-app.get("/admin/produtos", async (req, res) => {
-  const result = await pool.query(
-    "SELECT * FROM produtos ORDER BY id DESC"
-  );
-  res.json(result.rows);
+// UPLOAD DE IMAGEM
+app.post("/upload", verificarToken, upload.single("imagem"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).send("Nenhum arquivo enviado");
+    }
+    
+    const imageUrl = `http://localhost:3001/uploads/${req.file.filename}`;
+    res.json({ url: imageUrl });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro ao fazer upload");
+  }
+});
+
+// criar produto admin
+app.post("/admin/produtos", verificarToken, async (req, res) => {
+  try {
+    const { nome, preco, estoque, imagem_url, peso_kg, altura_cm, largura_cm, comprimento_cm } = req.body;
+
+    const result = await pool.query(
+      `INSERT INTO produtos 
+       (nome, descricao, preco, custo, sku, peso_kg, altura_cm, largura_cm, comprimento_cm, estoque, imagem_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       RETURNING *`,
+      [
+        nome, 
+        null, 
+        preco, 
+        null, 
+        null, 
+        peso_kg || null, 
+        altura_cm || null, 
+        largura_cm || null, 
+        comprimento_cm || null, 
+        estoque,
+        imagem_url || null
+      ]
+    );
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Erro ao criar produto:", error);
+    res.status(500).json({ error: "Erro ao criar produto", details: error.message });
+  }
 });
 // editar produto
-app.put("/admin/produtos/:id", async (req, res) => {
-  const { id } = req.params;
-  const { nome, preco, estoque } = req.body;
+app.put("/admin/produtos/:id", verificarToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nome, preco, estoque, imagem_url, peso_kg, altura_cm, largura_cm, comprimento_cm } = req.body;
 
-  await pool.query(
-    `UPDATE produtos
-     SET nome=$1, preco=$2, estoque=$3
-     WHERE id=$4`,
-    [nome, preco, estoque, id]
-  );
+    await pool.query(
+      `UPDATE produtos
+       SET nome=$1, preco=$2, estoque=$3, imagem_url=$4, peso_kg=$5, altura_cm=$6, largura_cm=$7, comprimento_cm=$8
+       WHERE id=$9`,
+      [nome, preco, estoque, imagem_url || null, peso_kg || null, altura_cm || null, largura_cm || null, comprimento_cm || null, id]
+    );
 
-  res.json({ ok: true });
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Erro ao editar produto:", error);
+    res.status(500).json({ error: "Erro ao editar produto", details: error.message });
+  }
+});
+
+// alternar status ativo/inativo
+app.patch("/admin/produtos/:id/status", verificarToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ativo } = req.body;
+
+    await pool.query(
+      "UPDATE produtos SET ativo=$1 WHERE id=$2",
+      [ativo, id]
+    );
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Erro ao alterar status:", error);
+    res.status(500).json({ error: "Erro ao alterar status" });
+  }
 });
 
 // deletar produto
-app.delete("/admin/produtos/:id", async (req, res) => {
+app.delete("/admin/produtos/:id", verificarToken, async (req, res) => {
   const { id } = req.params;
 
   await pool.query(
