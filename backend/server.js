@@ -591,9 +591,13 @@ app.get("/admin/usuarios", verificarToken, async (req, res) => {
 
 // ===== ENDPOINTS PÚBLICOS PARA CLIENTES =====
 
-// BUSCAR PEDIDOS POR EMAIL OU CPF
+// BUSCAR PEDIDOS POR EMAIL OU CPF (PÚBLICO - SEM AUTENTICAÇÃO)
 app.get("/pedidos/buscar", async (req, res) => {
   try {
+    console.log("📍 [PÚBLICO] Endpoint /pedidos/buscar chamado");
+    console.log("📍 Headers recebidos:", req.headers);
+    console.log("📍 Query params:", req.query);
+    
     const { tipo, valor } = req.query;
 
     console.log(`🔍 Busca de pedidos - Tipo: ${tipo}, Valor: ${valor}`);
