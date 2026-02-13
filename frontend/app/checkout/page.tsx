@@ -634,6 +634,8 @@ export default function CheckoutPage() {
                     placeholder="João Silva"
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
+                    name="name"
+                    autoComplete="name"
                     style={{
                       width: "100%",
                       minWidth: "min(100%, 200px)",
@@ -671,6 +673,8 @@ export default function CheckoutPage() {
                     value={cpf}
                     onChange={(e) => setCpf(formatarCPF(e.target.value))}
                     maxLength={14}
+                    name="cpf"
+                    autoComplete="off"
                     style={{
                       width: "100%",
                       minWidth: "min(100%, 200px)",
@@ -706,6 +710,8 @@ export default function CheckoutPage() {
                     placeholder="joao@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    name="email"
+                    autoComplete="email"
                     style={{
                       width: "100%",
                       minWidth: "min(100%, 200px)",
@@ -742,6 +748,8 @@ export default function CheckoutPage() {
                     maxLength={15}
                     value={telefone}
                     onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
+                    name="tel"
+                    autoComplete="tel"
                     style={{
                       width: "100%",
                       minWidth: "min(100%, 200px)",
@@ -826,6 +834,8 @@ export default function CheckoutPage() {
                     maxLength={9}
                     value={cep}
                     onChange={(e) => setCep(formatarCep(e.target.value))}
+                    name="postal-code"
+                    autoComplete="postal-code"
                     style={{
                       width: "100%",
                       minWidth: "min(100%, 200px)",
@@ -1564,15 +1574,34 @@ export default function CheckoutPage() {
             ) : formaPagamento === "cartao" && !pixQrCode ? (
               // Formulário de Cartão de Crédito
               !pedidoId ? (
-                // Se não tem pedido criado, mostra botão para criar
+                // Se não tem pedido criado, mostra botão para criar DENTRO do modal
                 <div style={{ textAlign: "center", padding: "clamp(20px, 5vw, 40px) 0" }}>
                   <p style={{
                     fontSize: "clamp(14px, 3.5vw, 16px)",
                     color: "#666",
                     marginBottom: "clamp(20px, 5vw, 24px)"
                   }}>
-                    Clique em "Confirmar Pedido" abaixo para prosseguir
+                    Confirme seu pedido para prosseguir com o pagamento
                   </p>
+                  
+                  <button
+                    onClick={finalizarPedido}
+                    disabled={carregando}
+                    style={{
+                      width: "100%",
+                      padding: "clamp(16px, 4vw, 18px)",
+                      background: carregando ? "#e5e7eb" : "#10b981",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "clamp(10px, 2.5vw, 12px)",
+                      fontSize: "clamp(15px, 3.5vw, 16px)",
+                      fontWeight: "700",
+                      cursor: carregando ? "not-allowed" : "pointer",
+                      transition: "all 0.3s ease"
+                    }}
+                  >
+                    {carregando ? "Criando pedido..." : "✓ Confirmar Pedido"}
+                  </button>
                 </div>
               ) : (
               <div>
