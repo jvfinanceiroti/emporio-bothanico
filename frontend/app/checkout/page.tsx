@@ -49,6 +49,15 @@ export default function CheckoutPage() {
   const [pedidoId, setPedidoId] = useState<number | null>(null);
   const [pedidoToken, setPedidoToken] = useState<string>("");
   const [verificandoPagamento, setVerificandoPagamento] = useState(false);
+  
+  // Estados para Cartão de Crédito
+  const [cartaoNumero, setCartaoNumero] = useState("");
+  const [cartaoNome, setCartaoNome] = useState("");
+  const [cartaoValidade, setCartaoValidade] = useState("");
+  const [cartaoCvv, setCartaoCvv] = useState("");
+  const [cartaoDocumento, setCartaoDocumento] = useState("");
+  const [cartaoParcelas, setCartaoParcelas] = useState(1);
+  const [processandoCartao, setProcessandoCartao] = useState(false);
 
   useEffect(() => {
     const carrinhoSalvo = JSON.parse(localStorage.getItem("carrinho") || "[]");
@@ -1289,13 +1298,19 @@ export default function CheckoutPage() {
                 wordBreak: "break-word",
                 flex: 1
               }}>
-                {pixQrCode ? "Pagamento PIX" : "Forma de Pagamento"}
+                {pixQrCode ? "Pagamento PIX" : formaPagamento === "cartao" ? "Pagamento com Cartão" : "Forma de Pagamento"}
               </h2>
               <button
                 onClick={() => {
                   setMostrarPagamento(false);
                   setPixQrCode("");
                   setVerificandoPagamento(false);
+                  setCartaoNumero("");
+                  setCartaoNome("");
+                  setCartaoValidade("");
+                  setCartaoCvv("");
+                  setCartaoDocumento("");
+                  setCartaoParcelas(1);
                 }}
                 style={{
                   background: "none",
@@ -1527,6 +1542,264 @@ export default function CheckoutPage() {
                   </div>
                 )}
               </div>
+            ) : formaPagamento === "cartao" && !pixQrCode ? (
+              // Formulário de Cartão de Crédito
+              <div>
+                <p style={{
+                  fontSize: "clamp(14px, 3.5vw, 15px)",
+                  color: "#666",
+                  marginBottom: "clamp(20px, 5vw, 24px)"
+                }}>
+                  Preencha os dados do cartão de crédito:
+                </p>
+
+                {/* Número do Cartão */}
+                <div style={{ marginBottom: "clamp(16px, 4vw, 20px)" }}>
+                  <label style={{
+                    display: "block",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "#0a0a0a",
+                    marginBottom: "8px"
+                  }}>
+                    Número do Cartão
+                  </label>
+                  <input
+                    type="text"
+                    value={cartaoNumero}
+                    onChange={(e) => {
+                      const valor = e.target.value.replace(/\D/g, "");
+                      const formatado = valor.replace(/(\d{4})(?=\d)/g, "$1 ");
+                      setCartaoNumero(formatado.trim());
+                    }}
+                    placeholder="1234 5678 9012 3456"
+                    maxLength={19}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      border: "2px solid #e5e7eb",
+                      borderRadius: "8px",
+                      fontSize: "15px",
+                      color: "#0a0a0a",
+                      backgroundColor: "white"
+                    }}
+                  />
+                </div>
+
+                {/* Nome no Cartão */}
+                <div style={{ marginBottom: "clamp(16px, 4vw, 20px)" }}>
+                  <label style={{
+                    display: "block",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "#0a0a0a",
+                    marginBottom: "8px"
+                  }}>
+                    Nome no Cartão
+                  </label>
+                  <input
+                    type="text"
+                    value={cartaoNome}
+                    onChange={(e) => setCartaoNome(e.target.value.toUpperCase())}
+                    placeholder="NOME COMPLETO"
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      border: "2px solid #e5e7eb",
+                      borderRadius: "8px",
+                      fontSize: "15px",
+                      color: "#0a0a0a",
+                      backgroundColor: "white",
+                      textTransform: "uppercase"
+                    }}
+                  />
+                </div>
+
+                {/* Validade e CVV */}
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "12px",
+                  marginBottom: "clamp(16px, 4vw, 20px)"
+                }}>
+                  <div>
+                    <label style={{
+                      display: "block",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      color: "#0a0a0a",
+                      marginBottom: "8px"
+                    }}>
+                      Validade
+                    </label>
+                    <input
+                      type="text"
+                      value={cartaoValidade}
+                      onChange={(e) => {
+                        let valor = e.target.value.replace(/\D/g, "");
+                        if (valor.length >= 2) {
+                          valor = valor.slice(0, 2) + "/" + valor.slice(2, 4);
+                        }
+                        setCartaoValidade(valor);
+                      }}
+                      placeholder="MM/AA"
+                      maxLength={5}
+                      style={{
+                        width: "100%",
+                        padding: "12px 16px",
+                        border: "2px solid #e5e7eb",
+                        borderRadius: "8px",
+                        fontSize: "15px",
+                        color: "#0a0a0a",
+                        backgroundColor: "white"
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{
+                      display: "block",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      color: "#0a0a0a",
+                      marginBottom: "8px"
+                    }}>
+                      CVV
+                    </label>
+                    <input
+                      type="text"
+                      value={cartaoCvv}
+                      onChange={(e) => setCartaoCvv(e.target.value.replace(/\D/g, ""))}
+                      placeholder="123"
+                      maxLength={4}
+                      style={{
+                        width: "100%",
+                        padding: "12px 16px",
+                        border: "2px solid #e5e7eb",
+                        borderRadius: "8px",
+                        fontSize: "15px",
+                        color: "#0a0a0a",
+                        backgroundColor: "white"
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* CPF do Titular */}
+                <div style={{ marginBottom: "clamp(16px, 4vw, 20px)" }}>
+                  <label style={{
+                    display: "block",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "#0a0a0a",
+                    marginBottom: "8px"
+                  }}>
+                    CPF do Titular
+                  </label>
+                  <input
+                    type="text"
+                    value={cartaoDocumento}
+                    onChange={(e) => {
+                      const valor = e.target.value.replace(/\D/g, "");
+                      let formatado = valor;
+                      if (valor.length > 3 && valor.length <= 6) {
+                        formatado = `${valor.slice(0, 3)}.${valor.slice(3)}`;
+                      } else if (valor.length > 6 && valor.length <= 9) {
+                        formatado = `${valor.slice(0, 3)}.${valor.slice(3, 6)}.${valor.slice(6)}`;
+                      } else if (valor.length > 9) {
+                        formatado = `${valor.slice(0, 3)}.${valor.slice(3, 6)}.${valor.slice(6, 9)}-${valor.slice(9, 11)}`;
+                      }
+                      setCartaoDocumento(formatado);
+                    }}
+                    placeholder="000.000.000-00"
+                    maxLength={14}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      border: "2px solid #e5e7eb",
+                      borderRadius: "8px",
+                      fontSize: "15px",
+                      color: "#0a0a0a",
+                      backgroundColor: "white"
+                    }}
+                  />
+                </div>
+
+                {/* Parcelas */}
+                <div style={{ marginBottom: "clamp(20px, 5vw, 24px)" }}>
+                  <label style={{
+                    display: "block",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "#0a0a0a",
+                    marginBottom: "8px"
+                  }}>
+                    Número de Parcelas
+                  </label>
+                  <select
+                    value={cartaoParcelas}
+                    onChange={(e) => setCartaoParcelas(Number(e.target.value))}
+                    style={{
+                      width: "100%",
+                      padding: "12px 16px",
+                      border: "2px solid #e5e7eb",
+                      borderRadius: "8px",
+                      fontSize: "15px",
+                      color: "#0a0a0a",
+                      backgroundColor: "white",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <option value={1}>1x de R$ {total.toFixed(2)} sem juros</option>
+                    <option value={2}>2x de R$ {(total / 2).toFixed(2)} sem juros</option>
+                    <option value={3}>3x de R$ {(total / 3).toFixed(2)} sem juros</option>
+                    <option value={4}>4x de R$ {(total / 4).toFixed(2)} sem juros</option>
+                    <option value={5}>5x de R$ {(total / 5).toFixed(2)} sem juros</option>
+                    <option value={6}>6x de R$ {(total / 6).toFixed(2)} sem juros</option>
+                    <option value={7}>7x de R$ {(total / 7).toFixed(2)} sem juros</option>
+                    <option value={8}>8x de R$ {(total / 8).toFixed(2)} sem juros</option>
+                    <option value={9}>9x de R$ {(total / 9).toFixed(2)} sem juros</option>
+                    <option value={10}>10x de R$ {(total / 10).toFixed(2)} sem juros</option>
+                    <option value={11}>11x de R$ {(total / 11).toFixed(2)} sem juros</option>
+                    <option value={12}>12x de R$ {(total / 12).toFixed(2)} sem juros</option>
+                  </select>
+                </div>
+
+                {/* Botão Pagar */}
+                <button
+                  onClick={async () => {
+                    // Validação básica
+                    if (!cartaoNumero || !cartaoNome || !cartaoValidade || !cartaoCvv || !cartaoDocumento) {
+                      alert("Preencha todos os campos do cartão");
+                      return;
+                    }
+
+                    setProcessandoCartao(true);
+                    try {
+                      // Aqui será implementada a integração com Mercado Pago
+                      alert("Funcionalidade de cartão será implementada");
+                    } catch (error) {
+                      alert("Erro ao processar cartão");
+                    } finally {
+                      setProcessandoCartao(false);
+                    }
+                  }}
+                  disabled={processandoCartao}
+                  style={{
+                    width: "100%",
+                    padding: "16px",
+                    background: processandoCartao ? "#e5e7eb" : "#10b981",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "12px",
+                    fontSize: "16px",
+                    fontWeight: "700",
+                    cursor: processandoCartao ? "not-allowed" : "pointer",
+                    transition: "all 0.3s"
+                  }}
+                >
+                  {processandoCartao ? "Processando..." : `Pagar R$ ${total.toFixed(2)}`}
+                </button>
+              </div>
             ) : (
               // Seleção de forma de pagamento
               <>
@@ -1686,77 +1959,6 @@ export default function CheckoutPage() {
                       wordBreak: "break-word"
                     }}>
                       Parcelamento disponível
-                    </p>
-                  </div>
-                </div>
-              </button>
-
-              {/* Boleto */}
-              <button
-                onClick={() => setFormaPagamento("boleto")}
-                style={{
-                  width: "100%",
-                  padding: "clamp(16px, 4vw, 24px)",
-                  borderRadius: "clamp(12px, 3vw, 16px)",
-                  border: `2px solid ${formaPagamento === "boleto" ? "#f59e0b" : "rgba(0,0,0,0.1)"}`,
-                  background: formaPagamento === "boleto" ? "rgba(245, 158, 11, 0.05)" : "white",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  textAlign: "left",
-                  minHeight: "44px"
-                }}
-                onMouseOver={(e) => {
-                  if (formaPagamento !== "boleto") {
-                    e.currentTarget.style.borderColor = "rgba(0,0,0,0.2)";
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (formaPagamento !== "boleto") {
-                    e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)";
-                  }
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "clamp(12px, 3vw, 16px)", flexWrap: "wrap" }}>
-                  <div style={{
-                    width: "clamp(20px, 5vw, 24px)",
-                    height: "clamp(20px, 5vw, 24px)",
-                    borderRadius: "50%",
-                    border: `2px solid ${formaPagamento === "boleto" ? "#f59e0b" : "#ddd"}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0
-                  }}>
-                    {formaPagamento === "boleto" && (
-                      <div style={{
-                        width: "clamp(10px, 2.5vw, 12px)",
-                        height: "clamp(10px, 2.5vw, 12px)",
-                        borderRadius: "50%",
-                        background: "#f59e0b"
-                      }}></div>
-                    )}
-                  </div>
-                  <svg style={{ width: "clamp(28px, 7vw, 32px)", height: "clamp(28px, 7vw, 32px)", color: "#0a0a0a", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <div style={{ flex: 1, minWidth: "0" }}>
-                    <h3 style={{
-                      fontSize: "clamp(16px, 4vw, 18px)",
-                      fontWeight: "700",
-                      color: "#0a0a0a",
-                      margin: 0,
-                      marginBottom: "4px",
-                      wordBreak: "break-word"
-                    }}>
-                      Boleto Bancário
-                    </h3>
-                    <p style={{
-                      fontSize: "clamp(13px, 3vw, 14px)",
-                      color: "#666",
-                      margin: 0,
-                      wordBreak: "break-word"
-                    }}>
-                      Vencimento em 3 dias úteis
                     </p>
                   </div>
                 </div>
