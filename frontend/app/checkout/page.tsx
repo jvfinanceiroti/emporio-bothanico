@@ -330,11 +330,11 @@ export default function CheckoutPage() {
       });
 
       if (response.ok) {
-        localStorage.removeItem("carrinho");
         const data = await response.json();
         
         // Se forma de pagamento for PIX, gerar QR Code
         if (formaPagamento === "pix") {
+          localStorage.removeItem("carrinho");
           setPedidoId(data.id);
           setPedidoToken(data.access_token);
           
@@ -367,6 +367,11 @@ export default function CheckoutPage() {
             setMostrarPagamento(false);
             setMostrarAlerta(true);
           }
+        } else if (formaPagamento === "cartao") {
+          // Cartão: salvar pedidoId e token, mas FICAR NO MODAL para preencher cartão
+          setPedidoId(data.id);
+          setPedidoToken(data.access_token);
+          // Modal continua aberto, formulário de cartão vai aparecer
         } else {
           // Outras formas: ir direto para sucesso
           router.push(`/sucesso?pedido=${data.id}&token=${data.access_token}`);
