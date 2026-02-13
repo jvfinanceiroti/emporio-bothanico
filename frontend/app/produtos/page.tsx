@@ -103,7 +103,7 @@ export default function ProdutosPage() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)"
+      background: "#f8f9fa"
     }}>
       {/* Header */}
       <header style={{
@@ -200,69 +200,137 @@ export default function ProdutosPage() {
         {/* Menu de Categorias */}
         <div style={{
           background: "white",
-          borderRadius: "clamp(16px, 4vw, 20px)",
-          padding: "clamp(20px, 5vw, 24px)",
-          marginBottom: "clamp(24px, 6vw, 32px)",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
+          borderRadius: "20px",
+          padding: "32px",
+          marginBottom: "32px",
+          boxShadow: "0 10px 40px rgba(0,0,0,0.06)",
+          border: "1px solid rgba(102, 126, 234, 0.1)"
         }}>
-          <h3 style={{
-            fontSize: "clamp(16px, 4vw, 18px)",
-            fontWeight: "700",
-            color: "#0a0a0a",
-            marginBottom: "clamp(16px, 4vw, 20px)"
-          }}>
-            🏷️ Categorias
-          </h3>
-
           <div style={{
             display: "flex",
-            gap: "clamp(8px, 2vw, 12px)",
-            flexWrap: "wrap"
+            alignItems: "center",
+            marginBottom: "24px",
+            gap: "12px"
+          }}>
+            <div style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "12px",
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "24px"
+            }}>
+              🏷️
+            </div>
+            <h3 style={{
+              fontSize: "clamp(18px, 4.5vw, 22px)",
+              fontWeight: "800",
+              color: "#0a0a0a",
+              margin: 0
+            }}>
+              Navegue por Categoria
+            </h3>
+          </div>
+
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "16px"
           }}>
             <button
               onClick={() => setCategoriaSelecionada(null)}
               style={{
-                padding: "clamp(10px, 2.5vw, 12px) clamp(20px, 5vw, 24px)",
+                padding: "16px 24px",
                 background: categoriaSelecionada === null 
                   ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" 
-                  : "white",
-                color: categoriaSelecionada === null ? "white" : "#667eea",
-                border: `2px solid ${categoriaSelecionada === null ? "transparent" : "#667eea"}`,
-                borderRadius: "clamp(8px, 2vw, 12px)",
-                fontSize: "clamp(12px, 3vw, 14px)",
+                  : "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+                color: categoriaSelecionada === null ? "white" : "#495057",
+                border: "none",
+                borderRadius: "16px",
+                fontSize: "15px",
                 fontWeight: "700",
                 cursor: "pointer",
-                transition: "all 0.3s",
-                minHeight: "44px",
-                whiteSpace: "nowrap"
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                minHeight: "60px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                boxShadow: categoriaSelecionada === null 
+                  ? "0 8px 24px rgba(102, 126, 234, 0.3)" 
+                  : "0 2px 8px rgba(0,0,0,0.04)",
+                transform: categoriaSelecionada === null ? "translateY(-2px)" : "none"
+              }}
+              onMouseOver={(e) => {
+                if (categoriaSelecionada !== null) {
+                  e.currentTarget.style.transform = "translateY(-4px)";
+                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(102, 126, 234, 0.15)";
+                }
+              }}
+              onMouseOut={(e) => {
+                if (categoriaSelecionada !== null) {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
+                }
               }}
             >
+              <span style={{ fontSize: "20px" }}>✨</span>
               Todos os Produtos
             </button>
 
-            {categorias.map((categoria) => (
-              <button
-                key={categoria.id}
-                onClick={() => setCategoriaSelecionada(categoria.slug)}
-                style={{
-                  padding: "clamp(10px, 2.5vw, 12px) clamp(20px, 5vw, 24px)",
-                  background: categoriaSelecionada === categoria.slug
-                    ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                    : "white",
-                  color: categoriaSelecionada === categoria.slug ? "white" : "#667eea",
-                  border: `2px solid ${categoriaSelecionada === categoria.slug ? "transparent" : "#667eea"}`,
-                  borderRadius: "clamp(8px, 2vw, 12px)",
-                  fontSize: "clamp(12px, 3vw, 14px)",
-                  fontWeight: "700",
-                  cursor: "pointer",
-                  transition: "all 0.3s",
-                  minHeight: "44px",
-                  whiteSpace: "nowrap"
-                }}
-              >
-                {categoria.nome}
-              </button>
-            ))}
+            {categorias.map((categoria) => {
+              const icones: { [key: string]: string } = {
+                'perfume': '🌸',
+                'aromas': '🕯️',
+                'banho': '🛁'
+              };
+              
+              return (
+                <button
+                  key={categoria.id}
+                  onClick={() => setCategoriaSelecionada(categoria.slug)}
+                  style={{
+                    padding: "16px 24px",
+                    background: categoriaSelecionada === categoria.slug
+                      ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                      : "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+                    color: categoriaSelecionada === categoria.slug ? "white" : "#495057",
+                    border: "none",
+                    borderRadius: "16px",
+                    fontSize: "15px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    minHeight: "60px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    boxShadow: categoriaSelecionada === categoria.slug
+                      ? "0 8px 24px rgba(102, 126, 234, 0.3)"
+                      : "0 2px 8px rgba(0,0,0,0.04)",
+                    transform: categoriaSelecionada === categoria.slug ? "translateY(-2px)" : "none"
+                  }}
+                  onMouseOver={(e) => {
+                    if (categoriaSelecionada !== categoria.slug) {
+                      e.currentTarget.style.transform = "translateY(-4px)";
+                      e.currentTarget.style.boxShadow = "0 8px 24px rgba(102, 126, 234, 0.15)";
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (categoriaSelecionada !== categoria.slug) {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
+                    }
+                  }}
+                >
+                  <span style={{ fontSize: "20px" }}>{icones[categoria.slug] || '📦'}</span>
+                  {categoria.nome}
+                </button>
+              );
+            })}
           </div>
         </div>
 
