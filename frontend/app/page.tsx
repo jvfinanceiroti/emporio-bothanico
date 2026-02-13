@@ -166,11 +166,52 @@ export default function Home() {
 
       {/* HERO BANNER */}
       <section style={{
-        background: "linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%)",
-        padding: "80px 48px",
-        borderBottom: "1px solid rgba(0,0,0,0.06)"
+        position: "relative",
+        padding: "120px 48px",
+        overflow: "hidden",
+        minHeight: "500px"
       }}>
-        <div style={{ maxWidth: "900px", margin: "0 auto", textAlign: "center" }}>
+        {/* Vídeo de fundo */}
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            minWidth: "100%",
+            minHeight: "100%",
+            width: "auto",
+            height: "auto",
+            transform: "translate(-50%, -50%)",
+            zIndex: 0,
+            objectFit: "cover",
+            opacity: 0.35
+          }}
+        >
+          <source src="https://cdn.pixabay.com/video/2022/12/08/142463-779635913_large.mp4" type="video/mp4" />
+        </video>
+
+        {/* Overlay escuro */}
+        <div style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(245,245,245,0.88) 100%)",
+          zIndex: 1
+        }}></div>
+
+        <div style={{ 
+          maxWidth: "900px", 
+          margin: "0 auto", 
+          textAlign: "center",
+          position: "relative",
+          zIndex: 2
+        }}>
 
           
           <h2 style={{
