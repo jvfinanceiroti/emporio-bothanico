@@ -1563,6 +1563,18 @@ export default function CheckoutPage() {
               </div>
             ) : formaPagamento === "cartao" && !pixQrCode ? (
               // Formulário de Cartão de Crédito
+              !pedidoId ? (
+                // Se não tem pedido criado, mostra botão para criar
+                <div style={{ textAlign: "center", padding: "clamp(20px, 5vw, 40px) 0" }}>
+                  <p style={{
+                    fontSize: "clamp(14px, 3.5vw, 16px)",
+                    color: "#666",
+                    marginBottom: "clamp(20px, 5vw, 24px)"
+                  }}>
+                    Clique em "Confirmar Pedido" abaixo para prosseguir
+                  </p>
+                </div>
+              ) : (
               <div>
                 <p style={{
                   fontSize: "clamp(14px, 3.5vw, 15px)",
@@ -1937,6 +1949,7 @@ export default function CheckoutPage() {
                   {processandoCartao ? "Processando..." : `Pagar R$ ${total.toFixed(2)}`}
                 </button>
               </div>
+              )
             ) : (
               // Seleção de forma de pagamento
               <>
