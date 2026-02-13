@@ -330,6 +330,8 @@ export default function AdminPedidos() {
               <option value="todos">Todos os Status</option>
               <option value="aguardando_pagamento">Pendente</option>
               <option value="pago">Pago</option>
+              <option value="enviado">Enviado</option>
+              <option value="entregue">Entregue</option>
               <option value="cancelado">Cancelado</option>
             </select>
           </div>
