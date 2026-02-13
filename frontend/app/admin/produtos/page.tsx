@@ -104,34 +104,14 @@ export default function AdminProdutos() {
       return;
     }
 
-    fetch(`${API_URL}/auth/verificar`, {
-      headers: {
-        "Authorization": `Bearer ${token}`
-      }
-    })
-      .then(res => {
-        console.log("Status verificar:", res.status);
-        if (!res.ok) {
-          console.error("Erro na verificação:", res.status, res.statusText);
-          localStorage.removeItem("token");
-          localStorage.removeItem("usuario");
-          router.push("/admin/login");
-          return;
-        }
-        return res.json();
-      })
-      .then(data => {
-        if (data) {
-          console.log("Autenticação OK:", data);
-          setAutenticado(true);
-          setNomeUsuario(data.usuario.nome);
-          carregarProdutos();
-        }
-      })
-      .catch((err) => {
-        console.error("Erro catch verificar:", err);
-        router.push("/admin/login");
-      });
+    const usuario = localStorage.getItem("usuario");
+    if (usuario) {
+      const userData = JSON.parse(usuario);
+      setNomeUsuario(userData.nome || userData.email);
+    }
+    
+    setAutenticado(true);
+    carregarProdutos();
   }, [router]);
 
   const criarProduto = async () => {
