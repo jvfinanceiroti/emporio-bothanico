@@ -570,6 +570,48 @@ export default function Home() {
               </Link>
             ))}
           </div>
+
+          {/* Botão Ver Todos os Produtos */}
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "clamp(48px, 12vw, 64px)"
+          }}>
+            <Link
+              href="/produtos"
+              style={{
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "clamp(16px, 4vw, 20px) clamp(40px, 10vw, 56px)",
+                background: "#0a0a0a",
+                color: "white",
+                borderRadius: "16px",
+                fontSize: "clamp(15px, 3.8vw, 18px)",
+                fontWeight: "700",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                border: "2px solid #0a0a0a"
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = "white";
+                e.currentTarget.style.color = "#0a0a0a";
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,0.25)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = "#0a0a0a";
+                e.currentTarget.style.color = "white";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.2)";
+              }}
+            >
+              <span style={{ fontSize: "clamp(20px, 5vw, 24px)" }}>🛍️</span>
+              Ver Todos os Produtos
+              <span style={{ fontSize: "clamp(16px, 4vw, 18px)" }}>→</span>
+            </Link>
+          </div>
         )}
       </main>
 
