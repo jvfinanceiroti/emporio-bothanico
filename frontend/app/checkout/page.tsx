@@ -410,48 +410,51 @@ export default function CheckoutPage() {
         </div>
       </header>
 
-      <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "clamp(40px, 8vw, 80px) clamp(20px, 5vw, 48px)" }}>
+      <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "clamp(24px, 5vw, 80px) clamp(16px, 4vw, 48px)" }}>
         <div style={{
           display: "grid",
-          gridTemplateColumns: "1fr 420px",
-          gap: "40px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
+          gap: "clamp(24px, 5vw, 40px)",
           alignItems: "start"
         }}>
           {/* FORMULÁRIO */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "clamp(16px, 4vw, 24px)" }}>
             {/* Dados Pessoais */}
             <div style={{
               background: "white",
-              borderRadius: "20px",
-              padding: "40px",
+              borderRadius: "clamp(12px, 3vw, 20px)",
+              padding: "clamp(20px, 5vw, 40px)",
               border: "1px solid rgba(0,0,0,0.08)"
             }}>
               <div style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "16px",
-                marginBottom: "32px"
+                gap: "clamp(12px, 3vw, 16px)",
+                marginBottom: "clamp(20px, 5vw, 32px)",
+                flexWrap: "wrap"
               }}>
                 <div style={{
-                  width: "48px",
-                  height: "48px",
+                  width: "clamp(40px, 10vw, 48px)",
+                  height: "clamp(40px, 10vw, 48px)",
                   background: "#0a0a0a",
                   color: "white",
                   borderRadius: "50%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "20px",
-                  fontWeight: "800"
+                  fontSize: "clamp(16px, 4vw, 20px)",
+                  fontWeight: "800",
+                  flexShrink: 0
                 }}>
                   1
                 </div>
                 <h2 style={{
-                  fontSize: "24px",
+                  fontSize: "clamp(18px, 4.5vw, 24px)",
                   fontWeight: "800",
                   color: "#0a0a0a",
                   margin: 0,
-                  letterSpacing: "-0.5px"
+                  letterSpacing: "-0.5px",
+                  wordBreak: "break-word"
                 }}>
                   Dados Pessoais
                 </h2>
@@ -459,16 +462,16 @@ export default function CheckoutPage() {
 
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "20px"
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
+                gap: "clamp(16px, 4vw, 20px)"
               }}>
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={{
                     display: "block",
-                    fontSize: "13px",
+                    fontSize: "clamp(12px, 2.8vw, 13px)",
                     fontWeight: "600",
                     color: "#666",
-                    marginBottom: "8px",
+                    marginBottom: "clamp(6px, 1.5vw, 8px)",
                     letterSpacing: "0.3px"
                   }}>
                     Nome Completo *
@@ -480,14 +483,16 @@ export default function CheckoutPage() {
                     onChange={(e) => setNome(e.target.value)}
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      minWidth: "min(100%, 200px)",
+                      padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
                       border: "1px solid rgba(0,0,0,0.1)",
-                      borderRadius: "10px",
-                      fontSize: "15px",
+                      borderRadius: "clamp(8px, 2vw, 10px)",
+                      fontSize: "clamp(14px, 3.5vw, 15px)",
                       fontWeight: "500",
                       outline: "none",
                       transition: "border-color 0.2s",
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
+                      minHeight: "44px"
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
@@ -497,10 +502,10 @@ export default function CheckoutPage() {
                 <div>
                   <label style={{
                     display: "block",
-                    fontSize: "13px",
+                    fontSize: "clamp(12px, 2.8vw, 13px)",
                     fontWeight: "600",
                     color: "#666",
-                    marginBottom: "8px",
+                    marginBottom: "clamp(6px, 1.5vw, 8px)",
                     letterSpacing: "0.3px"
                   }}>
                     Email *
@@ -512,14 +517,16 @@ export default function CheckoutPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      minWidth: "min(100%, 200px)",
+                      padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
                       border: "1px solid rgba(0,0,0,0.1)",
-                      borderRadius: "10px",
-                      fontSize: "15px",
+                      borderRadius: "clamp(8px, 2vw, 10px)",
+                      fontSize: "clamp(14px, 3.5vw, 15px)",
                       fontWeight: "500",
                       outline: "none",
                       transition: "border-color 0.2s",
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
+                      minHeight: "44px"
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
@@ -529,10 +536,10 @@ export default function CheckoutPage() {
                 <div>
                   <label style={{
                     display: "block",
-                    fontSize: "13px",
+                    fontSize: "clamp(12px, 2.8vw, 13px)",
                     fontWeight: "600",
                     color: "#666",
-                    marginBottom: "8px",
+                    marginBottom: "clamp(6px, 1.5vw, 8px)",
                     letterSpacing: "0.3px"
                   }}>
                     Telefone *
@@ -545,14 +552,16 @@ export default function CheckoutPage() {
                     onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      minWidth: "min(100%, 200px)",
+                      padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
                       border: "1px solid rgba(0,0,0,0.1)",
-                      borderRadius: "10px",
-                      fontSize: "15px",
+                      borderRadius: "clamp(8px, 2vw, 10px)",
+                      fontSize: "clamp(14px, 3.5vw, 15px)",
                       fontWeight: "500",
                       outline: "none",
                       transition: "border-color 0.2s",
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
+                      minHeight: "44px"
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
@@ -564,36 +573,39 @@ export default function CheckoutPage() {
             {/* Endereço */}
             <div style={{
               background: "white",
-              borderRadius: "20px",
-              padding: "40px",
+              borderRadius: "clamp(12px, 3vw, 20px)",
+              padding: "clamp(20px, 5vw, 40px)",
               border: "1px solid rgba(0,0,0,0.08)"
             }}>
               <div style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "16px",
-                marginBottom: "32px"
+                gap: "clamp(12px, 3vw, 16px)",
+                marginBottom: "clamp(20px, 5vw, 32px)",
+                flexWrap: "wrap"
               }}>
                 <div style={{
-                  width: "48px",
-                  height: "48px",
+                  width: "clamp(40px, 10vw, 48px)",
+                  height: "clamp(40px, 10vw, 48px)",
                   background: "#0a0a0a",
                   color: "white",
                   borderRadius: "50%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "20px",
-                  fontWeight: "800"
+                  fontSize: "clamp(16px, 4vw, 20px)",
+                  fontWeight: "800",
+                  flexShrink: 0
                 }}>
                   2
                 </div>
                 <h2 style={{
-                  fontSize: "24px",
+                  fontSize: "clamp(18px, 4.5vw, 24px)",
                   fontWeight: "800",
                   color: "#0a0a0a",
                   margin: 0,
-                  letterSpacing: "-0.5px"
+                  letterSpacing: "-0.5px",
+                  wordBreak: "break-word"
                 }}>
                   Endereço de Entrega
                 </h2>
@@ -601,19 +613,19 @@ export default function CheckoutPage() {
 
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "20px"
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
+                gap: "clamp(16px, 4vw, 20px)"
               }}>
                 <div>
                   <label style={{
                     display: "block",
-                    fontSize: "13px",
+                    fontSize: "clamp(12px, 2.8vw, 13px)",
                     fontWeight: "600",
                     color: "#666",
-                    marginBottom: "8px",
+                    marginBottom: "clamp(6px, 1.5vw, 8px)",
                     letterSpacing: "0.3px"
                   }}>
-                    CEP * {carregandoCep && <span style={{ color: "#10b981" }}>Buscando...</span>}
+                    CEP * {carregandoCep && <span style={{ color: "#10b981", whiteSpace: "nowrap" }}>Buscando...</span>}
                   </label>
                   <input
                     type="text"
@@ -623,14 +635,16 @@ export default function CheckoutPage() {
                     onChange={(e) => setCep(formatarCep(e.target.value))}
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      minWidth: "min(100%, 200px)",
+                      padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
                       border: "1px solid rgba(0,0,0,0.1)",
-                      borderRadius: "10px",
-                      fontSize: "15px",
+                      borderRadius: "clamp(8px, 2vw, 10px)",
+                      fontSize: "clamp(14px, 3.5vw, 15px)",
                       fontWeight: "500",
                       outline: "none",
                       transition: "border-color 0.2s",
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
+                      minHeight: "44px"
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
@@ -640,10 +654,10 @@ export default function CheckoutPage() {
                 <div>
                   <label style={{
                     display: "block",
-                    fontSize: "13px",
+                    fontSize: "clamp(12px, 2.8vw, 13px)",
                     fontWeight: "600",
                     color: "#666",
-                    marginBottom: "8px",
+                    marginBottom: "clamp(6px, 1.5vw, 8px)",
                     letterSpacing: "0.3px"
                   }}>
                     Número *
@@ -655,14 +669,16 @@ export default function CheckoutPage() {
                     onChange={(e) => setNumero(e.target.value)}
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      minWidth: "min(100%, 200px)",
+                      padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
                       border: "1px solid rgba(0,0,0,0.1)",
-                      borderRadius: "10px",
-                      fontSize: "15px",
+                      borderRadius: "clamp(8px, 2vw, 10px)",
+                      fontSize: "clamp(14px, 3.5vw, 15px)",
                       fontWeight: "500",
                       outline: "none",
                       transition: "border-color 0.2s",
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
+                      minHeight: "44px"
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
@@ -672,10 +688,10 @@ export default function CheckoutPage() {
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={{
                     display: "block",
-                    fontSize: "13px",
+                    fontSize: "clamp(12px, 2.8vw, 13px)",
                     fontWeight: "600",
                     color: "#666",
-                    marginBottom: "8px",
+                    marginBottom: "clamp(6px, 1.5vw, 8px)",
                     letterSpacing: "0.3px"
                   }}>
                     Endereço *
@@ -687,14 +703,16 @@ export default function CheckoutPage() {
                     onChange={(e) => setEndereco(e.target.value)}
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      minWidth: "min(100%, 200px)",
+                      padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
                       border: "1px solid rgba(0,0,0,0.1)",
-                      borderRadius: "10px",
-                      fontSize: "15px",
+                      borderRadius: "clamp(8px, 2vw, 10px)",
+                      fontSize: "clamp(14px, 3.5vw, 15px)",
                       fontWeight: "500",
                       outline: "none",
                       transition: "border-color 0.2s",
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
+                      minHeight: "44px"
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
@@ -704,10 +722,10 @@ export default function CheckoutPage() {
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={{
                     display: "block",
-                    fontSize: "13px",
+                    fontSize: "clamp(12px, 2.8vw, 13px)",
                     fontWeight: "600",
                     color: "#666",
-                    marginBottom: "8px",
+                    marginBottom: "clamp(6px, 1.5vw, 8px)",
                     letterSpacing: "0.3px"
                   }}>
                     Complemento
@@ -719,14 +737,16 @@ export default function CheckoutPage() {
                     onChange={(e) => setComplemento(e.target.value)}
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      minWidth: "min(100%, 200px)",
+                      padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
                       border: "1px solid rgba(0,0,0,0.1)",
-                      borderRadius: "10px",
-                      fontSize: "15px",
+                      borderRadius: "clamp(8px, 2vw, 10px)",
+                      fontSize: "clamp(14px, 3.5vw, 15px)",
                       fontWeight: "500",
                       outline: "none",
                       transition: "border-color 0.2s",
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
+                      minHeight: "44px"
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
@@ -736,10 +756,10 @@ export default function CheckoutPage() {
                 <div>
                   <label style={{
                     display: "block",
-                    fontSize: "13px",
+                    fontSize: "clamp(12px, 2.8vw, 13px)",
                     fontWeight: "600",
                     color: "#666",
-                    marginBottom: "8px",
+                    marginBottom: "clamp(6px, 1.5vw, 8px)",
                     letterSpacing: "0.3px"
                   }}>
                     Bairro *
@@ -751,14 +771,16 @@ export default function CheckoutPage() {
                     onChange={(e) => setBairro(e.target.value)}
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      minWidth: "min(100%, 200px)",
+                      padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
                       border: "1px solid rgba(0,0,0,0.1)",
-                      borderRadius: "10px",
-                      fontSize: "15px",
+                      borderRadius: "clamp(8px, 2vw, 10px)",
+                      fontSize: "clamp(14px, 3.5vw, 15px)",
                       fontWeight: "500",
                       outline: "none",
                       transition: "border-color 0.2s",
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
+                      minHeight: "44px"
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
@@ -768,10 +790,10 @@ export default function CheckoutPage() {
                 <div>
                   <label style={{
                     display: "block",
-                    fontSize: "13px",
+                    fontSize: "clamp(12px, 2.8vw, 13px)",
                     fontWeight: "600",
                     color: "#666",
-                    marginBottom: "8px",
+                    marginBottom: "clamp(6px, 1.5vw, 8px)",
                     letterSpacing: "0.3px"
                   }}>
                     Cidade *
@@ -783,14 +805,16 @@ export default function CheckoutPage() {
                     onChange={(e) => setCidade(e.target.value)}
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      minWidth: "min(100%, 200px)",
+                      padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
                       border: "1px solid rgba(0,0,0,0.1)",
-                      borderRadius: "10px",
-                      fontSize: "15px",
+                      borderRadius: "clamp(8px, 2vw, 10px)",
+                      fontSize: "clamp(14px, 3.5vw, 15px)",
                       fontWeight: "500",
                       outline: "none",
                       transition: "border-color 0.2s",
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
+                      minHeight: "44px"
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
@@ -800,10 +824,10 @@ export default function CheckoutPage() {
                 <div style={{ gridColumn: "1 / -1" }}>
                   <label style={{
                     display: "block",
-                    fontSize: "13px",
+                    fontSize: "clamp(12px, 2.8vw, 13px)",
                     fontWeight: "600",
                     color: "#666",
-                    marginBottom: "8px",
+                    marginBottom: "clamp(6px, 1.5vw, 8px)",
                     letterSpacing: "0.3px"
                   }}>
                     Estado *
@@ -816,14 +840,16 @@ export default function CheckoutPage() {
                     onChange={(e) => setEstado(e.target.value.toUpperCase())}
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      minWidth: "min(100%, 200px)",
+                      padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
                       border: "1px solid rgba(0,0,0,0.1)",
-                      borderRadius: "10px",
-                      fontSize: "15px",
+                      borderRadius: "clamp(8px, 2vw, 10px)",
+                      fontSize: "clamp(14px, 3.5vw, 15px)",
                       fontWeight: "500",
                       outline: "none",
                       transition: "border-color 0.2s",
-                      boxSizing: "border-box"
+                      boxSizing: "border-box",
+                      minHeight: "44px"
                     }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
@@ -834,19 +860,20 @@ export default function CheckoutPage() {
           </div>
 
           {/* RESUMO */}
-          <div style={{ position: "sticky", top: "120px" }}>
+          <div style={{ position: "sticky", top: "clamp(100px, 20vw, 120px)" }}>
             <div style={{
               background: "white",
-              borderRadius: "20px",
-              padding: "32px",
+              borderRadius: "clamp(12px, 3vw, 20px)",
+              padding: "clamp(20px, 5vw, 32px)",
               border: "1px solid rgba(0,0,0,0.08)"
             }}>
               <h2 style={{
-                fontSize: "24px",
+                fontSize: "clamp(18px, 4.5vw, 24px)",
                 fontWeight: "800",
                 color: "#0a0a0a",
-                marginBottom: "32px",
-                letterSpacing: "-0.5px"
+                marginBottom: "clamp(20px, 5vw, 32px)",
+                letterSpacing: "-0.5px",
+                wordBreak: "break-word"
               }}>
                 Resumo do Pedido
               </h2>
@@ -854,27 +881,29 @@ export default function CheckoutPage() {
               <div style={{
                 maxHeight: "240px",
                 overflowY: "auto",
-                marginBottom: "24px",
-                paddingRight: "8px"
+                marginBottom: "clamp(16px, 4vw, 24px)",
+                paddingRight: "clamp(4px, 1.5vw, 8px)"
               }}>
                 {carrinho.map((item: any) => (
                   <div key={item.id} style={{
                     display: "flex",
-                    gap: "16px",
-                    paddingBottom: "20px",
-                    marginBottom: "20px",
-                    borderBottom: "1px solid rgba(0,0,0,0.06)"
+                    gap: "clamp(12px, 3vw, 16px)",
+                    paddingBottom: "clamp(16px, 4vw, 20px)",
+                    marginBottom: "clamp(16px, 4vw, 20px)",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                    flexWrap: "wrap"
                   }}>
                     {item.imagem_url ? (
                       <img
                         src={item.imagem_url}
                         alt={item.nome}
                         style={{
-                          width: "64px",
-                          height: "64px",
+                          width: "clamp(56px, 14vw, 64px)",
+                          height: "clamp(56px, 14vw, 64px)",
                           objectFit: "cover",
-                          borderRadius: "10px",
-                          background: "#fafafa"
+                          borderRadius: "clamp(8px, 2vw, 10px)",
+                          background: "#fafafa",
+                          flexShrink: 0
                         }}
                         onError={(e) => {
                           e.currentTarget.src = 'https://via.placeholder.com/100x100/fafafa/ccc?text=Sem+Imagem';
@@ -882,36 +911,39 @@ export default function CheckoutPage() {
                       />
                     ) : (
                       <div style={{
-                        width: "64px",
-                        height: "64px",
+                        width: "clamp(56px, 14vw, 64px)",
+                        height: "clamp(56px, 14vw, 64px)",
                         background: "#fafafa",
-                        borderRadius: "10px",
+                        borderRadius: "clamp(8px, 2vw, 10px)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        fontSize: "28px"
+                        fontSize: "clamp(24px, 6vw, 28px)",
+                        flexShrink: 0
                       }}>
                         🌸
                       </div>
                     )}
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minWidth: "0" }}>
                       <h4 style={{
-                        fontSize: "14px",
+                        fontSize: "clamp(13px, 3vw, 14px)",
                         fontWeight: "600",
                         color: "#0a0a0a",
-                        marginBottom: "4px"
+                        marginBottom: "4px",
+                        wordBreak: "break-word"
                       }}>
                         {item.nome}
                       </h4>
                       <p style={{
-                        fontSize: "13px",
+                        fontSize: "clamp(12px, 2.8vw, 13px)",
                         color: "#666",
-                        marginBottom: "6px"
+                        marginBottom: "6px",
+                        wordBreak: "break-word"
                       }}>
                         Qtd: {item.quantidade}
                       </p>
                       <p style={{
-                        fontSize: "16px",
+                        fontSize: "clamp(15px, 3.5vw, 16px)",
                         fontWeight: "700",
                         color: "#0a0a0a"
                       }}>
@@ -922,29 +954,33 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
-              <div style={{ marginBottom: "24px" }}>
+              <div style={{ marginBottom: "clamp(16px, 4vw, 24px)" }}>
                 <div style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  marginBottom: "12px",
-                  fontSize: "15px",
-                  color: "#666"
+                  marginBottom: "clamp(10px, 2.5vw, 12px)",
+                  fontSize: "clamp(14px, 3.5vw, 15px)",
+                  color: "#666",
+                  flexWrap: "wrap",
+                  gap: "clamp(8px, 2vw, 12px)"
                 }}>
-                  <span>Subtotal ({totalItens} {totalItens === 1 ? 'item' : 'itens'})</span>
-                  <span style={{ fontWeight: "600", color: "#0a0a0a" }}>
+                  <span style={{ wordBreak: "break-word" }}>Subtotal ({totalItens} {totalItens === 1 ? 'item' : 'itens'})</span>
+                  <span style={{ fontWeight: "600", color: "#0a0a0a", whiteSpace: "nowrap" }}>
                     R$ {subtotal.toFixed(2)}
                   </span>
                 </div>
                 <div style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: "15px",
-                  color: "#666"
+                  fontSize: "clamp(14px, 3.5vw, 15px)",
+                  color: "#666",
+                  flexWrap: "wrap",
+                  gap: "clamp(8px, 2vw, 12px)"
                 }}>
-                  <span>
-                    Frete {carregandoFrete && <span style={{ fontSize: "12px" }}>(calculando...)</span>}
+                  <span style={{ wordBreak: "break-word" }}>
+                    Frete {carregandoFrete && <span style={{ fontSize: "clamp(11px, 2.5vw, 12px)", whiteSpace: "nowrap" }}>(calculando...)</span>}
                   </span>
-                  <span style={{ fontWeight: "600", color: "#0a0a0a" }}>
+                  <span style={{ fontWeight: "600", color: "#0a0a0a", whiteSpace: "nowrap" }}>
                     {frete === null ? "Calcular" : frete === 0 ? "Grátis" : `R$ ${frete.toFixed(2)}`}
                   </span>
                 </div>
@@ -954,20 +990,23 @@ export default function CheckoutPage() {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                paddingTop: "24px",
-                paddingBottom: "32px",
+                paddingTop: "clamp(16px, 4vw, 24px)",
+                paddingBottom: "clamp(20px, 5vw, 32px)",
                 borderTop: "2px solid rgba(0,0,0,0.08)",
-                marginBottom: "24px"
+                marginBottom: "clamp(16px, 4vw, 24px)",
+                flexWrap: "wrap",
+                gap: "clamp(12px, 3vw, 16px)"
               }}>
                 <span style={{
-                  fontSize: "18px",
+                  fontSize: "clamp(16px, 4vw, 18px)",
                   fontWeight: "700",
-                  color: "#0a0a0a"
+                  color: "#0a0a0a",
+                  wordBreak: "break-word"
                 }}>
                   Total
                 </span>
                 <span style={{
-                  fontSize: "36px",
+                  fontSize: "clamp(28px, 7vw, 36px)",
                   fontWeight: "900",
                   color: "#0a0a0a",
                   letterSpacing: "-1.5px"
@@ -981,16 +1020,19 @@ export default function CheckoutPage() {
                 disabled={carregando}
                 style={{
                   width: "100%",
-                  padding: "18px",
+                  padding: "clamp(16px, 4vw, 18px)",
                   background: "#10b981",
                   color: "white",
                   border: "none",
-                  borderRadius: "12px",
-                  fontSize: "16px",
+                  borderRadius: "clamp(10px, 2.5vw, 12px)",
+                  fontSize: "clamp(15px, 3.5vw, 16px)",
                   fontWeight: "700",
                   cursor: carregando ? "not-allowed" : "pointer",
                   transition: "all 0.3s ease",
-                  opacity: carregando ? 0.5 : 1
+                  opacity: carregando ? 0.5 : 1,
+                  minHeight: "50px",
+                  whiteSpace: "normal",
+                  wordBreak: "break-word"
                 }}
                 onMouseOver={(e) => {
                   if (!carregando) {
@@ -1011,18 +1053,19 @@ export default function CheckoutPage() {
               </button>
 
               <div style={{
-                marginTop: "16px",
+                marginTop: "clamp(12px, 3vw, 16px)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "8px",
-                fontSize: "13px",
-                color: "#999"
+                gap: "clamp(6px, 1.5vw, 8px)",
+                fontSize: "clamp(12px, 2.8vw, 13px)",
+                color: "#999",
+                flexWrap: "wrap"
               }}>
-                <svg style={{ width: "16px", height: "16px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ width: "clamp(14px, 3.5vw, 16px)", height: "clamp(14px, 3.5vw, 16px)", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                Compra 100% segura
+                <span style={{ whiteSpace: "nowrap" }}>Compra 100% segura</span>
               </div>
             </div>
           </div>
@@ -1040,18 +1083,20 @@ export default function CheckoutPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "20px"
+            padding: "clamp(16px, 4vw, 20px)"
           }}
           onClick={() => setMostrarPagamento(false)}
         >
           <div 
             style={{
               background: "white",
-              borderRadius: "20px",
+              borderRadius: "clamp(16px, 4vw, 20px)",
               maxWidth: "560px",
               width: "100%",
-              padding: "40px",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.3)"
+              padding: "clamp(24px, 6vw, 40px)",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+              maxHeight: "90vh",
+              overflowY: "auto"
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -1059,14 +1104,18 @@ export default function CheckoutPage() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              marginBottom: "24px"
+              marginBottom: "clamp(16px, 4vw, 24px)",
+              gap: "clamp(12px, 3vw, 16px)",
+              flexWrap: "wrap"
             }}>
               <h2 style={{
-                fontSize: "28px",
+                fontSize: "clamp(20px, 5vw, 28px)",
                 fontWeight: "800",
                 color: "#0a0a0a",
                 margin: 0,
-                letterSpacing: "-0.8px"
+                letterSpacing: "-0.8px",
+                wordBreak: "break-word",
+                flex: 1
               }}>
                 Forma de Pagamento
               </h2>
@@ -1077,21 +1126,29 @@ export default function CheckoutPage() {
                   border: "none",
                   color: "#999",
                   cursor: "pointer",
-                  transition: "color 0.2s"
+                  transition: "color 0.2s",
+                  padding: "clamp(4px, 1vw, 8px)",
+                  minWidth: "44px",
+                  minHeight: "44px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0
                 }}
                 onMouseOver={(e) => e.currentTarget.style.color = "#0a0a0a"}
                 onMouseOut={(e) => e.currentTarget.style.color = "#999"}
               >
-                <svg style={{ width: "24px", height: "24px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style={{ width: "clamp(20px, 5vw, 24px)", height: "clamp(20px, 5vw, 24px)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
             <p style={{
-              fontSize: "15px",
+              fontSize: "clamp(14px, 3.5vw, 15px)",
               color: "#666",
-              marginBottom: "32px"
+              marginBottom: "clamp(20px, 5vw, 32px)",
+              wordBreak: "break-word"
             }}>
               Selecione como deseja pagar:
             </p>
@@ -1099,21 +1156,22 @@ export default function CheckoutPage() {
             <div style={{
               display: "flex",
               flexDirection: "column",
-              gap: "16px",
-              marginBottom: "32px"
+              gap: "clamp(12px, 3vw, 16px)",
+              marginBottom: "clamp(20px, 5vw, 32px)"
             }}>
               {/* PIX */}
               <button
                 onClick={() => setFormaPagamento("pix")}
                 style={{
                   width: "100%",
-                  padding: "24px",
-                  borderRadius: "16px",
+                  padding: "clamp(16px, 4vw, 24px)",
+                  borderRadius: "clamp(12px, 3vw, 16px)",
                   border: `2px solid ${formaPagamento === "pix" ? "#10b981" : "rgba(0,0,0,0.1)"}`,
                   background: formaPagamento === "pix" ? "rgba(16, 185, 129, 0.05)" : "white",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
-                  textAlign: "left"
+                  textAlign: "left",
+                  minHeight: "44px"
                 }}
                 onMouseOver={(e) => {
                   if (formaPagamento !== "pix") {
@@ -1126,46 +1184,49 @@ export default function CheckoutPage() {
                   }
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "clamp(12px, 3vw, 16px)", flexWrap: "wrap" }}>
                   <div style={{
-                    width: "24px",
-                    height: "24px",
+                    width: "clamp(20px, 5vw, 24px)",
+                    height: "clamp(20px, 5vw, 24px)",
                     borderRadius: "50%",
                     border: `2px solid ${formaPagamento === "pix" ? "#10b981" : "#ddd"}`,
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center"
+                    justifyContent: "center",
+                    flexShrink: 0
                   }}>
                     {formaPagamento === "pix" && (
                       <div style={{
-                        width: "12px",
-                        height: "12px",
+                        width: "clamp(10px, 2.5vw, 12px)",
+                        height: "clamp(10px, 2.5vw, 12px)",
                         borderRadius: "50%",
                         background: "#10b981"
                       }}></div>
                     )}
                   </div>
-                  <svg style={{ width: "32px", height: "32px" }} viewBox="0 0 48 48" fill="none">
+                  <svg style={{ width: "clamp(28px, 7vw, 32px)", height: "clamp(28px, 7vw, 32px)", flexShrink: 0 }} viewBox="0 0 48 48" fill="none">
                     <rect width="48" height="48" rx="8" fill="#32BCAD"/>
                     <path d="M24 12L30 18L24 24L18 18L24 12Z" fill="white"/>
                     <path d="M24 24L30 30L24 36L18 30L24 24Z" fill="white"/>
                     <path d="M12 18L18 24L12 30L6 24L12 18Z" fill="white"/>
                     <path d="M36 18L42 24L36 30L30 24L36 18Z" fill="white"/>
                   </svg>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: "0" }}>
                     <h3 style={{
-                      fontSize: "18px",
+                      fontSize: "clamp(16px, 4vw, 18px)",
                       fontWeight: "700",
                       color: "#0a0a0a",
                       margin: 0,
-                      marginBottom: "4px"
+                      marginBottom: "4px",
+                      wordBreak: "break-word"
                     }}>
                       PIX
                     </h3>
                     <p style={{
-                      fontSize: "14px",
+                      fontSize: "clamp(13px, 3vw, 14px)",
                       color: "#666",
-                      margin: 0
+                      margin: 0,
+                      wordBreak: "break-word"
                     }}>
                       Pagamento instantâneo
                     </p>
@@ -1178,13 +1239,14 @@ export default function CheckoutPage() {
                 onClick={() => setFormaPagamento("cartao")}
                 style={{
                   width: "100%",
-                  padding: "24px",
-                  borderRadius: "16px",
+                  padding: "clamp(16px, 4vw, 24px)",
+                  borderRadius: "clamp(12px, 3vw, 16px)",
                   border: `2px solid ${formaPagamento === "cartao" ? "#3b82f6" : "rgba(0,0,0,0.1)"}`,
                   background: formaPagamento === "cartao" ? "rgba(59, 130, 246, 0.05)" : "white",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
-                  textAlign: "left"
+                  textAlign: "left",
+                  minHeight: "44px"
                 }}
                 onMouseOver={(e) => {
                   if (formaPagamento !== "cartao") {
@@ -1197,42 +1259,45 @@ export default function CheckoutPage() {
                   }
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "clamp(12px, 3vw, 16px)", flexWrap: "wrap" }}>
                   <div style={{
-                    width: "24px",
-                    height: "24px",
+                    width: "clamp(20px, 5vw, 24px)",
+                    height: "clamp(20px, 5vw, 24px)",
                     borderRadius: "50%",
                     border: `2px solid ${formaPagamento === "cartao" ? "#3b82f6" : "#ddd"}`,
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center"
+                    justifyContent: "center",
+                    flexShrink: 0
                   }}>
                     {formaPagamento === "cartao" && (
                       <div style={{
-                        width: "12px",
-                        height: "12px",
+                        width: "clamp(10px, 2.5vw, 12px)",
+                        height: "clamp(10px, 2.5vw, 12px)",
                         borderRadius: "50%",
                         background: "#3b82f6"
                       }}></div>
                     )}
                   </div>
-                  <svg style={{ width: "32px", height: "32px", color: "#0a0a0a" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg style={{ width: "clamp(28px, 7vw, 32px)", height: "clamp(28px, 7vw, 32px)", color: "#0a0a0a", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: "0" }}>
                     <h3 style={{
-                      fontSize: "18px",
+                      fontSize: "clamp(16px, 4vw, 18px)",
                       fontWeight: "700",
                       color: "#0a0a0a",
                       margin: 0,
-                      marginBottom: "4px"
+                      marginBottom: "4px",
+                      wordBreak: "break-word"
                     }}>
                       Cartão de Crédito
                     </h3>
                     <p style={{
-                      fontSize: "14px",
+                      fontSize: "clamp(13px, 3vw, 14px)",
                       color: "#666",
-                      margin: 0
+                      margin: 0,
+                      wordBreak: "break-word"
                     }}>
                       Parcelamento disponível
                     </p>
@@ -1245,13 +1310,14 @@ export default function CheckoutPage() {
                 onClick={() => setFormaPagamento("boleto")}
                 style={{
                   width: "100%",
-                  padding: "24px",
-                  borderRadius: "16px",
+                  padding: "clamp(16px, 4vw, 24px)",
+                  borderRadius: "clamp(12px, 3vw, 16px)",
                   border: `2px solid ${formaPagamento === "boleto" ? "#f59e0b" : "rgba(0,0,0,0.1)"}`,
                   background: formaPagamento === "boleto" ? "rgba(245, 158, 11, 0.05)" : "white",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
-                  textAlign: "left"
+                  textAlign: "left",
+                  minHeight: "44px"
                 }}
                 onMouseOver={(e) => {
                   if (formaPagamento !== "boleto") {
@@ -1264,42 +1330,45 @@ export default function CheckoutPage() {
                   }
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "clamp(12px, 3vw, 16px)", flexWrap: "wrap" }}>
                   <div style={{
-                    width: "24px",
-                    height: "24px",
+                    width: "clamp(20px, 5vw, 24px)",
+                    height: "clamp(20px, 5vw, 24px)",
                     borderRadius: "50%",
                     border: `2px solid ${formaPagamento === "boleto" ? "#f59e0b" : "#ddd"}`,
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center"
+                    justifyContent: "center",
+                    flexShrink: 0
                   }}>
                     {formaPagamento === "boleto" && (
                       <div style={{
-                        width: "12px",
-                        height: "12px",
+                        width: "clamp(10px, 2.5vw, 12px)",
+                        height: "clamp(10px, 2.5vw, 12px)",
                         borderRadius: "50%",
                         background: "#f59e0b"
                       }}></div>
                     )}
                   </div>
-                  <svg style={{ width: "32px", height: "32px", color: "#0a0a0a" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg style={{ width: "clamp(28px, 7vw, 32px)", height: "clamp(28px, 7vw, 32px)", color: "#0a0a0a", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: "0" }}>
                     <h3 style={{
-                      fontSize: "18px",
+                      fontSize: "clamp(16px, 4vw, 18px)",
                       fontWeight: "700",
                       color: "#0a0a0a",
                       margin: 0,
-                      marginBottom: "4px"
+                      marginBottom: "4px",
+                      wordBreak: "break-word"
                     }}>
                       Boleto Bancário
                     </h3>
                     <p style={{
-                      fontSize: "14px",
+                      fontSize: "clamp(13px, 3vw, 14px)",
                       color: "#666",
-                      margin: 0
+                      margin: 0,
+                      wordBreak: "break-word"
                     }}>
                       Vencimento em 3 dias úteis
                     </p>
@@ -1313,15 +1382,18 @@ export default function CheckoutPage() {
               disabled={carregando || !formaPagamento}
               style={{
                 width: "100%",
-                padding: "18px",
+                padding: "clamp(16px, 4vw, 18px)",
                 background: !formaPagamento || carregando ? "#e5e5e5" : "#10b981",
                 color: !formaPagamento || carregando ? "#999" : "white",
                 border: "none",
-                borderRadius: "12px",
-                fontSize: "16px",
+                borderRadius: "clamp(10px, 2.5vw, 12px)",
+                fontSize: "clamp(15px, 3.5vw, 16px)",
                 fontWeight: "700",
                 cursor: !formaPagamento || carregando ? "not-allowed" : "pointer",
-                transition: "all 0.3s ease"
+                transition: "all 0.3s ease",
+                minHeight: "50px",
+                whiteSpace: "normal",
+                wordBreak: "break-word"
               }}
               onMouseOver={(e) => {
                 if (formaPagamento && !carregando) {
@@ -1335,8 +1407,8 @@ export default function CheckoutPage() {
               }}
             >
               {carregando ? (
-                <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px" }}>
-                  <svg style={{ width: "20px", height: "20px", animation: "spin 1s linear infinite" }} fill="none" viewBox="0 0 24 24">
+                <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "clamp(8px, 2vw, 12px)", flexWrap: "wrap" }}>
+                  <svg style={{ width: "clamp(18px, 4.5vw, 20px)", height: "clamp(18px, 4.5vw, 20px)", animation: "spin 1s linear infinite", flexShrink: 0 }} fill="none" viewBox="0 0 24 24">
                     <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
@@ -1361,7 +1433,7 @@ export default function CheckoutPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "20px",
+            padding: "clamp(16px, 4vw, 20px)",
             animation: "fadeIn 0.2s ease"
           }}
           onClick={() => setMostrarAlerta(false)}
@@ -1369,48 +1441,53 @@ export default function CheckoutPage() {
           <div 
             style={{
               background: "white",
-              borderRadius: "20px",
+              borderRadius: "clamp(16px, 4vw, 20px)",
               maxWidth: "480px",
               width: "100%",
-              padding: "48px",
+              padding: "clamp(32px, 8vw, 48px)",
               boxShadow: "0 25px 50px rgba(0,0,0,0.3)",
               textAlign: "center",
-              animation: "slideUp 0.3s ease"
+              animation: "slideUp 0.3s ease",
+              maxHeight: "90vh",
+              overflowY: "auto"
             }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Ícone de Alerta */}
             <div style={{
-              width: "80px",
-              height: "80px",
+              width: "clamp(64px, 16vw, 80px)",
+              height: "clamp(64px, 16vw, 80px)",
               background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
               borderRadius: "50%",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              margin: "0 auto 24px",
-              animation: "bounce 0.6s ease"
+              margin: "0 auto clamp(20px, 5vw, 24px)",
+              animation: "bounce 0.6s ease",
+              flexShrink: 0
             }}>
-              <svg style={{ width: "40px", height: "40px", color: "#f59e0b" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg style={{ width: "clamp(32px, 8vw, 40px)", height: "clamp(32px, 8vw, 40px)", color: "#f59e0b" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
 
             <h2 style={{
-              fontSize: "28px",
+              fontSize: "clamp(22px, 5.5vw, 28px)",
               fontWeight: "800",
               color: "#0a0a0a",
-              marginBottom: "16px",
-              letterSpacing: "-0.8px"
+              marginBottom: "clamp(12px, 3vw, 16px)",
+              letterSpacing: "-0.8px",
+              wordBreak: "break-word"
             }}>
               Atenção!
             </h2>
 
             <p style={{
-              fontSize: "16px",
+              fontSize: "clamp(15px, 3.5vw, 16px)",
               color: "#666",
               lineHeight: "1.6",
-              marginBottom: "32px"
+              marginBottom: "clamp(24px, 6vw, 32px)",
+              wordBreak: "break-word"
             }}>
               {mensagemAlerta}
             </p>
@@ -1419,15 +1496,18 @@ export default function CheckoutPage() {
               onClick={() => setMostrarAlerta(false)}
               style={{
                 width: "100%",
-                padding: "16px",
+                padding: "clamp(14px, 3.5vw, 16px)",
                 background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
                 color: "white",
                 border: "none",
-                borderRadius: "12px",
-                fontSize: "16px",
+                borderRadius: "clamp(10px, 2.5vw, 12px)",
+                fontSize: "clamp(15px, 3.5vw, 16px)",
                 fontWeight: "700",
                 cursor: "pointer",
-                transition: "all 0.3s ease"
+                transition: "all 0.3s ease",
+                minHeight: "50px",
+                whiteSpace: "normal",
+                wordBreak: "break-word"
               }}
               onMouseOver={(e) => {
                 e.currentTarget.style.transform = "translateY(-2px)";
