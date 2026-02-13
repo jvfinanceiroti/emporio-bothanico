@@ -18,6 +18,7 @@ const cloudinary = require("cloudinary").v2;
 const { 
   configurarMercadoPago, 
   gerarPixMercadoPago, 
+  processarPagamentoCartao,
   processarWebhookMercadoPago 
 } = require("./mercadopago");
 
@@ -600,6 +601,120 @@ app.post("/pagamento/pix/confirmar", async (req, res) => {
   } catch (error) {
     console.error("❌ Erro ao confirmar pagamento:", error);
     res.status(500).json({ error: "Erro ao confirmar pagamento" });
+  }
+});
+
+// ============================================
+// PAGAMENTO COM CARTÃO DE CRÉDITO
+// ============================================
+app.post("/pagamento/cartao/processar", async (req, res) => {
+  try {
+    const { pedido_id, token, card_token, payment_method_id, issuer_id, installments } = req.body;
+
+    console.log("💳 Processando cartão para pedido:", pedido_id);
+
+    // Validação básica
+    if (!card_token || !payment_method_id || !installments) {
+      return res.status(400).json({ 
+        error: "Dados do cartão incompletos",
+        detalhes: "card_token, payment_method_id e installments são obrigatórios"
+      });
+    }
+
+    // Buscar pedido
+    const pedidoResult = await pool.query(
+      "SELECT * FROM pedidos WHERE id = $1 AND access_token = $2",
+      [pedido_id, token]
+    );
+
+    if (pedidoResult.rows.length === 0) {
+      return res.status(404).json({ error: "Pedido não encontrado" });
+    }
+
+    const pedido = pedidoResult.rows[0];
+
+    // Verificar se já não está pago
+    if (pedido.status === "pago") {
+      return res.status(400).json({ error: "Pedido já foi pago" });
+    }
+
+    if (!mercadoPagoAtivo) {
+      return res.status(503).json({ 
+        error: "Mercado Pago não está configurado",
+        detalhes: "Configure MERCADOPAGO_ACCESS_TOKEN nas variáveis de ambiente"
+      });
+    }
+
+    // Processar pagamento com Mercado Pago
+    console.log("💳 Enviando para Mercado Pago...");
+    
+    const dadosCartao = {
+      token: card_token,
+      payment_method_id,
+      issuer_id: issuer_id || null,
+      installments: parseInt(installments),
+      documento: pedido.cliente_cpf || "00000000000"
+    };
+
+    const resultado = await processarPagamentoCartao(dadosCartao, pedido);
+
+    if (!resultado.success) {
+      console.error("❌ Erro no pagamento:", resultado.error);
+      return res.status(400).json({ 
+        error: resultado.error,
+        approved: false
+      });
+    }
+
+    // Salvar payment_id no pedido
+    await pool.query(
+      `UPDATE pedidos 
+       SET mercadopago_payment_id = $1, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2`,
+      [resultado.paymentId, pedido.id]
+    );
+
+    // Se aprovado, atualizar status
+    if (resultado.approved) {
+      await pool.query(
+        `UPDATE pedidos 
+         SET status = 'pago', updated_at = CURRENT_TIMESTAMP
+         WHERE id = $1`,
+        [pedido.id]
+      );
+      console.log("✅ Pedido marcado como PAGO!");
+    } else {
+      // Status pendente ou rejeitado
+      let novoStatus = "aguardando_pagamento";
+      if (resultado.status === "rejected") {
+        novoStatus = "recusado";
+      }
+      
+      await pool.query(
+        `UPDATE pedidos 
+         SET status = $1, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $2`,
+        [novoStatus, pedido.id]
+      );
+      console.log(`⏳ Status atualizado: ${novoStatus}`);
+    }
+
+    console.log("✅ Cartão processado com sucesso!");
+
+    return res.json({
+      success: true,
+      approved: resultado.approved,
+      status: resultado.status,
+      statusDetail: resultado.statusDetail,
+      paymentId: resultado.paymentId
+    });
+
+  } catch (error) {
+    console.error("❌ Erro ao processar cartão:", error);
+    res.status(500).json({ 
+      error: "Erro ao processar pagamento",
+      detalhes: error.message 
+    });
   }
 });
 

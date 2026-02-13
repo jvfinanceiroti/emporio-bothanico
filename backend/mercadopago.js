@@ -172,8 +172,89 @@ async function processarWebhookMercadoPago(data, pool) {
   }
 }
 
+// Processar Pagamento com Cartão de Crédito
+async function processarPagamentoCartao(dadosCartao, pedido) {
+  try {
+    if (!paymentClient) {
+      throw new Error("Mercado Pago não está configurado");
+    }
+
+    const valorTotal = parseFloat(pedido.total) || 0;
+
+    // Preparar nome do cliente
+    const nomeCompleto = pedido.cliente_nome || "Cliente";
+    const partesNome = nomeCompleto.trim().split(" ");
+    const primeiroNome = partesNome[0];
+    const sobrenome = partesNome.slice(1).join(" ") || "-";
+
+    // Remover formatação do CPF
+    const cpfLimpo = dadosCartao.documento.replace(/\D/g, "");
+
+    // Criar pagamento com cartão
+    const payment = await paymentClient.create({
+      body: {
+        transaction_amount: valorTotal,
+        token: dadosCartao.token,
+        description: `Pedido #${pedido.id} - Empório Botânico`,
+        installments: dadosCartao.installments,
+        payment_method_id: dadosCartao.payment_method_id,
+        issuer_id: dadosCartao.issuer_id,
+        payer: {
+          email: pedido.cliente_email || "cliente@email.com",
+          identification: {
+            type: "CPF",
+            number: cpfLimpo
+          },
+          first_name: primeiroNome,
+          last_name: sobrenome,
+        },
+        notification_url: `${process.env.API_URL || 'http://localhost:5000'}/webhook/mercadopago`,
+        metadata: {
+          pedido_id: pedido.id,
+          cliente_nome: pedido.cliente_nome,
+        }
+      }
+    });
+
+    console.log("✅ Pagamento com Cartão criado:", payment.id);
+    console.log("📊 Status:", payment.status);
+
+    return {
+      success: true,
+      paymentId: payment.id,
+      status: payment.status,
+      statusDetail: payment.status_detail,
+      approved: payment.status === "approved"
+    };
+  } catch (error) {
+    console.error("❌ Erro ao processar cartão:", error);
+    
+    // Extrair mensagem de erro mais específica
+    let mensagemErro = "Erro ao processar pagamento com cartão";
+    
+    if (error.response?.data) {
+      const apiError = error.response.data;
+      if (apiError.message) mensagemErro = apiError.message;
+      if (apiError.cause) {
+        console.error("Causa:", apiError.cause);
+        if (apiError.cause[0]?.description) {
+          mensagemErro = apiError.cause[0].description;
+        }
+      }
+    } else if (error.message) {
+      mensagemErro = error.message;
+    }
+
+    return {
+      success: false,
+      error: mensagemErro
+    };
+  }
+}
+
 module.exports = {
   configurarMercadoPago,
   gerarPixMercadoPago,
+  processarPagamentoCartao,
   processarWebhookMercadoPago
 };

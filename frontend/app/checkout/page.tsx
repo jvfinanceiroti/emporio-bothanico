@@ -58,6 +58,25 @@ export default function CheckoutPage() {
   const [cartaoDocumento, setCartaoDocumento] = useState("");
   const [cartaoParcelas, setCartaoParcelas] = useState(1);
   const [processandoCartao, setProcessandoCartao] = useState(false);
+  const [mercadoPagoReady, setMercadoPagoReady] = useState(false);
+
+  // Carregar SDK do Mercado Pago
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://sdk.mercadopago.com/js/v2';
+    script.async = true;
+    script.onload = () => {
+      console.log("✅ Mercado Pago SDK carregado");
+      setMercadoPagoReady(true);
+    };
+    document.body.appendChild(script);
+    
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const carrinhoSalvo = JSON.parse(localStorage.getItem("carrinho") || "[]");
@@ -1769,16 +1788,121 @@ export default function CheckoutPage() {
                   onClick={async () => {
                     // Validação básica
                     if (!cartaoNumero || !cartaoNome || !cartaoValidade || !cartaoCvv || !cartaoDocumento) {
-                      alert("Preencha todos os campos do cartão");
+                      setMensagemAlerta("Preencha todos os campos do cartão");
+                      setMostrarAlerta(true);
+                      return;
+                    }
+
+                    if (!mercadoPagoReady) {
+                      setMensagemAlerta("Aguarde o carregamento do sistema de pagamento...");
+                      setMostrarAlerta(true);
+                      return;
+                    }
+
+                    if (!pedidoId || !pedidoToken) {
+                      setMensagemAlerta("Erro: pedido não encontrado. Finalize novamente.");
+                      setMostrarAlerta(true);
                       return;
                     }
 
                     setProcessandoCartao(true);
                     try {
-                      // Aqui será implementada a integração com Mercado Pago
-                      alert("Funcionalidade de cartão será implementada");
-                    } catch (error) {
-                      alert("Erro ao processar cartão");
+                      // Extrair mês e ano da validade
+                      const [mes, ano] = cartaoValidade.split("/");
+                      const anoCompleto = `20${ano}`;
+
+                      // Remover formatação do número do cartão
+                      const numeroLimpo = cartaoNumero.replace(/\s/g, "");
+                      const cpfLimpo = cartaoDocumento.replace(/\D/g, "");
+
+                      console.log("💳 Iniciando tokenização do cartão...");
+
+                      // Inicializar Mercado Pago
+                      const mp = new (window as any).MercadoPago('APP_USR-73e9a69c-931e-415d-bfcc-4138c8893bc4');
+
+                      // Criar token do cartão
+                      const cardData = {
+                        cardNumber: numeroLimpo,
+                        cardholderName: cartaoNome,
+                        cardExpirationMonth: mes,
+                        cardExpirationYear: anoCompleto,
+                        securityCode: cartaoCvv,
+                        identificationType: 'CPF',
+                        identificationNumber: cpfLimpo
+                      };
+
+                      console.log("🔐 Criando token seguro...");
+                      
+                      const tokenResponse = await mp.createCardToken(cardData);
+                      
+                      if (!tokenResponse || !tokenResponse.id) {
+                        throw new Error("Erro ao criar token do cartão");
+                      }
+
+                      console.log("✅ Token criado:", tokenResponse.id);
+
+                      // Buscar método de pagamento
+                      const bin = numeroLimpo.substring(0, 6);
+                      const paymentMethodResponse = await fetch(
+                        `https://api.mercadopago.com/v1/payment_methods?public_key=APP_USR-73e9a69c-931e-415d-bfcc-4138c8893bc4&bin=${bin}`
+                      );
+                      const paymentMethods = await paymentMethodResponse.json();
+                      const paymentMethod = paymentMethods.results?.[0];
+
+                      if (!paymentMethod) {
+                        throw new Error("Cartão não reconhecido");
+                      }
+
+                      console.log("💳 Método de pagamento:", paymentMethod.name);
+
+                      // Enviar para backend
+                      console.log("📤 Enviando pagamento para servidor...");
+                      
+                      const response = await fetch(`${API_URL}/pagamento/cartao/processar`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          pedido_id: pedidoId,
+                          token: pedidoToken,
+                          card_token: tokenResponse.id,
+                          payment_method_id: paymentMethod.id,
+                          issuer_id: paymentMethod.issuer?.id || null,
+                          installments: cartaoParcelas
+                        })
+                      });
+
+                      const resultado = await response.json();
+
+                      if (!response.ok) {
+                        throw new Error(resultado.error || "Erro ao processar pagamento");
+                      }
+
+                      console.log("✅ Pagamento processado:", resultado);
+
+                      if (resultado.approved) {
+                        // Pagamento aprovado - redirecionar para sucesso
+                        localStorage.removeItem("carrinho");
+                        router.push(`/sucesso?pedido=${pedidoId}&token=${pedidoToken}`);
+                      } else {
+                        // Pagamento recusado ou pendente
+                        let mensagem = "Pagamento não aprovado. ";
+                        if (resultado.status === "rejected") {
+                          mensagem += "Cartão recusado. Verifique os dados ou tente outro cartão.";
+                        } else if (resultado.status === "pending") {
+                          mensagem += "Pagamento em análise. Você receberá um e-mail com a confirmação.";
+                        } else {
+                          mensagem += `Status: ${resultado.statusDetail}`;
+                        }
+                        setMensagemAlerta(mensagem);
+                        setMostrarAlerta(true);
+                      }
+
+                    } catch (error: any) {
+                      console.error("❌ Erro no pagamento:", error);
+                      setMensagemAlerta(
+                        error.message || "Erro ao processar pagamento. Verifique os dados do cartão."
+                      );
+                      setMostrarAlerta(true);
                     } finally {
                       setProcessandoCartao(false);
                     }
