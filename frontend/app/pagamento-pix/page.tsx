@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-export default function PagamentoPix() {
+function PagamentoPixContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pedidoId = searchParams?.get("pedido");
@@ -444,5 +444,34 @@ export default function PagamentoPix() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function PagamentoPix() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#f8f9fa"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{
+            width: "48px",
+            height: "48px",
+            border: "4px solid #e5e7eb",
+            borderTopColor: "#0a0a0a",
+            borderRadius: "50%",
+            animation: "spin 1s linear infinite",
+            margin: "0 auto 16px"
+          }} />
+          <p style={{ color: "#666", fontSize: "14px" }}>Carregando...</p>
+        </div>
+      </div>
+    }>
+      <PagamentoPixContent />
+    </Suspense>
   );
 }
