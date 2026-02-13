@@ -1,5 +1,6 @@
 "use client";
 
+import { API_URL } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -16,7 +17,7 @@ export default function AdminDashboard() {
       return;
     }
 
-    fetch("http://localhost:3001/admin/dashboard", {
+    fetch(`${API_URL}/admin/dashboard`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())

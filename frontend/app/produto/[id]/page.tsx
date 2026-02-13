@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { API_URL } from "@/lib/api";
+import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
-export default function ProdutoPage() {
+// Forçar renderização dinâmica
+export const dynamic = 'force-dynamic';
+
+function ProdutoContent() {
   const params = useParams();
   const router = useRouter();
   const [produto, setProduto] = useState<any>(null);
@@ -14,7 +18,7 @@ export default function ProdutoPage() {
   useEffect(() => {
     if (!params?.id) return;
 
-    fetch(`http://localhost:3001/produtos/${params.id}`)
+    fetch(`${API_URL}/produtos/${params.id}`)
       .then((res) => res.json())
       .then((data) => setProduto(data));
   }, [params]);
@@ -481,5 +485,25 @@ export default function ProdutoPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function ProdutoPage() {
+  return (
+    <Suspense fallback={
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "48px", marginBottom: "16px" }}>⏳</div>
+          <p style={{ fontSize: "18px", fontWeight: "600", color: "#666" }}>Carregando produto...</p>
+        </div>
+      </div>
+    }>
+      <ProdutoContent />
+    </Suspense>
   );
 }

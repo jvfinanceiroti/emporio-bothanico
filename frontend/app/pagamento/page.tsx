@@ -1,15 +1,20 @@
 "use client";
 
+import { API_URL } from "@/lib/api";
 import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
 
-export default function PagamentoPage() {
+// Forçar renderização dinâmica
+export const dynamic = 'force-dynamic';
+
+function PagamentoContent() {
   const params = useSearchParams();
   const router = useRouter();
 
   const pedidoId = params.get("pedido");
 
   const pagar = async (aprovado: boolean) => {
-    await fetch("http://localhost:3001/pagamento-fake", {
+    await fetch(`${API_URL}/pagamento-fake`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -38,5 +43,13 @@ export default function PagamentoPage() {
         Simular Pagamento Recusado
       </button>
     </div>
+  );
+}
+
+export default function PagamentoPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 40 }}>Carregando...</div>}>
+      <PagamentoContent />
+    </Suspense>
   );
 }

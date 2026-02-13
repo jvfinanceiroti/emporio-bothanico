@@ -1,5 +1,6 @@
 "use client";
 
+import { API_URL } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ const [mostrarToast, setMostrarToast] = useState(false);
 
 
 useEffect(() => {
-  fetch(`http://localhost:3001/admin/pedidos/${params.id}`)
+  fetch(`${API_URL}/admin/pedidos/${params.id}`)
     .then(res => res.json())
     .then(data => {
       setData(data);
@@ -79,7 +80,7 @@ useEffect(() => {
   onClick={async () => {
     try {
       const response = await fetch(
-        `http://localhost:3001/admin/pedidos/${data.pedido.id}/status`,
+        `${API_URL}/admin/pedidos/${data.pedido.id}/status`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

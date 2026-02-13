@@ -203,21 +203,24 @@ app.get("/produtos/:id", async (req, res) => {
 app.post("/pedidos", async (req, res) => {
   try {
   	console.log("BODY RECEBIDO:", req.body);
-    const { itens, cliente } = req.body;
+    console.log("ITENS DO PEDIDO:", JSON.stringify(req.body.itens, null, 2));
+    const { itens, cliente, endereco, frete, formaPagamento } = req.body;
 
     if (!cliente) {
       return res.status(400).send("Cliente não enviado");
     }
 
     const total = itens.reduce(
-      (acc, item) => acc + Number(item.preco),
+      (acc, item) => acc + (Number(item.preco) * (item.quantidade || 1)),
       0
-    );
+    ) + (frete || 0);
 
     const pedidoResult = await pool.query(
       `INSERT INTO pedidos
-      (status, total, cliente_nome, cliente_email, cliente_telefone)
-      VALUES ($1,$2,$3,$4,$5)
+      (status, total, cliente_nome, cliente_email, cliente_telefone,
+       endereco_cep, endereco_rua, endereco_numero, endereco_complemento,
+       endereco_bairro, endereco_cidade, endereco_estado, frete, forma_pagamento)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
       RETURNING *`,
       [
         "aguardando_pagamento",
@@ -225,25 +228,35 @@ app.post("/pedidos", async (req, res) => {
         cliente.nome || null,
         cliente.email || null,
         cliente.telefone || null,
+        endereco?.cep || null,
+        endereco?.endereco || null,
+        endereco?.numero || null,
+        endereco?.complemento || null,
+        endereco?.bairro || null,
+        endereco?.cidade || null,
+        endereco?.estado || null,
+        frete || 0,
+        formaPagamento || null
       ]
     );
 
     const pedido = pedidoResult.rows[0];
 
 for (const item of itens) {
+  const quantidade = item.quantidade || 1;
 
   // salva item do pedido
   await pool.query(
     `INSERT INTO pedido_itens
     (pedido_id, produto_id, quantidade, preco_unitario)
     VALUES ($1,$2,$3,$4)`,
-    [pedido.id, item.id, 1, item.preco]
+    [pedido.id, item.id, quantidade, item.preco]
   );
 
   // baixa estoque
   await pool.query(
-    "UPDATE produtos SET estoque = estoque - 1 WHERE id = $1",
-    [item.id]
+    "UPDATE produtos SET estoque = estoque - $1 WHERE id = $2",
+    [quantidade, item.id]
   );
 
 }
@@ -295,27 +308,38 @@ app.get("/pedidos/:id", async (req, res) => {
 
 // LISTAR PEDIDOS ADMIN
 
-app.get("/admin/pedidos", async (req, res) => {
+app.get("/admin/pedidos", verificarToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT
         id,
         cliente_nome,
+        cliente_email,
+        cliente_telefone,
         total,
         status,
-        created_at
+        created_at as criado_em,
+        endereco_cep,
+        endereco_rua,
+        endereco_numero,
+        endereco_complemento,
+        endereco_bairro,
+        endereco_cidade,
+        endereco_estado,
+        frete,
+        forma_pagamento
       FROM pedidos
-      ORDER BY id DESC
+      ORDER BY created_at DESC
     `);
 
     res.json(result.rows);
   } catch (error) {
     console.error(error);
-    res.status(500).send("Erro ao listar pedidos");
+    res.status(500).json({ error: "Erro ao listar pedidos" });
   }
 });
 
-app.get("/admin/pedidos/:id", async (req, res) => {
+app.get("/admin/pedidos/:id", verificarToken, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -343,6 +367,29 @@ app.get("/admin/pedidos/:id", async (req, res) => {
     res.status(500).send("Erro detalhe pedido");
   }
 });
+
+// Listar usuários (exceto administradores)
+app.get("/admin/usuarios", verificarToken, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        id,
+        nome,
+        email,
+        role,
+        criado_em
+      FROM usuarios
+      WHERE role != 'admin'
+      ORDER BY criado_em DESC
+    `);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro ao listar usuários");
+  }
+});
+
 // Dashboard
 app.get("/admin/dashboard", verificarToken, async (req, res) => {
   try {

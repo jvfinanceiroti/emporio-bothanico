@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { API_URL } from "@/lib/api";
 
 interface ItemCarrinho {
   id: number;
@@ -13,6 +14,7 @@ interface ItemCarrinho {
   altura_cm?: number;
   largura_cm?: number;
   comprimento_cm?: number;
+  quantidade?: number;
 }
 
 export default function CheckoutPage() {
@@ -29,12 +31,13 @@ export default function CheckoutPage() {
   const [cidade, setCidade] = useState("");
   const [estado, setEstado] = useState("");
   const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState("");
   const [mostrarPagamento, setMostrarPagamento] = useState(false);
   const [formaPagamento, setFormaPagamento] = useState("");
   const [frete, setFrete] = useState<number | null>(null);
   const [carregandoCep, setCarregandoCep] = useState(false);
   const [carregandoFrete, setCarregandoFrete] = useState(false);
+  const [mostrarAlerta, setMostrarAlerta] = useState(false);
+  const [mensagemAlerta, setMensagemAlerta] = useState("");
 
   useEffect(() => {
     const carrinhoSalvo = JSON.parse(localStorage.getItem("carrinho") || "[]");
@@ -44,7 +47,18 @@ export default function CheckoutPage() {
       return;
     }
 
-    setCarrinho(carrinhoSalvo);
+    // Agrupar itens duplicados do localStorage
+    const carrinhoAgrupado = carrinhoSalvo.reduce((acc: ItemCarrinho[], item: any) => {
+      const existente = acc.find((i) => i.id === item.id);
+      if (existente) {
+        existente.quantidade = (existente.quantidade || 1) + 1;
+      } else {
+        acc.push({ ...item, quantidade: 1 });
+      }
+      return acc;
+    }, []);
+
+    setCarrinho(carrinhoAgrupado);
   }, [router]);
 
   useEffect(() => {
@@ -53,14 +67,14 @@ export default function CheckoutPage() {
       
       if (cepLimpo.length === 8) {
         setCarregandoCep(true);
-        setErro("");
 
         try {
           const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
           const data = await response.json();
 
           if (data.erro) {
-            setErro("CEP não encontrado");
+            setMensagemAlerta("CEP não encontrado. Verifique e tente novamente.");
+            setMostrarAlerta(true);
             setEndereco("");
             setBairro("");
             setCidade("");
@@ -73,14 +87,14 @@ export default function CheckoutPage() {
           setBairro(data.bairro || "");
           setCidade(data.localidade || "");
           setEstado(data.uf || "");
-          setErro("");
 
           // Calcular frete automaticamente após buscar CEP
           if (numero) {
             calcularFrete(data.uf);
           }
         } catch (error) {
-          setErro("Erro ao buscar CEP");
+          setMensagemAlerta("Erro ao buscar CEP. Verifique sua conexão.");
+          setMostrarAlerta(true);
         } finally {
           setCarregandoCep(false);
         }
@@ -103,24 +117,15 @@ export default function CheckoutPage() {
   const calcularFrete = async (uf: string) => {
     setCarregandoFrete(true);
 
-    // Calcular peso total e dimensões máximas
-    const carrinhoAgrupado = carrinho.reduce((acc: any[], item) => {
-      const existente = acc.find((i) => i.id === item.id);
-      if (existente) {
-        existente.quantidade += 1;
-      } else {
-        acc.push({ ...item, quantidade: 1 });
-      }
-      return acc;
-    }, []);
-
+    // Calcular peso total e dimensões máximas (carrinho já está agrupado)
     let pesoTotal = 0;
     let alturaMax = 0;
     let larguraMax = 0;
     let comprimentoMax = 0;
 
-    carrinhoAgrupado.forEach(item => {
-      pesoTotal += (item.peso_kg || 0.5) * item.quantidade;
+    carrinho.forEach(item => {
+      const quantidade = item.quantidade || 1;
+      pesoTotal += (item.peso_kg || 0.5) * quantidade;
       alturaMax = Math.max(alturaMax, item.altura_cm || 10);
       larguraMax = Math.max(larguraMax, item.largura_cm || 10);
       comprimentoMax = Math.max(comprimentoMax, item.comprimento_cm || 15);
@@ -174,19 +179,60 @@ export default function CheckoutPage() {
   };
 
   const validarFormulario = () => {
-    if (!nome || !email || !telefone) {
-      setErro("Preencha seus dados pessoais");
-      return false;
-    }
-
-    if (!cep || !endereco || !numero || !bairro || !cidade || !estado) {
-      setErro("Preencha o endereço completo");
+    // Validar dados pessoais
+    if (!nome || nome.trim().length < 3) {
+      setMensagemAlerta("Por favor, preencha seu nome completo");
+      setMostrarAlerta(true);
       return false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setErro("Email inválido");
+    if (!email || !emailRegex.test(email)) {
+      setMensagemAlerta("Por favor, informe um email válido");
+      setMostrarAlerta(true);
+      return false;
+    }
+
+    if (!telefone || telefone.replace(/\D/g, "").length < 10) {
+      setMensagemAlerta("Por favor, informe um telefone válido");
+      setMostrarAlerta(true);
+      return false;
+    }
+
+    // Validar endereço
+    if (!cep || cep.replace(/\D/g, "").length !== 8) {
+      setMensagemAlerta("Por favor, preencha um CEP válido (8 dígitos)");
+      setMostrarAlerta(true);
+      return false;
+    }
+
+    if (!endereco || endereco.trim().length < 5) {
+      setMensagemAlerta("Por favor, preencha o endereço completo");
+      setMostrarAlerta(true);
+      return false;
+    }
+
+    if (!numero || numero.trim().length === 0) {
+      setMensagemAlerta("Por favor, informe o número do endereço");
+      setMostrarAlerta(true);
+      return false;
+    }
+
+    if (!bairro || bairro.trim().length < 2) {
+      setMensagemAlerta("Por favor, preencha o bairro");
+      setMostrarAlerta(true);
+      return false;
+    }
+
+    if (!cidade || cidade.trim().length < 2) {
+      setMensagemAlerta("Por favor, preencha a cidade");
+      setMostrarAlerta(true);
+      return false;
+    }
+
+    if (!estado || estado.length !== 2) {
+      setMensagemAlerta("Por favor, preencha o estado (sigla com 2 letras)");
+      setMostrarAlerta(true);
       return false;
     }
 
@@ -196,20 +242,22 @@ export default function CheckoutPage() {
   const abrirSelecaoPagamento = () => {
     if (!validarFormulario()) return;
     setMostrarPagamento(true);
-    setErro("");
   };
 
   const finalizarPedido = async () => {
     if (!formaPagamento) {
-      setErro("Selecione uma forma de pagamento");
+      setMensagemAlerta("Por favor, selecione uma forma de pagamento");
+      setMostrarPagamento(false);
+      setMostrarAlerta(true);
       return;
     }
 
     setCarregando(true);
-    setErro("");
 
     try {
-      const response = await fetch("http://localhost:3001/pedidos", {
+      console.log("CARRINHO COM QUANTIDADES:", carrinho);
+
+      const response = await fetch(`${API_URL}/pedidos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -240,10 +288,14 @@ export default function CheckoutPage() {
         const data = await response.json();
         router.push(`/pagamento?pedido=${data.id}`);
       } else {
-        setErro("Erro ao finalizar pedido. Tente novamente.");
+        setMensagemAlerta("Erro ao finalizar pedido. Tente novamente.");
+        setMostrarPagamento(false);
+        setMostrarAlerta(true);
       }
     } catch (error) {
-      setErro("Erro de conexão. Tente novamente.");
+      setMensagemAlerta("Erro de conexão. Verifique sua internet e tente novamente.");
+      setMostrarPagamento(false);
+      setMostrarAlerta(true);
     } finally {
       setCarregando(false);
     }
@@ -263,20 +315,11 @@ export default function CheckoutPage() {
     return `${numeros.slice(0, 5)}-${numeros.slice(5, 8)}`;
   };
 
-  const subtotal = carrinho.reduce((acc, item) => acc + Number(item.preco), 0);
+  const subtotal = carrinho.reduce((acc, item) => acc + (Number(item.preco) * (item.quantidade || 1)), 0);
   const total = subtotal + (frete || 0);
 
-  const carrinhoAgrupado = carrinho.reduce((acc: any[], item) => {
-    const existente = acc.find((i) => i.id === item.id);
-    if (existente) {
-      existente.quantidade += 1;
-    } else {
-      acc.push({ ...item, quantidade: 1 });
-    }
-    return acc;
-  }, []);
-
-  const totalItens = carrinhoAgrupado.reduce((acc, item) => acc + item.quantidade, 0);
+  // carrinho já está agrupado, não precisa reagrupar
+  const totalItens = carrinho.reduce((acc, item) => acc + (item.quantidade || 1), 0);
 
   return (
     <div style={{ minHeight: "100vh", background: "#fafafa" }}>
@@ -346,27 +389,6 @@ export default function CheckoutPage() {
       </header>
 
       <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "80px 48px" }}>
-        {erro && (
-          <div style={{
-            marginBottom: "32px",
-            background: "#fee",
-            border: "1px solid #fcc",
-            color: "#c33",
-            padding: "16px 20px",
-            borderRadius: "12px",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            fontSize: "14px",
-            fontWeight: "500"
-          }}>
-            <svg style={{ width: "20px", height: "20px", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            {erro}
-          </div>
-        )}
-
         <div style={{
           display: "grid",
           gridTemplateColumns: "1fr 420px",
@@ -813,7 +835,7 @@ export default function CheckoutPage() {
                 marginBottom: "24px",
                 paddingRight: "8px"
               }}>
-                {carrinhoAgrupado.map((item: any) => (
+                {carrinho.map((item: any) => (
                   <div key={item.id} style={{
                     display: "flex",
                     gap: "16px",
@@ -1264,20 +1286,6 @@ export default function CheckoutPage() {
               </button>
             </div>
 
-            {erro && (
-              <div style={{
-                marginBottom: "20px",
-                background: "#fee",
-                border: "1px solid #fcc",
-                color: "#c33",
-                padding: "12px 16px",
-                borderRadius: "10px",
-                fontSize: "14px"
-              }}>
-                {erro}
-              </div>
-            )}
-
             <button
               onClick={finalizarPedido}
               disabled={carregando || !formaPagamento}
@@ -1319,6 +1327,123 @@ export default function CheckoutPage() {
           </div>
         </div>
       )}
+
+      {/* MODAL DE ALERTA */}
+      {mostrarAlerta && (
+        <div 
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.6)",
+            zIndex: 2000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            animation: "fadeIn 0.2s ease"
+          }}
+          onClick={() => setMostrarAlerta(false)}
+        >
+          <div 
+            style={{
+              background: "white",
+              borderRadius: "20px",
+              maxWidth: "480px",
+              width: "100%",
+              padding: "48px",
+              boxShadow: "0 25px 50px rgba(0,0,0,0.3)",
+              textAlign: "center",
+              animation: "slideUp 0.3s ease"
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Ícone de Alerta */}
+            <div style={{
+              width: "80px",
+              height: "80px",
+              background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 24px",
+              animation: "bounce 0.6s ease"
+            }}>
+              <svg style={{ width: "40px", height: "40px", color: "#f59e0b" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+
+            <h2 style={{
+              fontSize: "28px",
+              fontWeight: "800",
+              color: "#0a0a0a",
+              marginBottom: "16px",
+              letterSpacing: "-0.8px"
+            }}>
+              Atenção!
+            </h2>
+
+            <p style={{
+              fontSize: "16px",
+              color: "#666",
+              lineHeight: "1.6",
+              marginBottom: "32px"
+            }}>
+              {mensagemAlerta}
+            </p>
+
+            <button
+              onClick={() => setMostrarAlerta(false)}
+              style={{
+                width: "100%",
+                padding: "16px",
+                background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                color: "white",
+                border: "none",
+                borderRadius: "12px",
+                fontSize: "16px",
+                fontWeight: "700",
+                cursor: "pointer",
+                transition: "all 0.3s ease"
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 8px 16px rgba(245, 158, 11, 0.4)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              Entendi
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes bounce {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+      `}</style>
     </div>
   );
 }

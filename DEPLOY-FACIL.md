@@ -1,254 +1,238 @@
-# 🚀 DEPLOY SUPER FÁCIL - RENDER.COM
-## Em 5 passos sua loja está no ar!
+# 🚀 DEPLOY RÁPIDO - Vercel + Railway
+
+## ✅ PASSO A PASSO (15 minutos)
+
+### 📋 PREPARAÇÃO (já feito!)
+
+✅ Git configurado
+✅ Arquivos preparados para Vercel
+✅ Código funcionando em localhost
 
 ---
 
-## ✅ PRÉ-REQUISITOS
+## 🎯 ETAPA 1: Fazer Commit e Push
 
-1. **Instalar Git** (se ainda não tem):
-   - Baixe: https://git-scm.com/download/win
-   - Instale com configurações padrão
-   - **Reinicie o PowerShell**
-
-2. **Criar conta no GitHub** (se ainda não tem):
-   - Acesse: https://github.com/signup
-   - Crie sua conta gratuitamente
-
----
-
-## 📦 PASSO 1: PREPARAR O CÓDIGO
-
-Abra o PowerShell na pasta do projeto e execute:
+Execute estes comandos (já estou fazendo para você):
 
 ```powershell
-cd C:\Users\joaov\loja
-
-# Inicializar Git
-git init
-
-# Adicionar todos os arquivos
 git add .
-
-# Criar commit
-git commit -m "Deploy Emporio Bothanico"
+git commit -m "Deploy para Vercel - Loja completa"
+git push origin main
 ```
 
 ---
 
-## 🐙 PASSO 2: SUBIR PARA O GITHUB
+## 🎯 ETAPA 2: Deploy do Frontend (Vercel)
 
-### 2.1 - Criar repositório no GitHub
-1. Acesse: https://github.com/new
-2. Preencha:
-   - **Nome**: `emporio-bothanico`
-   - **Visibilidade**: Private (ou Public)
-3. Clique em **"Create repository"**
-4. **NÃO marque** nenhuma opção (README, .gitignore, etc)
+### 1. Criar conta/Login no Vercel
 
-### 2.2 - Fazer push do código
-Copie os comandos que aparecem na página e execute no PowerShell:
+1. Acesse: https://vercel.com
+2. Clique em **"Sign Up"** (ou "Login" se já tem conta)
+3. Escolha **"Continue with GitHub"**
+4. Autorize o Vercel a acessar seus repositórios
 
+### 2. Importar Projeto
+
+1. No dashboard do Vercel, clique em **"Add New..."** → **"Project"**
+2. Procure o repositório **"loja"** na lista
+3. Clique em **"Import"**
+
+### 3. Configurar Projeto
+
+**Root Directory:**
+- Clique em **"Edit"**
+- Selecione pasta **"frontend"**
+- Confirmar
+
+**Framework Preset:**
+- Deve detectar automaticamente: **Next.js**
+
+**Build Settings:**
+- Deixar padrão (já configurado no `vercel.json`)
+
+**Environment Variables:**
+Adicionar estas variáveis:
+
+```
+NEXT_PUBLIC_API_URL = https://api.emporiobothanico.com.br
+NODE_ENV = production
+```
+
+### 4. Deploy
+
+1. Clicar em **"Deploy"**
+2. Aguardar 2-3 minutos
+3. ✅ Vercel vai gerar uma URL tipo: `https://loja-seunome.vercel.app`
+
+---
+
+## 🎯 ETAPA 3: Deploy do Backend (Railway)
+
+### 1. Criar conta no Railway
+
+1. Acesse: https://railway.app
+2. Clique em **"Login with GitHub"**
+3. Autorize o Railway
+
+### 2. Criar Novo Projeto
+
+1. Dashboard → **"New Project"**
+2. Selecione **"Deploy from GitHub repo"**
+3. Escolha o repositório **"loja"**
+4. Quando perguntar o diretório, selecione **"backend"**
+
+### 3. Configurar Variáveis de Ambiente
+
+No painel do Railway:
+
+1. Aba **"Variables"**
+2. Adicionar:
+
+```
+DATABASE_URL = sua-connection-string-do-supabase
+JWT_SECRET = minha-chave-secreta-123456
+PORT = 3001
+```
+
+### 4. Deploy
+
+1. Railway faz deploy automático
+2. Após terminar, clique em **"Settings"** → **"Generate Domain"**
+3. ✅ Railway vai gerar URL tipo: `https://backend-production-xxxx.up.railway.app`
+
+---
+
+## 🎯 ETAPA 4: Conectar Frontend ao Backend
+
+### 1. Atualizar URL da API no Vercel
+
+1. No dashboard do Vercel, entre no projeto
+2. **"Settings"** → **"Environment Variables"**
+3. **Editar** a variável `NEXT_PUBLIC_API_URL`:
+   ```
+   NEXT_PUBLIC_API_URL = https://backend-production-xxxx.up.railway.app
+   ```
+   (Cole a URL que o Railway gerou)
+4. **Save**
+5. **"Deployments"** → Redeploy (botão com 3 pontinhos → Redeploy)
+
+### 2. Configurar CORS no Backend
+
+Adicionar a URL do Vercel no backend:
+
+```javascript
+// No backend/server.js, na seção CORS:
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://loja-seunome.vercel.app'  // Adicionar sua URL Vercel
+  ],
+  credentials: true
+}));
+```
+
+Commit e push:
 ```powershell
-git remote add origin https://github.com/SEU-USUARIO/emporio-bothanico.git
-git branch -M main
-git push -u origin main
-```
-
-Se pedir usuário e senha:
-- **Usuário**: seu username do GitHub
-- **Senha**: crie um token em https://github.com/settings/tokens/new
-  - Marque: `repo` (acesso completo)
-  - Copie o token gerado e use como senha
-
----
-
-## 🎯 PASSO 3: CRIAR CONTA NO RENDER
-
-1. Acesse: https://render.com/
-2. Clique em **"Get Started"**
-3. Faça login com **GitHub** (botão azul)
-4. Autorize o Render a acessar seus repositórios
-
----
-
-## 🚀 PASSO 4: FAZER O DEPLOY (O MAIS IMPORTANTE!)
-
-### 4.1 - Criar novo Blueprint
-1. No dashboard do Render, clique em **"New +"**
-2. Selecione **"Blueprint"**
-3. Conecte o repositório `emporio-bothanico`
-4. O Render vai detectar o arquivo `render.yaml`
-5. Clique em **"Apply"**
-
-### 4.2 - Aguardar o deploy
-- O Render vai criar **automaticamente**:
-  - ✅ Banco de dados PostgreSQL
-  - ✅ Backend (API)
-  - ✅ Frontend (Site)
-  
-- Tempo estimado: **5-8 minutos**
-- Você pode acompanhar os logs em tempo real
-
-### 4.3 - Pegar as URLs
-Após finalizar, você verá 2 serviços:
-- **emporio-backend**: URL tipo `https://emporio-backend-xxxx.onrender.com`
-- **emporio-frontend**: URL tipo `https://emporio-frontend-yyyy.onrender.com`
-
-**SALVE essas URLs!**
-
----
-
-## 🌐 PASSO 5: CONFIGURAR SEU DOMÍNIO
-
-### 5.1 - Adicionar domínio no Render
-1. Clique no serviço **emporio-frontend**
-2. Vá em **"Settings"** (menu lateral)
-3. Role até **"Custom Domain"**
-4. Clique em **"Add Custom Domain"**
-5. Digite seu domínio: `emporiobothanico.com.br`
-6. Clique em **"Add"**
-
-### 5.2 - Configurar DNS no seu provedor
-
-O Render mostrará algo assim:
-```
-CNAME Record
-Name: emporiobothanico.com.br
-Value: emporio-frontend-yyyy.onrender.com
-```
-
-**No painel do seu provedor de domínio** (Registro.br, GoDaddy, Hostinger, etc):
-
-1. Encontre **"Gerenciar DNS"** ou **"DNS Records"**
-2. Adicione um registro **CNAME**:
-   - **Nome/Host**: `@` (ou deixe vazio)
-   - **Tipo**: CNAME
-   - **Valor/Aponta para**: Cole a URL que o Render forneceu
-   - **TTL**: 3600 (ou automático)
-3. Se for `www.emporiobothanico.com.br`, adicione outro CNAME:
-   - **Nome/Host**: `www`
-   - **Tipo**: CNAME
-   - **Valor**: mesma URL do Render
-4. **Salve as alterações**
-
-### 5.3 - Aguardar propagação
-- Pode levar de **15 minutos até 48 horas**
-- Geralmente funciona em **30 minutos**
-- Teste em: https://dnschecker.org
-
----
-
-## ✅ VERIFICAÇÃO FINAL
-
-### Testar o Backend
-Acesse: `https://emporio-backend-xxxx.onrender.com/produtos`
-- **Deve retornar**: `[]` ou lista de produtos
-
-### Testar o Frontend
-Acesse: `https://emporio-frontend-yyyy.onrender.com`
-- **Deve mostrar**: Sua loja funcionando!
-
-### Testar o Admin
-Acesse: `https://emporiobothanico.com.br/admin/login`
-- **Email**: `admin@emporio.com.br`
-- **Senha**: `admin123`
-
----
-
-## 🔥 DICAS IMPORTANTES
-
-### ⚠️ IMPORTANTE: Primeiro acesso pode ser lento
-- O Render coloca serviços gratuitos em "modo hibernação" após 15min sem uso
-- O **primeiro acesso** pode levar 30-60 segundos para "acordar"
-- Depois disso fica rápido normalmente
-
-### 🔄 Como fazer atualizações?
-Sempre que você fizer alterações no código:
-```powershell
-cd C:\Users\joaov\loja
-git add .
-git commit -m "Descrição da mudança"
+git add backend/server.js
+git commit -m "Adicionar CORS para Vercel"
 git push
 ```
-O Render faz **deploy automático** em 2-3 minutos!
 
-### 📊 Ver logs em tempo real
-1. No dashboard do Render
-2. Clique no serviço (backend ou frontend)
-3. Vá em **"Logs"**
-4. Veja tudo que está acontecendo!
-
-### 🆘 Serviço não inicia?
-1. Verifique os **Logs** no Render
-2. Procure por mensagens de erro em vermelho
-3. Se necessário, apague e recrie o Blueprint
+Railway faz redeploy automático.
 
 ---
 
-## 🎉 PRONTO! SUA LOJA ESTÁ NO AR!
+## 🎯 ETAPA 5: Conectar Seu Domínio (emporiobothanico.com.br)
 
-**URLs para compartilhar:**
-- Loja: `https://emporiobothanico.com.br`
-- Admin: `https://emporiobothanico.com.br/admin/login`
+### No Vercel:
 
-**Credenciais Admin:**
-- Email: `admin@emporio.com.br`
-- Senha: `admin123`
+1. Projeto → **"Settings"** → **"Domains"**
+2. Adicionar: `emporiobothanico.com.br`
+3. Vercel vai mostrar instruções de DNS
 
-⚠️ **LEMBRE-SE**: Altere a senha após primeiro acesso!
+### No Hostinger (DNS):
 
----
+1. hPanel → **"Domínios"** → `emporiobothanico.com.br`
+2. **"DNS / Nameservers"** → **"DNS Records"**
+3. Adicionar/Editar registro:
+   - **Type:** A
+   - **Name:** @ (ou deixar vazio)
+   - **Value:** `76.76.21.21` (IP do Vercel)
+4. Adicionar CNAME:
+   - **Type:** CNAME
+   - **Name:** www
+   - **Value:** `cname.vercel-dns.com`
+5. **Save**
 
-## 📞 PROBLEMAS COMUNS
+### Aguardar propagação DNS (5-30 minutos)
 
-### "Service failed to start"
-- Verifique os logs no Render
-- Geralmente é problema de variável de ambiente
-- O render.yaml já configura tudo automaticamente
-
-### "Database connection failed"
-- Aguarde 1-2 minutos - banco pode estar inicializando
-- Verifique se o banco de dados foi criado no Blueprint
-
-### "Domain not working"
-- Aguarde até 48h para propagação DNS
-- Use https://dnschecker.org para verificar
-- Confirme que o CNAME está correto no provedor
-
-### "Site muito lento"
-- Primeiro acesso após hibernação é lento (30-60s)
-- Considere upgrade para plano pago ($7/mês) para evitar hibernação
+Depois disso:
+- ✅ `https://emporiobothanico.com.br` → Seu site!
+- ✅ SSL automático (HTTPS)
 
 ---
 
-## 💰 CUSTOS
+## 🎯 ETAPA 6 (Opcional): Subdomínio para API
 
-**Plano Gratuito (atual):**
-- ✅ Banco PostgreSQL: 500MB grátis
-- ✅ Backend: 750h/mês grátis
-- ✅ Frontend: 750h/mês grátis
-- ⚠️ Hiberna após 15min de inatividade
-- ⚠️ Primeiro acesso pode ser lento
+Se quiser usar `api.emporiobothanico.com.br`:
 
-**Plano Pago (opcional):**
-- 💰 $7/mês por serviço
-- ✅ Nunca hiberna
-- ✅ Performance melhor
-- ✅ Builds mais rápidos
+### No Railway:
+1. **"Settings"** → **"Custom Domain"**
+2. Adicionar: `api.emporiobothanico.com.br`
+3. Railway mostra valor CNAME
 
----
+### No Hostinger DNS:
+1. Adicionar registro:
+   - **Type:** CNAME
+   - **Name:** api
+   - **Value:** (valor que Railway mostrou)
+2. **Save**
 
-## 🚀 PRÓXIMOS PASSOS
+Aguardar propagação (5-30 min).
 
-Depois que tudo estiver funcionando, você pode:
-- ✅ Adicionar produtos na área admin
-- ✅ Personalizar cores e textos
-- ✅ Adicionar mais funcionalidades
-- ✅ Integrar pagamento (PIX, cartão)
-- ✅ Adicionar rastreamento (Google Analytics)
+Depois atualizar `NEXT_PUBLIC_API_URL` no Vercel para:
+```
+NEXT_PUBLIC_API_URL = https://api.emporiobothanico.com.br
+```
 
 ---
 
-**🎊 PARABÉNS! SUA LOJA ESTÁ PROFISSIONALMENTE HOSPEDADA!**
+## 📋 CHECKLIST FINAL
 
-Qualquer dúvida, consulte a documentação do Render: https://render.com/docs
+- [ ] Código commitado e pushed para GitHub
+- [ ] Frontend deployado no Vercel
+- [ ] Backend deployado no Railway
+- [ ] Variáveis de ambiente configuradas em ambos
+- [ ] Frontend conectado ao backend (URL atualizada)
+- [ ] CORS configurado no backend
+- [ ] Domínio conectado ao Vercel
+- [ ] DNS propagado (teste: https://emporiobothanico.com.br)
+- [ ] Site funcionando com produtos
+- [ ] Admin funcionando
+
+---
+
+## 🎉 RESULTADO FINAL
+
+- 🛍️ **Loja:** https://emporiobothanico.com.br
+- 🔧 **Admin:** https://emporiobothanico.com.br/admin/login
+- 🚀 **API:** https://api.emporiobothanico.com.br
+- ✅ **SSL:** Automático
+- ✅ **Deploy:** Automático via Git push
+- ✅ **Custo:** R$ 0,00 (grátis)
+
+---
+
+## 💡 VANTAGENS
+
+✅ Deploy em 2 minutos após push
+✅ SSL/HTTPS automático
+✅ CDN global (site super rápido)
+✅ Logs e monitoramento
+✅ Rollback fácil
+✅ 100% profissional
+✅ Grátis para sempre (com limites generosos)
+
+---
+
+**Qualquer dúvida em alguma etapa, me chama! 🚀**

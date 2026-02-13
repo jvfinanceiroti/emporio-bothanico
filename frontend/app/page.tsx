@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { API_URL } from "@/lib/api";
 
 export default function Home() {
   const [produtos, setProdutos] = useState<any[]>([]);
   const [carrinho, setCarrinho] = useState<any[]>([]);
 
   const carregarProdutos = () => {
-    fetch("http://localhost:3001/produtos")
+    fetch(`${API_URL}/produtos`)
       .then(res => res.json())
       .then(data => {
         const produtosAtivos = data.filter((p: any) => p.ativo === true && p.estoque > 0);

@@ -1,0 +1,51 @@
+# ==========================================
+# EXEMPLO DE ARQUIVO .env PARA O BACKEND
+# ==========================================
+# 
+# INSTRUÇÕES:
+# 1. Copie este conteúdo
+# 2. Crie um arquivo chamado .env em C:\Users\joaov\loja\backend\
+# 3. Cole este conteúdo
+# 4. Substitua os valores de exemplo pelos valores reais
+# 5. NUNCA compartilhe este arquivo ou faça commit no Git!
+
+# ==========================================
+# BANCO DE DADOS (SUPABASE)
+# ==========================================
+# Cole aqui a Connection String que você copiou do Supabase
+# Exemplo: postgresql://postgres.abcd1234:SuaSenha123@aws-0-sa-east-1.pooler.supabase.com:6543/postgres
+
+DATABASE_URL=postgresql://SEU_USUARIO:SUA_SENHA@SEU_HOST:6543/postgres
+
+# ==========================================
+# SEGURANÇA
+# ==========================================
+# JWT_SECRET: Use uma string aleatória longa e segura
+# Gere uma em: https://randomkeygen.com/ ou use: openssl rand -base64 32
+
+JWT_SECRET=troque-por-uma-string-aleatoria-longa-e-segura-de-pelo-menos-32-caracteres
+
+# ==========================================
+# SERVIDOR
+# ==========================================
+# Porta do servidor backend (padrão: 3001)
+
+PORT=3001
+
+# ==========================================
+# EXEMPLO PREENCHIDO (SUBSTITUA PELOS SEUS VALORES)
+# ==========================================
+# 
+# DATABASE_URL=postgresql://postgres.xyzabcd123:MinhaSenh@Forte2024@aws-0-sa-east-1.pooler.supabase.com:6543/postgres
+# JWT_SECRET=8d7f6e5c4b3a2e1d9c8b7a6f5e4d3c2b1a9f8e7d6c5b4a3e2d1c9b8a7f6e5d4
+# PORT=3001
+
+# ==========================================
+# NOTAS IMPORTANTES
+# ==========================================
+# 
+# 1. NUNCA compartilhe este arquivo
+# 2. NUNCA faça commit do .env no Git
+# 3. No Hostinger, configure essas variáveis no painel (não use arquivo .env)
+# 4. Sempre use HTTPS em produção
+# 5. Troque o JWT_SECRET regularmente (a cada 3-6 meses)

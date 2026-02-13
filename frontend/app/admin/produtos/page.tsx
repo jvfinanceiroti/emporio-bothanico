@@ -1,5 +1,6 @@
 "use client";
 
+import { API_URL } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminHeader from "../components/AdminHeader";
@@ -57,7 +58,7 @@ export default function AdminProdutos() {
   const carregarProdutos = () => {
     const token = localStorage.getItem("token");
     
-    fetch("http://localhost:3001/admin/produtos", {
+    fetch(`${API_URL}/admin/produtos`, {
       headers: {
         "Authorization": `Bearer ${token}`
       }
@@ -103,7 +104,7 @@ export default function AdminProdutos() {
       return;
     }
 
-    fetch("http://localhost:3001/auth/verificar", {
+    fetch(`${API_URL}/auth/verificar`, {
       headers: {
         "Authorization": `Bearer ${token}`
       }
@@ -143,7 +144,7 @@ export default function AdminProdutos() {
         const formData = new FormData();
         formData.append("imagem", novaImagemArquivo);
 
-        const uploadRes = await fetch("http://localhost:3001/upload", {
+        const uploadRes = await fetch(`${API_URL}/upload`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`
@@ -160,7 +161,7 @@ export default function AdminProdutos() {
         imagemUrl = uploadData.url;
       }
 
-      const response = await fetch("http://localhost:3001/admin/produtos", {
+      const response = await fetch(`${API_URL}/admin/produtos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -235,7 +236,7 @@ export default function AdminProdutos() {
         const formData = new FormData();
         formData.append("imagem", editImagemArquivo);
 
-        const uploadRes = await fetch("http://localhost:3001/upload", {
+        const uploadRes = await fetch(`${API_URL}/upload`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`
@@ -252,7 +253,7 @@ export default function AdminProdutos() {
         imagemUrl = uploadData.url;
       }
 
-      const response = await fetch(`http://localhost:3001/admin/produtos/${id}`, {
+      const response = await fetch(`${API_URL}/admin/produtos/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -290,7 +291,7 @@ export default function AdminProdutos() {
 
     const token = localStorage.getItem("token");
 
-    await fetch(`http://localhost:3001/admin/produtos/${id}`, {
+    await fetch(`${API_URL}/admin/produtos/${id}`, {
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${token}`
@@ -304,7 +305,7 @@ export default function AdminProdutos() {
     const token = localStorage.getItem("token");
 
     try {
-      const response = await fetch(`http://localhost:3001/admin/produtos/${id}/status`, {
+      const response = await fetch(`${API_URL}/admin/produtos/${id}/status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
