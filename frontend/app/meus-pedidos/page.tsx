@@ -262,7 +262,7 @@ export default function MeusPedidos() {
           <div style={{
             display: "flex",
             gap: "clamp(8px, 2vw, 12px)",
-            flexDirection: window.innerWidth < 600 ? "column" : "row"
+            flexWrap: "wrap"
           }}>
             <input
               type={tipoBusca === "email" ? "email" : "text"}
