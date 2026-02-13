@@ -775,12 +775,23 @@ app.get("/admin/funcionarios", verificarToken, async (req, res) => {
           u.nome,
           u.email,
           u.role,
-          u.created_at,
-          p.*
+          p.pode_criar_produtos,
+          p.pode_editar_produtos,
+          p.pode_deletar_produtos,
+          p.pode_gerenciar_estoque,
+          p.pode_upload_imagens,
+          p.pode_visualizar_pedidos,
+          p.pode_alterar_status_pedidos,
+          p.pode_cancelar_pedidos,
+          p.pode_adicionar_rastreio,
+          p.pode_visualizar_usuarios,
+          p.pode_gerenciar_funcionarios,
+          p.pode_gerenciar_categorias,
+          p.pode_acessar_dashboard
         FROM usuarios u
         LEFT JOIN permissoes p ON u.id = p.usuario_id
         WHERE u.role = 'funcionario'
-        ORDER BY u.created_at DESC
+        ORDER BY u.id DESC
       `);
       
       return res.json(result.rows);
@@ -792,11 +803,10 @@ app.get("/admin/funcionarios", verificarToken, async (req, res) => {
           id,
           nome,
           email,
-          role,
-          created_at
+          role
         FROM usuarios
         WHERE role = 'funcionario'
-        ORDER BY created_at DESC
+        ORDER BY id DESC
       `);
       
       return res.json(result.rows);
