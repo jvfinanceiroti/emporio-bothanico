@@ -15,6 +15,11 @@ const {
   JWT_SECRET
 } = require("./middleware/auth");
 const cloudinary = require("cloudinary").v2;
+const { 
+  configurarMercadoPago, 
+  gerarPixMercadoPago, 
+  processarWebhookMercadoPago 
+} = require("./mercadopago");
 
 // Handlers globais de erro para prevenir crash
 process.on('unhandledRejection', (reason, promise) => {
@@ -33,6 +38,10 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY || "629775744341559",
   api_secret: process.env.CLOUDINARY_API_SECRET || "IACl75fZDlj66c44Us981JkWDi0"
 });
+
+// Configurar Mercado Pago
+const mercadoPagoAtivo = configurarMercadoPago();
+console.log("💳 Mercado Pago:", mercadoPagoAtivo ? "ATIVO" : "DESATIVADO (modo simulação)");
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -425,6 +434,8 @@ app.post("/pagamento/pix/gerar", async (req, res) => {
   try {
     const { pedido_id, token } = req.body;
 
+    console.log("🔷 Gerando PIX para pedido:", pedido_id);
+
     // Buscar pedido
     const pedidoResult = await pool.query(
       "SELECT * FROM pedidos WHERE id = $1 AND access_token = $2",
@@ -436,31 +447,54 @@ app.post("/pagamento/pix/gerar", async (req, res) => {
     }
 
     const pedido = pedidoResult.rows[0];
-
-    // Converter total para número
     const valorTotal = parseFloat(pedido.total) || 0;
 
-    // Gerar código PIX (Pix copia e cola - formato simplificado)
-    // Em produção, você deve usar uma API de pagamento real (Mercado Pago, PagSeguro, etc)
+    // Tentar usar Mercado Pago se estiver configurado
+    if (mercadoPagoAtivo) {
+      console.log("💳 Usando Mercado Pago...");
+      
+      const resultado = await gerarPixMercadoPago(pedido);
+      
+      if (resultado.success) {
+        // Salvar dados do PIX no pedido
+        await pool.query(
+          `UPDATE pedidos 
+           SET pix_codigo = $1, pix_expira_em = $2, mercadopago_payment_id = $3
+           WHERE id = $4`,
+          [resultado.copiaCola, resultado.expiraEm, resultado.paymentId, pedido.id]
+        );
+
+        console.log("✅ PIX Mercado Pago gerado com sucesso!");
+
+        return res.json({
+          qrCode: resultado.qrCode,
+          copiaCola: resultado.copiaCola,
+          valor: resultado.valor,
+          expiraEm: resultado.expiraEm.toISOString(),
+          provider: "mercadopago"
+        });
+      } else {
+        console.warn("⚠️ Falha no Mercado Pago, usando simulação:", resultado.error);
+      }
+    }
+
+    // Fallback: Gerar PIX simulado (QR Code estático)
+    console.log("🧪 Usando PIX simulado...");
+    
     const pixData = {
-      chave: process.env.PIX_CHAVE || "emporiobothanico@gmail.com", // Sua chave PIX
+      chave: process.env.PIX_CHAVE || "emporiobothanico@gmail.com",
       nome: "Emporio Bothanico LTDA",
       cidade: "Belo Horizonte",
       valor: valorTotal.toFixed(2),
       identificador: `PED${pedido.id}`,
     };
 
-    // Gerar string PIX copia e cola (formato simplificado)
     const pixString = gerarPixCopiaCola(pixData);
-
-    // Gerar QR Code
     const qrCodeBase64 = await QRCode.toDataURL(pixString);
-
-    // Definir expiração (1 hora)
+    
     const expiraEm = new Date();
     expiraEm.setHours(expiraEm.getHours() + 1);
 
-    // Salvar dados do PIX no pedido
     await pool.query(
       `UPDATE pedidos 
        SET pix_codigo = $1, pix_expira_em = $2 
@@ -473,6 +507,7 @@ app.post("/pagamento/pix/gerar", async (req, res) => {
       copiaCola: pixString,
       valor: valorTotal,
       expiraEm: expiraEm.toISOString(),
+      provider: "simulacao"
     });
   } catch (error) {
     console.error("❌ Erro ao gerar PIX:", error);
@@ -565,6 +600,33 @@ app.post("/pagamento/pix/confirmar", async (req, res) => {
   } catch (error) {
     console.error("❌ Erro ao confirmar pagamento:", error);
     res.status(500).json({ error: "Erro ao confirmar pagamento" });
+  }
+});
+
+// ============================================
+// WEBHOOK MERCADO PAGO
+// ============================================
+app.post("/webhook/mercadopago", async (req, res) => {
+  try {
+    console.log("🔔 Webhook Mercado Pago recebido!");
+    console.log("📦 Body:", JSON.stringify(req.body, null, 2));
+    console.log("📋 Query:", req.query);
+
+    // Processar webhook
+    const resultado = await processarWebhookMercadoPago(req.body, pool);
+    
+    if (resultado.success) {
+      console.log("✅ Webhook processado com sucesso!");
+    } else {
+      console.warn("⚠️ Webhook processado com avisos:", resultado);
+    }
+
+    // IMPORTANTE: Sempre retornar 200 OK para o Mercado Pago
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("❌ Erro no webhook Mercado Pago:", error);
+    // Mesmo com erro, retornar 200 para não reenviar
+    res.status(200).json({ error: error.message });
   }
 });
 
