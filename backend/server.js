@@ -269,10 +269,10 @@ app.post("/pedidos", async (req, res) => {
 
     const pedidoResult = await pool.query(
       `INSERT INTO pedidos
-      (status, total, cliente_nome, cliente_email, cliente_telefone,
+      (status, total, cliente_nome, cliente_email, cliente_telefone, cliente_cpf,
        endereco_cep, endereco_rua, endereco_numero, endereco_complemento,
        endereco_bairro, endereco_cidade, endereco_estado, frete, forma_pagamento, access_token)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
       RETURNING *`,
       [
         "aguardando_pagamento",
@@ -280,6 +280,7 @@ app.post("/pedidos", async (req, res) => {
         cliente.nome || null,
         cliente.email || null,
         cliente.telefone || null,
+        cliente.cpf || null,
         endereco?.cep || null,
         endereco?.endereco || null,
         endereco?.numero || null,

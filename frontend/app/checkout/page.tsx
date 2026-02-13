@@ -21,6 +21,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [carrinho, setCarrinho] = useState<ItemCarrinho[]>([]);
   const [nome, setNome] = useState("");
+  const [cpf, setCpf] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [cep, setCep] = useState("");
@@ -186,6 +187,12 @@ export default function CheckoutPage() {
       return false;
     }
 
+    if (!cpf || cpf.replace(/\D/g, "").length !== 11) {
+      setMensagemAlerta("Por favor, informe um CPF válido");
+      setMostrarAlerta(true);
+      return false;
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) {
       setMensagemAlerta("Por favor, informe um email válido");
@@ -266,6 +273,7 @@ export default function CheckoutPage() {
           itens: carrinho,
           cliente: {
             nome,
+            cpf: cpf.replace(/\D/g, ""),
             email,
             telefone,
           },
@@ -299,6 +307,17 @@ export default function CheckoutPage() {
     } finally {
       setCarregando(false);
     }
+  };
+
+  const formatarCPF = (valor: string) => {
+    const numeros = valor.replace(/\D/g, '');
+    if (numeros.length <= 11) {
+      return numeros
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    }
+    return numeros.slice(0, 11);
   };
 
   const formatarTelefone = (valor: string) => {
@@ -481,6 +500,43 @@ export default function CheckoutPage() {
                     placeholder="João Silva"
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
+                    style={{
+                      width: "100%",
+                      minWidth: "min(100%, 200px)",
+                      padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
+                      border: "1px solid rgba(0,0,0,0.1)",
+                      borderRadius: "clamp(8px, 2vw, 10px)",
+                      fontSize: "clamp(14px, 3.5vw, 15px)",
+                      fontWeight: "500",
+                      color: "#0a0a0a",
+                      outline: "none",
+                      transition: "border-color 0.2s",
+                      boxSizing: "border-box",
+                      minHeight: "44px"
+                    }}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
+                    onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
+                  />
+                </div>
+
+                {/* CPF */}
+                <div>
+                  <label style={{
+                    display: "block",
+                    fontSize: "clamp(12px, 2.8vw, 13px)",
+                    fontWeight: "600",
+                    color: "#666",
+                    marginBottom: "clamp(6px, 1.5vw, 8px)",
+                    letterSpacing: "0.3px"
+                  }}>
+                    CPF *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="000.000.000-00"
+                    value={cpf}
+                    onChange={(e) => setCpf(formatarCPF(e.target.value))}
+                    maxLength={14}
                     style={{
                       width: "100%",
                       minWidth: "min(100%, 200px)",
