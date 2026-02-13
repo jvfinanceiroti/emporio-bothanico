@@ -212,33 +212,36 @@ function ProdutoContent() {
         }}>
           <div style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 500px), 1fr))",
             gap: "0"
           }}>
             {/* IMAGEM */}
             <div style={{
               position: "relative",
               background: "#fafafa",
-              minHeight: "600px",
+              minHeight: "clamp(400px, 80vw, 600px)",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center"
+              justifyContent: "center",
+              padding: "clamp(20px, 5vw, 40px)"
             }}>
               {produto.imagem_url ? (
                 <img 
                   src={produto.imagem_url} 
                   alt={produto.nome}
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover"
+                    maxWidth: "100%",
+                    maxHeight: "100%",
+                    width: "auto",
+                    height: "auto",
+                    objectFit: "contain"
                   }}
                   onError={(e) => {
                     e.currentTarget.src = 'https://via.placeholder.com/600x600/fafafa/ccc?text=Sem+Imagem';
                   }}
                 />
               ) : (
-                <div style={{ fontSize: "120px" }}>🌸</div>
+                <div style={{ fontSize: "clamp(80px, 20vw, 120px)" }}>🌸</div>
               )}
               
               {produto.estoque <= 5 && produto.estoque > 0 && (
@@ -280,7 +283,7 @@ function ProdutoContent() {
 
             {/* DETALHES */}
             <div style={{
-              padding: "64px",
+              padding: "clamp(32px, 8vw, 64px)",
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between"
