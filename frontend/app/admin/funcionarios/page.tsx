@@ -453,9 +453,59 @@ function FuncionariosConteudo() {
               </>
             )}
 
-            <h3 style={{ marginTop: "30px", marginBottom: "15px", color: "#0a0a0a", fontSize: "18px" }}>
-              🔐 Permissões
-            </h3>
+            <div style={{ marginTop: "30px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px", flexWrap: "wrap", gap: "10px" }}>
+              <h3 style={{ color: "#0a0a0a", fontSize: "18px", margin: 0 }}>
+                🔐 Permissões
+              </h3>
+              
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const todasMarcadas: any = {};
+                    Object.keys(permissoes).forEach(key => {
+                      todasMarcadas[key] = true;
+                    });
+                    setPermissoes(todasMarcadas);
+                  }}
+                  style={{
+                    background: "#10b981",
+                    color: "white",
+                    border: "none",
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    fontWeight: "500"
+                  }}
+                >
+                  ✓ Marcar Todas
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => {
+                    const todasDesmarcadas: any = {};
+                    Object.keys(permissoes).forEach(key => {
+                      todasDesmarcadas[key] = false;
+                    });
+                    setPermissoes(todasDesmarcadas);
+                  }}
+                  style={{
+                    background: "#ef4444",
+                    color: "white",
+                    border: "none",
+                    padding: "8px 16px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    fontWeight: "500"
+                  }}
+                >
+                  ✗ Desmarcar Todas
+                </button>
+              </div>
+            </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "12px" }}>
               {[

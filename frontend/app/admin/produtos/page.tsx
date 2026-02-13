@@ -8,14 +8,7 @@ import { usePermissoes } from "@/lib/usePermissoes";
 import { ProtegerRota, usePodeExecutar } from "@/lib/ProtegerRota";
 
 export default function AdminProdutos() {
-  return (
-    <ProtegerRota 
-      permissoesRequeridas={['pode_editar_produtos', 'pode_criar_produtos']} 
-      modoOr={true}
-    >
-      <ProdutosConteudo />
-    </ProtegerRota>
-  );
+  return <ProdutosConteudo />;
 }
 
 function ProdutosConteudo() {
