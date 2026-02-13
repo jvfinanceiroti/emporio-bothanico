@@ -39,6 +39,16 @@ export default function CheckoutPage() {
   const [carregandoFrete, setCarregandoFrete] = useState(false);
   const [mostrarAlerta, setMostrarAlerta] = useState(false);
   const [mensagemAlerta, setMensagemAlerta] = useState("");
+  
+  // Estados PIX
+  const [pixQrCode, setPixQrCode] = useState("");
+  const [pixCopiaCola, setPixCopiaCola] = useState("");
+  const [pixCopiado, setPixCopiado] = useState(false);
+  const [pixExpiraEm, setPixExpiraEm] = useState<Date | null>(null);
+  const [pixTempoRestante, setPixTempoRestante] = useState("");
+  const [pedidoId, setPedidoId] = useState<number | null>(null);
+  const [pedidoToken, setPedidoToken] = useState<string>("");
+  const [verificandoPagamento, setVerificandoPagamento] = useState(false);
 
   useEffect(() => {
     const carrinhoSalvo = JSON.parse(localStorage.getItem("carrinho") || "[]");
@@ -295,9 +305,40 @@ export default function CheckoutPage() {
         localStorage.removeItem("carrinho");
         const data = await response.json();
         
-        // Se forma de pagamento for PIX, ir para página de pagamento PIX
+        // Se forma de pagamento for PIX, gerar QR Code
         if (formaPagamento === "pix") {
-          router.push(`/pagamento-pix?pedido=${data.id}&token=${data.access_token}`);
+          setPedidoId(data.id);
+          setPedidoToken(data.access_token);
+          
+          // Gerar PIX
+          try {
+            const pixResponse = await fetch(`${API_URL}/pagamento/pix/gerar`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                pedido_id: data.id, 
+                token: data.access_token 
+              }),
+            });
+
+            if (pixResponse.ok) {
+              const pixData = await pixResponse.json();
+              setPixQrCode(pixData.qrCode);
+              setPixCopiaCola(pixData.copiaCola);
+              setPixExpiraEm(new Date(pixData.expiraEm));
+              
+              // Manter modal de pagamento aberto com PIX
+              setVerificandoPagamento(true);
+            } else {
+              setMensagemAlerta("Erro ao gerar PIX. Tente novamente.");
+              setMostrarPagamento(false);
+              setMostrarAlerta(true);
+            }
+          } catch (error) {
+            setMensagemAlerta("Erro ao gerar PIX. Tente novamente.");
+            setMostrarPagamento(false);
+            setMostrarAlerta(true);
+          }
         } else {
           // Outras formas: ir direto para sucesso
           router.push(`/sucesso?pedido=${data.id}&token=${data.access_token}`);
@@ -348,6 +389,62 @@ export default function CheckoutPage() {
 
   // carrinho já está agrupado, não precisa reagrupar
   const totalItens = carrinho.reduce((acc, item) => acc + (item.quantidade || 1), 0);
+
+  // Atualizar tempo restante do PIX
+  useEffect(() => {
+    if (!pixExpiraEm) return;
+
+    const interval = setInterval(() => {
+      const agora = new Date();
+      const diff = pixExpiraEm.getTime() - agora.getTime();
+
+      if (diff <= 0) {
+        setPixTempoRestante("Expirado");
+        clearInterval(interval);
+        return;
+      }
+
+      const minutos = Math.floor(diff / 60000);
+      const segundos = Math.floor((diff % 60000) / 1000);
+      setPixTempoRestante(`${minutos}:${segundos.toString().padStart(2, "0")}`);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [pixExpiraEm]);
+
+  // Verificar status do pagamento PIX
+  useEffect(() => {
+    if (!verificandoPagamento || !pedidoId || !pedidoToken) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(
+          `${API_URL}/pagamento/pix/status/${pedidoId}?token=${pedidoToken}`
+        );
+        const data = await response.json();
+
+        if (data.pago) {
+          clearInterval(interval);
+          router.push(`/sucesso?pedido=${pedidoId}&token=${pedidoToken}`);
+        } else if (data.expirado) {
+          clearInterval(interval);
+          setMensagemAlerta("Pagamento PIX expirado. Por favor, faça um novo pedido.");
+          setMostrarPagamento(false);
+          setMostrarAlerta(true);
+        }
+      } catch (error) {
+        console.error("Erro ao verificar pagamento:", error);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [verificandoPagamento, pedidoId, pedidoToken, router]);
+
+  const copiarCodigoPix = () => {
+    navigator.clipboard.writeText(pixCopiaCola);
+    setPixCopiado(true);
+    setTimeout(() => setPixCopiado(false), 2000);
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: "#fafafa" }}>
@@ -1192,10 +1289,14 @@ export default function CheckoutPage() {
                 wordBreak: "break-word",
                 flex: 1
               }}>
-                Forma de Pagamento
+                {pixQrCode ? "Pagamento PIX" : "Forma de Pagamento"}
               </h2>
               <button
-                onClick={() => setMostrarPagamento(false)}
+                onClick={() => {
+                  setMostrarPagamento(false);
+                  setPixQrCode("");
+                  setVerificandoPagamento(false);
+                }}
                 style={{
                   background: "none",
                   border: "none",
@@ -1219,14 +1320,224 @@ export default function CheckoutPage() {
               </button>
             </div>
 
-            <p style={{
-              fontSize: "clamp(14px, 3.5vw, 15px)",
-              color: "#666",
-              marginBottom: "clamp(20px, 5vw, 32px)",
-              wordBreak: "break-word"
-            }}>
-              Selecione como deseja pagar:
-            </p>
+            {/* Conteúdo PIX */}
+            {pixQrCode ? (
+              <div style={{ textAlign: "center" }}>
+                <p style={{
+                  fontSize: "clamp(14px, 3.5vw, 15px)",
+                  color: "#666",
+                  marginBottom: "clamp(20px, 5vw, 24px)"
+                }}>
+                  Escaneie o QR Code ou copie o código PIX
+                </p>
+
+                {/* Valor */}
+                <div style={{
+                  background: "#f8f9fa",
+                  padding: "clamp(16px, 4vw, 20px)",
+                  borderRadius: "12px",
+                  marginBottom: "clamp(20px, 5vw, 24px)"
+                }}>
+                  <div style={{
+                    fontSize: "13px",
+                    color: "#666",
+                    marginBottom: "4px"
+                  }}>
+                    Valor a pagar
+                  </div>
+                  <div style={{
+                    fontSize: "clamp(28px, 7vw, 36px)",
+                    fontWeight: "800",
+                    color: "#0a0a0a"
+                  }}>
+                    R$ {total.toFixed(2)}
+                  </div>
+                </div>
+
+                {/* QR Code */}
+                <div style={{
+                  background: "#f8f9fa",
+                  padding: "clamp(16px, 4vw, 24px)",
+                  borderRadius: "16px",
+                  marginBottom: "clamp(16px, 4vw, 20px)"
+                }}>
+                  <img
+                    src={pixQrCode}
+                    alt="QR Code PIX"
+                    style={{
+                      width: "100%",
+                      maxWidth: "240px",
+                      height: "auto",
+                      display: "block",
+                      margin: "0 auto"
+                    }}
+                  />
+                </div>
+
+                {/* Código Copia e Cola */}
+                <div style={{ marginBottom: "clamp(16px, 4vw, 20px)" }}>
+                  <div style={{
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "#0a0a0a",
+                    marginBottom: "8px",
+                    textAlign: "left"
+                  }}>
+                    Código PIX Copia e Cola
+                  </div>
+                  <div style={{
+                    display: "flex",
+                    gap: "8px",
+                    flexWrap: "nowrap"
+                  }}>
+                    <input
+                      type="text"
+                      value={pixCopiaCola}
+                      readOnly
+                      style={{
+                        flex: 1,
+                        padding: "12px 16px",
+                        border: "2px solid #e5e7eb",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                        fontFamily: "monospace",
+                        background: "#f8f9fa",
+                        color: "#0a0a0a",
+                        minWidth: 0
+                      }}
+                    />
+                    <button
+                      onClick={copiarCodigoPix}
+                      style={{
+                        padding: "12px 20px",
+                        background: pixCopiado ? "#10b981" : "#0a0a0a",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        transition: "all 0.3s",
+                        whiteSpace: "nowrap",
+                        flexShrink: 0
+                      }}
+                    >
+                      {pixCopiado ? "✓" : "Copiar"}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tempo Restante */}
+                <div style={{
+                  background: pixTempoRestante === "Expirado" ? "#fee2e2" : "#fef3c7",
+                  padding: "clamp(12px, 3vw, 16px)",
+                  borderRadius: "12px",
+                  marginBottom: "clamp(16px, 4vw, 20px)"
+                }}>
+                  <div style={{
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: pixTempoRestante === "Expirado" ? "#dc2626" : "#d97706"
+                  }}>
+                    {pixTempoRestante === "Expirado" 
+                      ? "⚠️ PIX Expirado" 
+                      : `⏱️ Tempo restante: ${pixTempoRestante}`}
+                  </div>
+                </div>
+
+                {/* Verificando Pagamento */}
+                {verificandoPagamento && pixTempoRestante !== "Expirado" && (
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "12px",
+                    padding: "clamp(12px, 3vw, 16px)",
+                    background: "#eff6ff",
+                    borderRadius: "12px",
+                    marginBottom: "clamp(16px, 4vw, 20px)"
+                  }}>
+                    <div style={{
+                      width: "16px",
+                      height: "16px",
+                      border: "2px solid #3b82f6",
+                      borderTopColor: "transparent",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite"
+                    }} />
+                    <div style={{
+                      fontSize: "14px",
+                      color: "#3b82f6",
+                      fontWeight: "600"
+                    }}>
+                      Aguardando pagamento...
+                    </div>
+                  </div>
+                )}
+
+                {/* Instruções */}
+                <div style={{
+                  textAlign: "left",
+                  fontSize: "13px",
+                  color: "#666",
+                  lineHeight: "1.8"
+                }}>
+                  <p style={{ fontWeight: "600", color: "#0a0a0a", marginBottom: "8px", margin: 0 }}>
+                    Como pagar:
+                  </p>
+                  <ol style={{ paddingLeft: "20px", margin: "8px 0 0 0" }}>
+                    <li>Abra o app do seu banco</li>
+                    <li>Entre na área PIX</li>
+                    <li>Escaneie o QR Code ou cole o código</li>
+                    <li>Confirme o pagamento</li>
+                    <li>Aguarde a confirmação automática</li>
+                  </ol>
+                </div>
+
+                {/* Botão Simular (DEV) */}
+                {process.env.NODE_ENV === "development" && pedidoId && pedidoToken && (
+                  <div style={{ marginTop: "20px" }}>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await fetch(`${API_URL}/pagamento/pix/confirmar`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ pedido_id: pedidoId, token: pedidoToken }),
+                          });
+                          alert("Pagamento simulado com sucesso!");
+                        } catch (error) {
+                          alert("Erro ao simular pagamento");
+                        }
+                      }}
+                      style={{
+                        padding: "12px 24px",
+                        background: "#10b981",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        width: "100%"
+                      }}
+                    >
+                      🧪 Simular Pagamento (DEV)
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Seleção de forma de pagamento
+              <>
+                <p style={{
+                  fontSize: "clamp(14px, 3.5vw, 15px)",
+                  color: "#666",
+                  marginBottom: "clamp(20px, 5vw, 32px)",
+                  wordBreak: "break-word"
+                }}>
+                  Selecione como deseja pagar:
+                </p>
 
             <div style={{
               display: "flex",
@@ -1493,6 +1804,8 @@ export default function CheckoutPage() {
                 "✓ Confirmar Pedido"
               )}
             </button>
+            </>
+            )}
           </div>
         </div>
       )}
