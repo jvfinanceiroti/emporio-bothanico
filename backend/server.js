@@ -527,6 +527,8 @@ app.post("/pagamento/pix/confirmar", async (req, res) => {
   try {
     const { pedido_id, token } = req.body;
 
+    console.log("🔔 Webhook PIX recebido:", { pedido_id, token });
+
     // Verificar se o pedido existe e não expirou
     const result = await pool.query(
       `SELECT id, status, pix_expira_em 
@@ -536,6 +538,7 @@ app.post("/pagamento/pix/confirmar", async (req, res) => {
     );
 
     if (result.rows.length === 0) {
+      console.error("❌ Pedido não encontrado:", pedido_id);
       return res.status(404).json({ error: "Pedido não encontrado" });
     }
 
@@ -546,19 +549,85 @@ app.post("/pagamento/pix/confirmar", async (req, res) => {
     const expiraEm = new Date(pedido.pix_expira_em);
 
     if (agora > expiraEm) {
+      console.warn("⚠️ Pagamento expirado:", pedido_id);
       return res.status(400).json({ error: "Pagamento expirado" });
     }
 
     // Marcar como pago
     await pool.query(
-      "UPDATE pedidos SET status = $1 WHERE id = $2",
+      "UPDATE pedidos SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2",
       ["pago", pedido_id]
     );
+
+    console.log("✅ Pagamento confirmado para pedido:", pedido_id);
 
     res.json({ success: true, message: "Pagamento confirmado!" });
   } catch (error) {
     console.error("❌ Erro ao confirmar pagamento:", error);
     res.status(500).json({ error: "Erro ao confirmar pagamento" });
+  }
+});
+
+// ============================================
+// WEBHOOK para APIs de Pagamento Reais
+// ============================================
+// Endpoint genérico para receber notificações de pagamento
+// Mercado Pago, PagSeguro, Asaas, etc. podem enviar notificações aqui
+app.post("/webhook/pagamento", async (req, res) => {
+  try {
+    console.log("🔔 Webhook de pagamento recebido:", req.body);
+    console.log("📋 Headers:", req.headers);
+
+    // Aqui você deve validar a assinatura do webhook (segurança)
+    // Cada provedor tem seu próprio método de validação
+
+    // Exemplo genérico de processamento:
+    const { pedido_id, status, external_id, payment_method } = req.body;
+
+    if (!pedido_id) {
+      console.warn("⚠️ Webhook sem pedido_id");
+      return res.status(400).json({ error: "pedido_id obrigatório" });
+    }
+
+    // Buscar pedido
+    const pedidoResult = await pool.query(
+      "SELECT id, status FROM pedidos WHERE id = $1",
+      [pedido_id]
+    );
+
+    if (pedidoResult.rows.length === 0) {
+      console.error("❌ Pedido não encontrado:", pedido_id);
+      return res.status(404).json({ error: "Pedido não encontrado" });
+    }
+
+    const pedido = pedidoResult.rows[0];
+
+    // Mapear status (adaptar para cada provedor)
+    let novoStatus = pedido.status;
+    if (status === "approved" || status === "paid" || status === "pago") {
+      novoStatus = "pago";
+    } else if (status === "rejected" || status === "cancelled") {
+      novoStatus = "recusado";
+    } else if (status === "pending") {
+      novoStatus = "aguardando_pagamento";
+    }
+
+    // Atualizar pedido
+    await pool.query(
+      `UPDATE pedidos 
+       SET status = $1, updated_at = CURRENT_TIMESTAMP 
+       WHERE id = $2`,
+      [novoStatus, pedido_id]
+    );
+
+    console.log(`✅ Webhook processado: Pedido ${pedido_id} → ${novoStatus}`);
+
+    // Importante: sempre retornar 200 OK rapidamente
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("❌ Erro ao processar webhook:", error);
+    // Mesmo com erro, retornar 200 para não reenviar o webhook
+    res.status(200).json({ error: error.message });
   }
 });
 
