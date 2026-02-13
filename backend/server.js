@@ -368,7 +368,8 @@ app.get("/admin/pedidos", verificarToken, async (req, res) => {
         endereco_cidade,
         endereco_estado,
         frete,
-        forma_pagamento
+        forma_pagamento,
+        codigo_rastreio
       FROM pedidos
       ORDER BY created_at DESC
     `);
@@ -406,6 +407,26 @@ app.get("/admin/pedidos/:id", verificarToken, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).send("Erro detalhe pedido");
+  }
+});
+
+// ATUALIZAR STATUS DO PEDIDO
+app.put("/admin/pedidos/:id/status", verificarToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, codigo_rastreio } = req.body;
+
+    await pool.query(
+      `UPDATE pedidos 
+       SET status = $1, codigo_rastreio = $2, updated_at = NOW() 
+       WHERE id = $3`,
+      [status, codigo_rastreio || null, id]
+    );
+
+    res.json({ success: true, message: "Status atualizado com sucesso" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao atualizar status do pedido" });
   }
 });
 

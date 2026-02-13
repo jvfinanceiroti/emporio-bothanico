@@ -22,6 +22,7 @@ interface Pedido {
   endereco_estado?: string;
   frete?: number;
   forma_pagamento?: string;
+  codigo_rastreio?: string;
 }
 
 interface ItemPedido {
@@ -48,6 +49,10 @@ export default function AdminPedidos() {
   const [carregandoDetalhes, setCarregandoDetalhes] = useState(false);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 20;
+  const [editandoStatus, setEditandoStatus] = useState(false);
+  const [novoStatus, setNovoStatus] = useState("");
+  const [codigoRastreio, setCodigoRastreio] = useState("");
+  const [salvandoStatus, setSalvandoStatus] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -113,6 +118,9 @@ export default function AdminPedidos() {
       });
       const data = await response.json();
       setPedidoSelecionado(data);
+      setNovoStatus(data.pedido.status);
+      setCodigoRastreio(data.pedido.codigo_rastreio || "");
+      setEditandoStatus(false);
     } catch (error) {
       console.error("Erro ao carregar detalhes:", error);
     } finally {
@@ -144,6 +152,10 @@ export default function AdminPedidos() {
       case "pago":
       case "aprovado":
         return { bg: "rgba(16, 185, 129, 0.1)", color: "#10b981", label: "✓ Pago" };
+      case "enviado":
+        return { bg: "rgba(59, 130, 246, 0.1)", color: "#3b82f6", label: "📦 Enviado" };
+      case "entregue":
+        return { bg: "rgba(34, 197, 94, 0.1)", color: "#22c55e", label: "✓ Entregue" };
       case "pendente":
       case "aguardando_pagamento":
         return { bg: "rgba(245, 158, 11, 0.1)", color: "#f59e0b", label: "⏳ Pendente" };
@@ -175,6 +187,74 @@ export default function AdminPedidos() {
       case "cartao": return "💳 Cartão de Crédito";
       case "boleto": return "📄 Boleto Bancário";
       default: return forma || "Não informado";
+    }
+  };
+
+  const atualizarStatusPedido = async () => {
+    if (!pedidoSelecionado) return;
+    
+    setSalvandoStatus(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/admin/pedidos/${pedidoSelecionado.pedido.id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          status: novoStatus,
+          codigo_rastreio: codigoRastreio
+        })
+      });
+
+      if (response.ok) {
+        // Atualizar pedido na lista
+        setPedidos(prev => prev.map(p => 
+          p.id === pedidoSelecionado.pedido.id 
+            ? { ...p, status: novoStatus } 
+            : p
+        ));
+        
+        // Atualizar pedido selecionado
+        setPedidoSelecionado({
+          ...pedidoSelecionado,
+          pedido: {
+            ...pedidoSelecionado.pedido,
+            status: novoStatus,
+            codigo_rastreio: codigoRastreio
+          }
+        });
+        
+        setEditandoStatus(false);
+        
+        // Notificação de sucesso
+        const notification = document.createElement("div");
+        notification.innerHTML = "✓ Status atualizado com sucesso!";
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #10b981;
+          color: white;
+          padding: 16px 24px;
+          border-radius: 12px;
+          font-weight: 700;
+          font-size: 14px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+          z-index: 10000;
+          animation: slideIn 0.3s ease-out;
+        `;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+      } else {
+        throw new Error("Erro ao atualizar status");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+      alert("Erro ao atualizar status do pedido");
+    } finally {
+      setSalvandoStatus(false);
     }
   };
 
@@ -657,24 +737,110 @@ export default function AdminPedidos() {
                       <div style={{ fontSize: "13px", color: "#666", marginBottom: "8px", fontWeight: "600" }}>
                         Status do Pedido
                       </div>
-                      <div>
-                        {(() => {
-                          const statusInfo = getStatusColor(pedidoSelecionado.pedido.status);
-                          return (
-                            <span style={{
-                              padding: "8px 16px",
-                              background: statusInfo.bg,
-                              color: statusInfo.color,
+                      {editandoStatus ? (
+                        <div>
+                          <select
+                            value={novoStatus}
+                            onChange={(e) => setNovoStatus(e.target.value)}
+                            style={{
+                              width: "100%",
+                              padding: "10px",
+                              border: "1px solid #d1d5db",
                               borderRadius: "8px",
                               fontSize: "14px",
+                              fontWeight: "600",
+                              marginBottom: "12px"
+                            }}
+                          >
+                            <option value="aguardando_pagamento">⏳ Pendente</option>
+                            <option value="pago">✓ Pago</option>
+                            <option value="enviado">📦 Enviado</option>
+                            <option value="entregue">✓ Entregue</option>
+                            <option value="cancelado">✗ Cancelado</option>
+                          </select>
+                          
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <button
+                              onClick={atualizarStatusPedido}
+                              disabled={salvandoStatus}
+                              style={{
+                                flex: 1,
+                                padding: "8px 12px",
+                                background: "#10b981",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "8px",
+                                fontSize: "13px",
+                                fontWeight: "700",
+                                cursor: salvandoStatus ? "wait" : "pointer",
+                                opacity: salvandoStatus ? 0.7 : 1
+                              }}
+                            >
+                              {salvandoStatus ? "Salvando..." : "Salvar"}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setEditandoStatus(false);
+                                setNovoStatus(pedidoSelecionado.pedido.status);
+                              }}
+                              disabled={salvandoStatus}
+                              style={{
+                                flex: 1,
+                                padding: "8px 12px",
+                                background: "#e5e7eb",
+                                color: "#374151",
+                                border: "none",
+                                borderRadius: "8px",
+                                fontSize: "13px",
+                                fontWeight: "700",
+                                cursor: "pointer"
+                              }}
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          {(() => {
+                            const statusInfo = getStatusColor(pedidoSelecionado.pedido.status);
+                            return (
+                              <span style={{
+                                padding: "8px 16px",
+                                background: statusInfo.bg,
+                                color: statusInfo.color,
+                                borderRadius: "8px",
+                                fontSize: "14px",
+                                fontWeight: "700",
+                                display: "inline-block",
+                                marginBottom: "12px"
+                              }}>
+                                {statusInfo.label}
+                              </span>
+                            );
+                          })()}
+                          <button
+                            onClick={() => setEditandoStatus(true)}
+                            style={{
+                              display: "block",
+                              width: "100%",
+                              padding: "8px",
+                              background: "#667eea",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "8px",
+                              fontSize: "12px",
                               fontWeight: "700",
-                              display: "inline-block"
-                            }}>
-                              {statusInfo.label}
-                            </span>
-                          );
-                        })()}
-                      </div>
+                              cursor: "pointer",
+                              transition: "background 0.2s"
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = "#5568d3"}
+                            onMouseOut={(e) => e.currentTarget.style.background = "#667eea"}
+                          >
+                            Alterar Status
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <div style={{
@@ -689,6 +855,38 @@ export default function AdminPedidos() {
                         {getFormaPagamentoLabel(pedidoSelecionado.pedido.forma_pagamento || "")}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Código de Rastreio */}
+                  <div style={{
+                    background: "#fafafa",
+                    padding: "20px",
+                    borderRadius: "12px",
+                    marginBottom: "24px"
+                  }}>
+                    <div style={{ fontSize: "13px", color: "#666", marginBottom: "8px", fontWeight: "600" }}>
+                      📦 Código de Rastreio
+                    </div>
+                    {editandoStatus ? (
+                      <input
+                        type="text"
+                        value={codigoRastreio}
+                        onChange={(e) => setCodigoRastreio(e.target.value)}
+                        placeholder="Digite o código de rastreio..."
+                        style={{
+                          width: "100%",
+                          padding: "10px",
+                          border: "1px solid #d1d5db",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          fontWeight: "600"
+                        }}
+                      />
+                    ) : (
+                      <div style={{ fontSize: "15px", fontWeight: "700", color: "#0a0a0a" }}>
+                        {pedidoSelecionado.pedido.codigo_rastreio || "Não informado"}
+                      </div>
+                    )}
                   </div>
 
                   {/* Dados do Cliente */}
