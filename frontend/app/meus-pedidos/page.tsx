@@ -142,6 +142,8 @@ export default function MeusPedidos() {
       
       const data = await response.json();
       console.log("✅ Dados recebidos:", data);
+      console.log("📅 Data do pedido (criado_em):", data.pedido?.criado_em);
+      console.log("📊 Tipo da data:", typeof data.pedido?.criado_em);
       
       setPedidoSelecionado(data);
       console.log("✅ Modal deve abrir agora!");
@@ -171,17 +173,34 @@ export default function MeusPedidos() {
     }
   };
 
-  const formatarData = (data: string) => {
-    if (!data) return "Data não disponível";
+  const formatarData = (data: string | null | undefined) => {
+    console.log("📅 Formatando data:", data, "Tipo:", typeof data);
+    
+    if (!data) {
+      console.warn("⚠️ Data não fornecida");
+      return "Data não disponível";
+    }
+    
     try {
-      return new Date(data).toLocaleDateString("pt-BR", {
+      const dataObj = new Date(data);
+      console.log("📅 Data convertida:", dataObj);
+      
+      if (isNaN(dataObj.getTime())) {
+        console.error("❌ Data inválida:", data);
+        return "Data inválida";
+      }
+      
+      const formatada = dataObj.toLocaleDateString("pt-BR", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit"
       });
-    } catch {
+      console.log("✅ Data formatada:", formatada);
+      return formatada;
+    } catch (error) {
+      console.error("❌ Erro ao formatar data:", error);
       return "Data inválida";
     }
   };
