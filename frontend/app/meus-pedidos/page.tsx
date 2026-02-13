@@ -3,7 +3,22 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+// Função para pegar a URL da API de forma dinâmica
+function getApiUrl() {
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    
+    // Se está em produção (não é localhost)
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return 'https://emporio-bothanico.onrender.com';
+    }
+  }
+  
+  // Fallback para localhost em desenvolvimento
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+}
+
+const API_URL = getApiUrl();
 
 interface Pedido {
   id: number;
