@@ -207,7 +207,7 @@ export default function Home() {
             height: "100%",
             zIndex: 0,
             objectFit: "cover",
-            opacity: 0.35
+            opacity: 0.6
           }}
         >
           <source src="https://assets.mixkit.co/videos/preview/mixkit-green-leaves-of-a-plant-moving-in-the-wind-1188-large.mp4" type="video/mp4" />
@@ -221,7 +221,7 @@ export default function Home() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(245,245,245,0.88) 100%)",
+          background: "linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(245,245,245,0.65) 100%)",
           zIndex: 1
         }}></div>
 
