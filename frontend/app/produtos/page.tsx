@@ -26,6 +26,7 @@ export default function ProdutosPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [termoBusca, setTermoBusca] = useState("");
 
   useEffect(() => {
     carregarCategorias();
@@ -98,7 +99,9 @@ export default function ProdutosPage() {
     setTimeout(() => notification.remove(), 3000);
   };
 
-  const produtosFiltrados = produtos;
+  const produtosFiltrados = produtos.filter(produto => 
+    produto.nome.toLowerCase().includes(termoBusca.toLowerCase())
+  );
 
   return (
     <div style={{
@@ -133,14 +136,23 @@ export default function ProdutosPage() {
             <h1 style={{
               fontSize: "clamp(18px, 4.5vw, 24px)",
               fontWeight: "800",
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
+              color: "#0a0a0a",
               margin: 0
             }}>
               Empório Botânico
             </h1>
           </Link>
+
+          <nav style={{
+            display: "flex",
+            gap: "clamp(16px, 4vw, 24px)",
+            alignItems: "center",
+            flexWrap: "wrap"
+          }}>
+            <Link href="/" style={{ textDecoration: "none", color: "#0a0a0a", fontSize: "clamp(13px, 3vw, 14px)", fontWeight: "600" }}>Início</Link>
+            <Link href="/produtos" style={{ textDecoration: "none", color: "#0a0a0a", fontSize: "clamp(13px, 3vw, 14px)", fontWeight: "600" }}>Produtos</Link>
+            <Link href="/meus-pedidos" style={{ textDecoration: "none", color: "#0a0a0a", fontSize: "clamp(13px, 3vw, 14px)", fontWeight: "600" }}>Meus Pedidos</Link>
+          </nav>
 
           <div style={{ display: "flex", gap: "clamp(12px, 3vw, 16px)", alignItems: "center" }}>
             <Link
@@ -148,12 +160,12 @@ export default function ProdutosPage() {
               style={{
                 textDecoration: "none",
                 padding: "clamp(10px, 2.5vw, 12px) clamp(20px, 5vw, 24px)",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "#0a0a0a",
                 color: "white",
                 borderRadius: "clamp(8px, 2vw, 12px)",
                 fontSize: "clamp(13px, 3vw, 14px)",
                 fontWeight: "700",
-                boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+                boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
                 transition: "all 0.3s",
                 minHeight: "44px",
                 display: "flex",
@@ -173,7 +185,7 @@ export default function ProdutosPage() {
         margin: "0 auto",
         padding: "clamp(24px, 6vw, 40px) clamp(20px, 5vw, 40px)"
       }}>
-        {/* Título e Descrição */}
+        {/* Título e Barra de Pesquisa */}
         <div style={{
           textAlign: "center",
           marginBottom: "clamp(32px, 8vw, 48px)"
@@ -191,10 +203,78 @@ export default function ProdutosPage() {
             fontSize: "clamp(14px, 3.5vw, 18px)",
             color: "#666",
             maxWidth: "600px",
-            margin: "0 auto"
+            margin: "0 auto 24px"
           }}>
             Descubra fragrâncias exclusivas para todos os momentos
           </p>
+
+          {/* Barra de Pesquisa Grande */}
+          <div style={{
+            maxWidth: "700px",
+            margin: "0 auto",
+            position: "relative"
+          }}>
+            <input
+              type="text"
+              placeholder="🔍 Pesquisar produtos..."
+              value={termoBusca}
+              onChange={(e) => setTermoBusca(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "clamp(16px, 4vw, 20px) clamp(20px, 5vw, 24px)",
+                fontSize: "clamp(15px, 3.8vw, 18px)",
+                border: "2px solid #e5e7eb",
+                borderRadius: "clamp(12px, 3vw, 16px)",
+                outline: "none",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                transition: "all 0.3s",
+                fontWeight: "500",
+                color: "#0a0a0a"
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = "#0a0a0a";
+                e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.15)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = "#e5e7eb";
+                e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)";
+              }}
+            />
+            {termoBusca && (
+              <button
+                onClick={() => setTermoBusca("")}
+                style={{
+                  position: "absolute",
+                  right: "16px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "#ef4444",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "32px",
+                  height: "32px",
+                  cursor: "pointer",
+                  fontSize: "18px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: "700",
+                  transition: "all 0.3s"
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = "#dc2626";
+                  e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = "#ef4444";
+                  e.currentTarget.style.transform = "translateY(-50%) scale(1)";
+                }}
+              >
+                ×
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Menu de Categorias */}
@@ -204,7 +284,7 @@ export default function ProdutosPage() {
           padding: "32px",
           marginBottom: "32px",
           boxShadow: "0 10px 40px rgba(0,0,0,0.06)",
-          border: "1px solid rgba(102, 126, 234, 0.1)"
+          border: "1px solid #e5e7eb"
         }}>
           <div style={{
             display: "flex",
@@ -216,7 +296,7 @@ export default function ProdutosPage() {
               width: "48px",
               height: "48px",
               borderRadius: "12px",
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              background: "#0a0a0a",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -244,10 +324,10 @@ export default function ProdutosPage() {
               style={{
                 padding: "16px 24px",
                 background: categoriaSelecionada === null 
-                  ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" 
-                  : "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+                  ? "#0a0a0a" 
+                  : "#f8f9fa",
                 color: categoriaSelecionada === null ? "white" : "#495057",
-                border: "none",
+                border: categoriaSelecionada === null ? "2px solid #0a0a0a" : "2px solid #e5e7eb",
                 borderRadius: "16px",
                 fontSize: "15px",
                 fontWeight: "700",
@@ -259,20 +339,22 @@ export default function ProdutosPage() {
                 justifyContent: "center",
                 gap: "8px",
                 boxShadow: categoriaSelecionada === null 
-                  ? "0 8px 24px rgba(102, 126, 234, 0.3)" 
+                  ? "0 8px 24px rgba(0,0,0,0.2)" 
                   : "0 2px 8px rgba(0,0,0,0.04)",
                 transform: categoriaSelecionada === null ? "translateY(-2px)" : "none"
               }}
               onMouseOver={(e) => {
                 if (categoriaSelecionada !== null) {
                   e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(102, 126, 234, 0.15)";
+                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)";
+                  e.currentTarget.style.borderColor = "#0a0a0a";
                 }
               }}
               onMouseOut={(e) => {
                 if (categoriaSelecionada !== null) {
                   e.currentTarget.style.transform = "translateY(0)";
                   e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
+                  e.currentTarget.style.borderColor = "#e5e7eb";
                 }
               }}
             >
@@ -294,10 +376,10 @@ export default function ProdutosPage() {
                   style={{
                     padding: "16px 24px",
                     background: categoriaSelecionada === categoria.slug
-                      ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                      : "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)",
+                      ? "#0a0a0a"
+                      : "#f8f9fa",
                     color: categoriaSelecionada === categoria.slug ? "white" : "#495057",
-                    border: "none",
+                    border: categoriaSelecionada === categoria.slug ? "2px solid #0a0a0a" : "2px solid #e5e7eb",
                     borderRadius: "16px",
                     fontSize: "15px",
                     fontWeight: "700",
@@ -309,20 +391,22 @@ export default function ProdutosPage() {
                     justifyContent: "center",
                     gap: "8px",
                     boxShadow: categoriaSelecionada === categoria.slug
-                      ? "0 8px 24px rgba(102, 126, 234, 0.3)"
+                      ? "0 8px 24px rgba(0,0,0,0.2)"
                       : "0 2px 8px rgba(0,0,0,0.04)",
                     transform: categoriaSelecionada === categoria.slug ? "translateY(-2px)" : "none"
                   }}
                   onMouseOver={(e) => {
                     if (categoriaSelecionada !== categoria.slug) {
                       e.currentTarget.style.transform = "translateY(-4px)";
-                      e.currentTarget.style.boxShadow = "0 8px 24px rgba(102, 126, 234, 0.15)";
+                      e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)";
+                      e.currentTarget.style.borderColor = "#0a0a0a";
                     }
                   }}
                   onMouseOut={(e) => {
                     if (categoriaSelecionada !== categoria.slug) {
                       e.currentTarget.style.transform = "translateY(0)";
                       e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
+                      e.currentTarget.style.borderColor = "#e5e7eb";
                     }
                   }}
                 >
@@ -434,7 +518,7 @@ export default function ProdutosPage() {
                     {produto.categoria_nome && (
                       <span style={{
                         fontSize: "clamp(11px, 2.8vw, 12px)",
-                        color: "#667eea",
+                        color: "#666",
                         fontWeight: "700",
                         textTransform: "uppercase",
                         letterSpacing: "0.5px",
@@ -457,9 +541,7 @@ export default function ProdutosPage() {
                     <div style={{
                       fontSize: "clamp(22px, 5.5vw, 28px)",
                       fontWeight: "800",
-                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
+                      color: "#0a0a0a",
                       marginTop: "auto"
                     }}>
                       R$ {Number(produto.preco).toFixed(2)}
@@ -487,7 +569,7 @@ export default function ProdutosPage() {
                       padding: "clamp(12px, 3vw, 14px)",
                       background: produto.estoque === 0
                         ? "#e5e7eb"
-                        : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                        : "#0a0a0a",
                       color: "white",
                       border: "none",
                       borderRadius: "clamp(10px, 2.5vw, 12px)",
@@ -496,6 +578,20 @@ export default function ProdutosPage() {
                       cursor: produto.estoque === 0 ? "not-allowed" : "pointer",
                       transition: "all 0.3s",
                       minHeight: "44px"
+                    }}
+                    onMouseOver={(e) => {
+                      if (produto.estoque !== 0) {
+                        e.currentTarget.style.background = "#1a1a1a";
+                        e.currentTarget.style.transform = "translateY(-2px)";
+                        e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.3)";
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (produto.estoque !== 0) {
+                        e.currentTarget.style.background = "#0a0a0a";
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.boxShadow = "none";
+                      }
                     }}
                   >
                     {produto.estoque === 0 ? "Indisponível" : "🛒 Adicionar ao Carrinho"}
