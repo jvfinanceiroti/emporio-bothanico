@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 interface Pedido {
   id: number;
@@ -70,19 +70,27 @@ export default function MeusPedidos() {
 
     try {
       const valor = tipoBusca === "cpf" ? busca.replace(/\D/g, "") : busca;
-      const response = await fetch(`${API_URL}/pedidos/buscar?tipo=${tipoBusca}&valor=${encodeURIComponent(valor)}`);
+      const url = `${API_URL}/pedidos/buscar?tipo=${tipoBusca}&valor=${encodeURIComponent(valor)}`;
+      
+      console.log("🔍 Buscando pedidos:", { tipo: tipoBusca, valor, url });
+      
+      const response = await fetch(url);
+      
+      console.log("📡 Status da resposta:", response.status, response.statusText);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("Erro na resposta:", errorData);
-        throw new Error(errorData.error || "Erro ao buscar pedidos");
+        console.error("❌ Erro na resposta:", errorData);
+        throw new Error(errorData.error || `Erro ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
+      console.log("✅ Pedidos encontrados:", data);
+      
       setPedidos(data || []);
       setBuscaRealizada(true);
-    } catch (error) {
-      console.error("Erro ao buscar pedidos:", error);
+    } catch (error: any) {
+      console.error("💥 Erro ao buscar pedidos:", error);
       alert(`Erro ao buscar pedidos: ${error.message}`);
       setPedidos([]);
       setBuscaRealizada(true);

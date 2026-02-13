@@ -148,6 +148,14 @@ export default function AdminDashboard() {
               description="Administre usuários do sistema"
               color="#8b5cf6"
             />
+
+            <ActionButton
+              href="/admin/funcionarios"
+              icon="🔧"
+              title="Gerenciar Funcionários"
+              description="Gerencie funcionários e permissões"
+              color="#ec4899"
+            />
           </div>
         </div>
       </div>

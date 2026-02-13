@@ -15,6 +15,15 @@ const {
 } = require("./middleware/auth");
 const cloudinary = require("cloudinary").v2;
 
+// Handlers globais de erro para prevenir crash
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('❌ Uncaught Exception:', error);
+});
+
 const app = express();
 
 // Configurar Cloudinary
@@ -86,24 +95,6 @@ app.post("/upload", async (req, res) => {
 });
 
 // ========== AUTENTICAÇÃO ==========
-
-// Middleware para verificar token
-const verificarToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  
-  if (!token) {
-    return res.status(401).json({ error: "Token não fornecido" });
-  }
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.userId = decoded.id;
-    req.userEmail = decoded.email;
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: "Token inválido" });
-  }
-};
 
 // Login
 app.post("/auth/login", async (req, res) => {
@@ -605,6 +596,8 @@ app.get("/pedidos/buscar", async (req, res) => {
   try {
     const { tipo, valor } = req.query;
 
+    console.log(`🔍 Busca de pedidos - Tipo: ${tipo}, Valor: ${valor}`);
+
     if (!tipo || !valor) {
       return res.status(400).json({ error: "Tipo e valor são obrigatórios" });
     }
@@ -623,6 +616,12 @@ app.get("/pedidos/buscar", async (req, res) => {
         ORDER BY created_at DESC
       `;
       params = [valor];
+      
+      console.log(`📧 Executando busca por email: ${valor}`);
+      const result = await pool.query(query, params);
+      console.log(`✅ Encontrados ${result.rows.length} pedidos`);
+      return res.json(result.rows);
+      
     } else if (tipo === "cpf") {
       // Tentar buscar com cliente_cpf primeiro
       try {
@@ -637,22 +636,21 @@ app.get("/pedidos/buscar", async (req, res) => {
         `;
         params = [valor];
         
+        console.log(`🆔 Executando busca por CPF: ${valor}`);
         const result = await pool.query(query, params);
+        console.log(`✅ Encontrados ${result.rows.length} pedidos`);
         return res.json(result.rows);
       } catch (columnError) {
         // Se coluna cliente_cpf não existe, retornar array vazio
-        console.log("Coluna cliente_cpf não existe no banco");
+        console.log("⚠️ Coluna cliente_cpf não existe no banco");
         return res.json([]);
       }
     } else {
       return res.status(400).json({ error: "Tipo inválido. Use 'email' ou 'cpf'" });
     }
-
-    const result = await pool.query(query, params);
-    res.json(result.rows);
   } catch (error) {
-    console.error("Erro ao buscar pedidos:", error);
-    res.status(500).json({ error: "Erro ao buscar pedidos" });
+    console.error("❌ Erro ao buscar pedidos:", error);
+    res.status(500).json({ error: "Erro ao buscar pedidos", detalhes: error.message });
   }
 });
 
@@ -717,6 +715,265 @@ app.get("/pedidos/:id/detalhes", async (req, res) => {
 
 // Dashboard
 app.get("/admin/dashboard", verificarToken, async (req, res) => {
+  try {
+    const totalPedidos = await pool.query("SELECT COUNT(*) FROM pedidos");
+    const totalProdutos = await pool.query("SELECT COUNT(*) FROM produtos");
+    const totalUsuarios = await pool.query("SELECT COUNT(*) FROM usuarios WHERE role != 'admin'");
+    
+    // Pedidos recentes
+    const pedidosRecentes = await pool.query(`
+      SELECT id, cliente_nome, total, status, created_at 
+      FROM pedidos 
+      ORDER BY created_at DESC 
+      LIMIT 5
+    `);
+
+    res.json({
+      totalPedidos: totalPedidos.rows[0].count,
+      totalProdutos: totalProdutos.rows[0].count,
+      totalUsuarios: totalUsuarios.rows[0].count,
+      pedidosRecentes: pedidosRecentes.rows
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao buscar dados do dashboard" });
+  }
+});
+
+// ===== ENDPOINTS DE GERENCIAMENTO DE FUNCIONÁRIOS =====
+
+// LISTAR FUNCIONÁRIOS
+app.get("/admin/funcionarios", verificarToken, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        u.id,
+        u.nome,
+        u.email,
+        u.role,
+        u.created_at,
+        p.*
+      FROM usuarios u
+      LEFT JOIN permissoes p ON u.id = p.usuario_id
+      WHERE u.role = 'funcionario'
+      ORDER BY u.created_at DESC
+    `);
+    
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao listar funcionários" });
+  }
+});
+
+// CRIAR FUNCIONÁRIO
+app.post("/admin/funcionarios", verificarToken, async (req, res) => {
+  try {
+    const { 
+      nome, 
+      email, 
+      senha,
+      permissoes 
+    } = req.body;
+
+    // Validar
+    if (!nome || !email || !senha) {
+      return res.status(400).json({ error: "Nome, email e senha são obrigatórios" });
+    }
+
+    // Verificar se email já existe
+    const emailExiste = await pool.query(
+      "SELECT id FROM usuarios WHERE email = $1",
+      [email]
+    );
+
+    if (emailExiste.rows.length > 0) {
+      return res.status(400).json({ error: "Email já cadastrado" });
+    }
+
+    // Hash da senha
+    const senhaHash = await bcrypt.hash(senha, 10);
+
+    // Criar usuário
+    const novoUsuario = await pool.query(
+      `INSERT INTO usuarios (nome, email, senha, role) 
+       VALUES ($1, $2, $3, 'funcionario') 
+       RETURNING id, nome, email, role`,
+      [nome, email, senhaHash]
+    );
+
+    const funcionarioId = novoUsuario.rows[0].id;
+
+    // Criar permissões
+    await pool.query(
+      `INSERT INTO permissoes (
+        usuario_id,
+        pode_criar_produtos,
+        pode_editar_produtos,
+        pode_deletar_produtos,
+        pode_gerenciar_estoque,
+        pode_upload_imagens,
+        pode_visualizar_pedidos,
+        pode_alterar_status_pedidos,
+        pode_cancelar_pedidos,
+        pode_adicionar_rastreio,
+        pode_visualizar_usuarios,
+        pode_gerenciar_funcionarios,
+        pode_gerenciar_categorias,
+        pode_acessar_dashboard
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+      [
+        funcionarioId,
+        permissoes?.pode_criar_produtos || false,
+        permissoes?.pode_editar_produtos || false,
+        permissoes?.pode_deletar_produtos || false,
+        permissoes?.pode_gerenciar_estoque || false,
+        permissoes?.pode_upload_imagens || false,
+        permissoes?.pode_visualizar_pedidos || true,
+        permissoes?.pode_alterar_status_pedidos || false,
+        permissoes?.pode_cancelar_pedidos || false,
+        permissoes?.pode_adicionar_rastreio || false,
+        permissoes?.pode_visualizar_usuarios || false,
+        permissoes?.pode_gerenciar_funcionarios || false,
+        permissoes?.pode_gerenciar_categorias || false,
+        permissoes?.pode_acessar_dashboard || true
+      ]
+    );
+
+    res.json({
+      success: true,
+      funcionario: novoUsuario.rows[0]
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao criar funcionário" });
+  }
+});
+
+// ATUALIZAR PERMISSÕES DE FUNCIONÁRIO
+app.put("/admin/funcionarios/:id/permissoes", verificarToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const permissoes = req.body;
+
+    await pool.query(
+      `UPDATE permissoes SET
+        pode_criar_produtos = $1,
+        pode_editar_produtos = $2,
+        pode_deletar_produtos = $3,
+        pode_gerenciar_estoque = $4,
+        pode_upload_imagens = $5,
+        pode_visualizar_pedidos = $6,
+        pode_alterar_status_pedidos = $7,
+        pode_cancelar_pedidos = $8,
+        pode_adicionar_rastreio = $9,
+        pode_visualizar_usuarios = $10,
+        pode_gerenciar_funcionarios = $11,
+        pode_gerenciar_categorias = $12,
+        pode_acessar_dashboard = $13,
+        updated_at = NOW()
+      WHERE usuario_id = $14`,
+      [
+        permissoes.pode_criar_produtos,
+        permissoes.pode_editar_produtos,
+        permissoes.pode_deletar_produtos,
+        permissoes.pode_gerenciar_estoque,
+        permissoes.pode_upload_imagens,
+        permissoes.pode_visualizar_pedidos,
+        permissoes.pode_alterar_status_pedidos,
+        permissoes.pode_cancelar_pedidos,
+        permissoes.pode_adicionar_rastreio,
+        permissoes.pode_visualizar_usuarios,
+        permissoes.pode_gerenciar_funcionarios,
+        permissoes.pode_gerenciar_categorias,
+        permissoes.pode_acessar_dashboard,
+        id
+      ]
+    );
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao atualizar permissões" });
+  }
+});
+
+// DELETAR FUNCIONÁRIO
+app.delete("/admin/funcionarios/:id", verificarToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verificar se não é admin
+    const usuario = await pool.query(
+      "SELECT role FROM usuarios WHERE id = $1",
+      [id]
+    );
+
+    if (usuario.rows[0]?.role === 'admin') {
+      return res.status(403).json({ error: "Não é possível deletar administrador" });
+    }
+
+    await pool.query("DELETE FROM usuarios WHERE id = $1", [id]);
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao deletar funcionário" });
+  }
+});
+
+// BUSCAR PERMISSÕES DO USUÁRIO LOGADO
+app.get("/auth/permissoes", verificarToken, async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    // Se for admin, tem todas as permissões
+    const usuario = await pool.query(
+      "SELECT role FROM usuarios WHERE id = $1",
+      [userId]
+    );
+
+    if (usuario.rows[0]?.role === 'admin') {
+      return res.json({
+        role: 'admin',
+        pode_criar_produtos: true,
+        pode_editar_produtos: true,
+        pode_deletar_produtos: true,
+        pode_gerenciar_estoque: true,
+        pode_upload_imagens: true,
+        pode_visualizar_pedidos: true,
+        pode_alterar_status_pedidos: true,
+        pode_cancelar_pedidos: true,
+        pode_adicionar_rastreio: true,
+        pode_visualizar_usuarios: true,
+        pode_gerenciar_funcionarios: true,
+        pode_gerenciar_categorias: true,
+        pode_acessar_dashboard: true
+      });
+    }
+
+    // Buscar permissões do funcionário
+    const permissoes = await pool.query(
+      "SELECT * FROM permissoes WHERE usuario_id = $1",
+      [userId]
+    );
+
+    if (permissoes.rows.length === 0) {
+      return res.status(404).json({ error: "Permissões não encontradas" });
+    }
+
+    res.json({
+      role: 'funcionario',
+      ...permissoes.rows[0]
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao buscar permissões" });
+  }
+});
+
+// Dashboard
+app.get("/admin/dashboard-old", verificarToken, async (req, res) => {
   try {
 
     const totalVendas = await pool.query(`

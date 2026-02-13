@@ -72,25 +72,72 @@ async function initDatabase() {
         nome VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
         senha VARCHAR(255) NOT NULL,
-        role VARCHAR(50) DEFAULT 'admin',
         criado_em TIMESTAMP DEFAULT NOW()
       );
     `);
 
-    // Inserir usuário admin padrão (senha: admin123)
-    await pool.query(`
-      INSERT INTO usuarios (nome, email, senha, role) 
-      VALUES ('Admin', 'admin@emporio.com.br', '$2b$10$rK3YzJxGV5y0hJK9pGqVLe8QP8y5F5sL6qKZxZ3yZ3yZ3yZ3yZ3yZ', 'admin')
-      ON CONFLICT (email) DO NOTHING;
-    `);
+    // Adicionar coluna role se não existir
+    try {
+      await pool.query(`
+        ALTER TABLE usuarios 
+        ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'admin';
+      `);
+    } catch (err) {
+      console.log("⚠️  Coluna role já existe ou não pôde ser adicionada");
+    }
 
-    // Criar índices
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_produtos_ativo ON produtos(ativo);
-      CREATE INDEX IF NOT EXISTS idx_produtos_estoque ON produtos(estoque);
-      CREATE INDEX IF NOT EXISTS idx_pedidos_status ON pedidos(status);
-      CREATE INDEX IF NOT EXISTS idx_pedidos_data ON pedidos(criado_em);
-    `);
+    // Inserir usuário admin padrão (senha: admin123)
+    try {
+      await pool.query(`
+        INSERT INTO usuarios (nome, email, senha, role) 
+        VALUES ('Admin', 'admin@emporio.com.br', '$2b$10$rK3YzJxGV5y0hJK9pGqVLe8QP8y5F5sL6qKZxZ3yZ3yZ3yZ3yZ3yZ', 'admin')
+        ON CONFLICT (email) DO NOTHING;
+      `);
+    } catch (err) {
+      // Tentar sem role se der erro
+      try {
+        await pool.query(`
+          INSERT INTO usuarios (nome, email, senha) 
+          VALUES ('Admin', 'admin@emporio.com.br', '$2b$10$rK3YzJxGV5y0hJK9pGqVLe8QP8y5F5sL6qKZxZ3yZ3yZ3yZ3yZ3yZ')
+          ON CONFLICT (email) DO NOTHING;
+        `);
+      } catch (err2) {
+        console.log("⚠️  Usuário admin já existe ou erro ao criar");
+      }
+    }
+
+    // Criar índices (se as colunas existirem)
+    try {
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS idx_produtos_ativo ON produtos(ativo);
+      `);
+    } catch (err) {
+      console.log("⚠️  Índice idx_produtos_ativo não criado");
+    }
+
+    try {
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS idx_produtos_estoque ON produtos(estoque);
+      `);
+    } catch (err) {
+      console.log("⚠️  Índice idx_produtos_estoque não criado");
+    }
+
+    try {
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS idx_pedidos_status ON pedidos(status);
+      `);
+    } catch (err) {
+      console.log("⚠️  Índice idx_pedidos_status não criado");
+    }
+
+    try {
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS idx_pedidos_data ON pedidos(created_at);
+      `);
+    } catch (err) {
+      console.log("⚠️  Índice idx_pedidos_data não criado");
+    }
 
     console.log("✅ Banco de dados verificado e pronto!");
     await pool.end();

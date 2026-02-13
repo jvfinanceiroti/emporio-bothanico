@@ -8,7 +8,10 @@ const pool = new Pool(
         connectionString: process.env.DATABASE_URL,
         ssl: {
           rejectUnauthorized: false
-        }
+        },
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
       }
     : {
         user: process.env.DB_USER || "postgres",
@@ -16,6 +19,9 @@ const pool = new Pool(
         database: process.env.DB_NAME || "loja",
         password: process.env.DB_PASSWORD || "Rollex99!",
         port: process.env.DB_PORT || 5432,
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
       }
 );
 

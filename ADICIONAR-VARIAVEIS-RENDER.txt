@@ -1,0 +1,43 @@
+# 🚀 INSTRUÇÕES PARA ADICIONAR VARIÁVEIS NO RENDER
+
+## Acesse o Render:
+https://dashboard.render.com
+
+## Vá em: 
+**emporio-bothanico → Environment**
+
+## Adicione estas variáveis (clique em "Add Environment Variable"):
+
+```
+DATABASE_URL
+postgresql://postgres.cztqxdogiabesdgpyogv:Rollex99Rollex@aws-0-us-west-2.pooler.supabase.com:5432/postgres
+
+JWT_SECRET
+chave-secreta-super-segura-producao-emporio-botanico-2026
+
+CLOUDINARY_CLOUD_NAME
+dhyblzugz
+
+CLOUDINARY_API_KEY
+629775744341559
+
+CLOUDINARY_API_SECRET
+IACl75fZDlj66c44Us981JkWDi0
+
+NODE_ENV
+production
+```
+
+## Depois de adicionar TODAS as variáveis:
+1. Clique em **"Save Changes"**
+2. Aguarde o deploy automático (~2 minutos)
+3. Verifique os logs para confirmar que iniciou sem erros
+
+## Teste após o deploy:
+- Site: https://emporiobothanico.com.br
+- Login: admin@emporio.com.br / admin123
+- Buscar pedido: kleb@gmail.com
+
+---
+
+**IMPORTANTE**: Copie EXATAMENTE como está acima, incluindo toda a string de conexão.
