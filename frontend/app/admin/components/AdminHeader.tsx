@@ -3,11 +3,20 @@
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { usePermissoes } from "@/lib/usePermissoes";
+import { useEffect, useState } from "react";
 
 export default function AdminHeader() {
   const router = useRouter();
   const pathname = usePathname();
   const { permissoes, temPermissao, isAdmin } = usePermissoes();
+  const [nomeUsuario, setNomeUsuario] = useState("");
+
+  useEffect(() => {
+    const usuario = localStorage.getItem("usuario");
+    if (usuario) {
+      setNomeUsuario(usuario);
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -76,32 +85,63 @@ export default function AdminHeader() {
                 marginTop: "2px"
               }}>
                 {isAdmin() ? "👑 Administrador" : "👤 Funcionário"}
+                {nomeUsuario && ` • Olá, ${nomeUsuario}`}
               </p>
             )}
           </div>
         </div>
 
-        <button
-          onClick={handleLogout}
-          style={{
-            background: "#ef4444",
-            color: "white",
-            border: "none",
-            padding: "clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 24px)",
-            borderRadius: "clamp(6px, 1.5vw, 8px)",
-            cursor: "pointer",
-            fontWeight: "600",
-            fontSize: "clamp(12px, 3vw, 14px)",
-            transition: "all 0.2s",
-            minHeight: "44px",
-            whiteSpace: "nowrap",
-            flexShrink: 0
-          }}
-          onMouseOver={(e) => e.currentTarget.style.background = "#dc2626"}
-          onMouseOut={(e) => e.currentTarget.style.background = "#ef4444"}
-        >
-          Sair
-        </button>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "clamp(12px, 3vw, 16px)",
+          flexWrap: "wrap"
+        }}>
+          {nomeUsuario && (
+            <div style={{
+              padding: "clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px)",
+              background: "#f3f4f6",
+              borderRadius: "clamp(6px, 1.5vw, 8px)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              minHeight: "44px"
+            }}>
+              <span style={{ fontSize: "20px" }}>
+                {isAdmin() ? "👑" : "👤"}
+              </span>
+              <span style={{
+                fontSize: "clamp(12px, 3vw, 14px)",
+                fontWeight: "600",
+                color: "#374151"
+              }}>
+                {nomeUsuario}
+              </span>
+            </div>
+          )}
+
+          <button
+            onClick={handleLogout}
+            style={{
+              background: "#ef4444",
+              color: "white",
+              border: "none",
+              padding: "clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 24px)",
+              borderRadius: "clamp(6px, 1.5vw, 8px)",
+              cursor: "pointer",
+              fontWeight: "600",
+              fontSize: "clamp(12px, 3vw, 14px)",
+              transition: "all 0.2s",
+              minHeight: "44px",
+              whiteSpace: "nowrap",
+              flexShrink: 0
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = "#dc2626"}
+            onMouseOut={(e) => e.currentTarget.style.background = "#ef4444"}
+          >
+            Sair
+          </button>
+        </div>
       </div>
 
       <div style={{
