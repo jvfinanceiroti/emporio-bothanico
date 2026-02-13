@@ -117,11 +117,11 @@ app.post("/auth/login", async (req, res) => {
       return res.status(401).json({ error: "Email ou senha incorretos" });
     }
 
-    const token = jwt.sign(
-      { id: usuario.id, email: usuario.email, nome: usuario.nome },
-      JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = gerarToken({
+      id: usuario.id,
+      email: usuario.email,
+      nome: usuario.nome
+    });
 
     res.json({
       token,
