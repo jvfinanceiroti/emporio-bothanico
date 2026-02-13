@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ProtegerRota, usePodeExecutar } from "@/lib/ProtegerRota";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -43,6 +44,14 @@ interface Funcionario {
 }
 
 export default function FuncionariosPage() {
+  return (
+    <ProtegerRota permissoesRequeridas={['pode_gerenciar_funcionarios']}>
+      <FuncionariosConteudo />
+    </ProtegerRota>
+  );
+}
+
+function FuncionariosConteudo() {
   const router = useRouter();
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [loading, setLoading] = useState(true);

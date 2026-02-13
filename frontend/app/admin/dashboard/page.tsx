@@ -5,8 +5,17 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminHeader from "../components/AdminHeader";
+import { ProtegerRota } from "@/lib/ProtegerRota";
 
 export default function AdminDashboard() {
+  return (
+    <ProtegerRota permissoesRequeridas={['pode_acessar_dashboard']}>
+      <DashboardConteudo />
+    </ProtegerRota>
+  );
+}
+
+function DashboardConteudo() {
   const router = useRouter();
   const [dados, setDados] = useState<any>(null);
 

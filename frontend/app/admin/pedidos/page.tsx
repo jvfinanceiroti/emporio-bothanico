@@ -4,6 +4,7 @@ import { API_URL } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminHeader from "../components/AdminHeader";
+import { ProtegerRota, usePodeExecutar } from "@/lib/ProtegerRota";
 
 interface Pedido {
   id: number;
@@ -40,7 +41,19 @@ interface DetalhesPedido {
 }
 
 export default function AdminPedidos() {
+  return (
+    <ProtegerRota permissoesRequeridas={['pode_visualizar_pedidos']}>
+      <PedidosConteudo />
+    </ProtegerRota>
+  );
+}
+
+function PedidosConteudo() {
   const router = useRouter();
+  const podeAlterar = usePodeExecutar('pode_alterar_status_pedidos');
+  const podeCancelar = usePodeExecutar('pode_cancelar_pedidos');
+  const podeAdicionarRastreio = usePodeExecutar('pode_adicionar_rastreio');
+  
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [filtro, setFiltro] = useState("");

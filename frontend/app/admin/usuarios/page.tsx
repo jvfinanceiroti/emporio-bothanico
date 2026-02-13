@@ -4,6 +4,7 @@ import { API_URL } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminHeader from "../components/AdminHeader";
+import { ProtegerRota } from "@/lib/ProtegerRota";
 
 interface Usuario {
   id: number;
@@ -14,6 +15,14 @@ interface Usuario {
 }
 
 export default function AdminUsuarios() {
+  return (
+    <ProtegerRota permissoesRequeridas={['pode_visualizar_usuarios']}>
+      <UsuariosConteudo />
+    </ProtegerRota>
+  );
+}
+
+function UsuariosConteudo() {
   const router = useRouter();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [carregando, setCarregando] = useState(true);
