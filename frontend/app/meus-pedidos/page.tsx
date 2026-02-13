@@ -66,22 +66,26 @@ export default function MeusPedidos() {
 
     setCarregando(true);
     setBuscaRealizada(false);
+    setPedidos([]);
 
     try {
       const valor = tipoBusca === "cpf" ? busca.replace(/\D/g, "") : busca;
       const response = await fetch(`${API_URL}/pedidos/buscar?tipo=${tipoBusca}&valor=${encodeURIComponent(valor)}`);
       
       if (!response.ok) {
-        throw new Error("Erro ao buscar pedidos");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Erro na resposta:", errorData);
+        throw new Error(errorData.error || "Erro ao buscar pedidos");
       }
 
       const data = await response.json();
-      setPedidos(data);
+      setPedidos(data || []);
       setBuscaRealizada(true);
     } catch (error) {
       console.error("Erro ao buscar pedidos:", error);
-      alert("Erro ao buscar pedidos. Tente novamente.");
+      alert(`Erro ao buscar pedidos: ${error.message}`);
       setPedidos([]);
+      setBuscaRealizada(true);
     } finally {
       setCarregando(false);
     }

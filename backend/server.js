@@ -624,16 +624,26 @@ app.get("/pedidos/buscar", async (req, res) => {
       `;
       params = [valor];
     } else if (tipo === "cpf") {
-      query = `
-        SELECT 
-          id, cliente_nome, cliente_email, cliente_telefone, 
-          total, status, created_at as criado_em,
-          forma_pagamento
-        FROM pedidos 
-        WHERE cliente_cpf = $1
-        ORDER BY created_at DESC
-      `;
-      params = [valor];
+      // Tentar buscar com cliente_cpf primeiro
+      try {
+        query = `
+          SELECT 
+            id, cliente_nome, cliente_email, cliente_telefone, 
+            total, status, created_at as criado_em,
+            forma_pagamento
+          FROM pedidos 
+          WHERE cliente_cpf = $1
+          ORDER BY created_at DESC
+        `;
+        params = [valor];
+        
+        const result = await pool.query(query, params);
+        return res.json(result.rows);
+      } catch (columnError) {
+        // Se coluna cliente_cpf não existe, retornar array vazio
+        console.log("Coluna cliente_cpf não existe no banco");
+        return res.json([]);
+      }
     } else {
       return res.status(400).json({ error: "Tipo inválido. Use 'email' ou 'cpf'" });
     }
