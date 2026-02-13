@@ -24,17 +24,35 @@ function SucessoContent() {
   const [pedido, setPedido] = useState<Pedido | null>(null);
   const [carregando, setCarregando] = useState(true);
 
-  useEffect(() => {
+  // Função para buscar pedido
+  const buscarPedido = async () => {
     if (!pedidoId) return;
 
-    fetch(`${API_URL}/pedidos/${pedidoId}`)
-      .then(res => res.json())
-      .then(data => {
-        setPedido(data);
-        setCarregando(false);
-      })
-      .catch(() => setCarregando(false));
+    try {
+      const res = await fetch(`${API_URL}/pedidos/${pedidoId}`);
+      const data = await res.json();
+      setPedido(data);
+      setCarregando(false);
+    } catch {
+      setCarregando(false);
+    }
+  };
+
+  // Buscar pedido inicial
+  useEffect(() => {
+    buscarPedido();
   }, [pedidoId]);
+
+  // Atualizar status a cada 5 segundos se estiver aguardando pagamento
+  useEffect(() => {
+    if (!pedido || pedido.status !== "aguardando_pagamento") return;
+
+    const interval = setInterval(() => {
+      buscarPedido();
+    }, 5000); // Atualiza a cada 5 segundos
+
+    return () => clearInterval(interval);
+  }, [pedido?.status, pedidoId]);
 
   const getFormaPagamentoLabel = (forma?: string) => {
     switch (forma) {
@@ -42,6 +60,48 @@ function SucessoContent() {
       case "cartao": return "Cartão de Crédito";
       case "boleto": return "Boleto Bancário";
       default: return "Não informado";
+    }
+  };
+
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case "aguardando_pagamento":
+        return { 
+          label: "⏳ Aguardando Pagamento", 
+          color: "#f59e0b", 
+          bg: "rgba(245, 158, 11, 0.1)" 
+        };
+      case "pago":
+      case "aprovado":
+        return { 
+          label: "✓ Pago", 
+          color: "#10b981", 
+          bg: "rgba(16, 185, 129, 0.1)" 
+        };
+      case "enviado":
+        return { 
+          label: "📦 Enviado", 
+          color: "#3b82f6", 
+          bg: "rgba(59, 130, 246, 0.1)" 
+        };
+      case "entregue":
+        return { 
+          label: "✓ Entregue", 
+          color: "#22c55e", 
+          bg: "rgba(34, 197, 94, 0.1)" 
+        };
+      case "cancelado":
+        return { 
+          label: "✗ Cancelado", 
+          color: "#ef4444", 
+          bg: "rgba(239, 68, 68, 0.1)" 
+        };
+      default:
+        return { 
+          label: status, 
+          color: "#9ca3af", 
+          bg: "rgba(156, 163, 175, 0.1)" 
+        };
     }
   };
 
@@ -345,18 +405,24 @@ function SucessoContent() {
                   Status
                 </div>
                 <div>
-                  <span style={{
-                    padding: "clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px)",
-                    background: "rgba(245, 158, 11, 0.1)",
-                    color: "#f59e0b",
-                    borderRadius: "clamp(6px, 1.5vw, 8px)",
-                    fontSize: "clamp(12px, 3vw, 14px)",
-                    fontWeight: "700",
-                    display: "inline-block",
-                    wordBreak: "break-word"
-                  }}>
-                    ⏳ Aguardando Pagamento
-                  </span>
+                  {(() => {
+                    const statusInfo = getStatusInfo(pedido.status);
+                    return (
+                      <span style={{
+                        padding: "clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px)",
+                        background: statusInfo.bg,
+                        color: statusInfo.color,
+                        borderRadius: "clamp(6px, 1.5vw, 8px)",
+                        fontSize: "clamp(12px, 3vw, 14px)",
+                        fontWeight: "700",
+                        display: "inline-block",
+                        wordBreak: "break-word",
+                        transition: "all 0.3s"
+                      }}>
+                        {statusInfo.label}
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
 
