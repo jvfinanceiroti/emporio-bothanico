@@ -109,17 +109,23 @@ app.post("/auth/login", async (req, res) => {
 // Verificar token (para validar sessão)
 app.get("/auth/verificar", verificarToken, async (req, res) => {
   try {
+    console.log("Verificando usuário ID:", req.userId);
     const result = await pool.query(
       "SELECT id, email, nome, tipo FROM usuarios WHERE id = $1",
       [req.userId]
     );
 
+    console.log("Resultado query:", result.rows);
+
     if (result.rows.length === 0) {
+      console.log("Usuário não encontrado no banco");
       return res.status(401).json({ error: "Usuário não encontrado" });
     }
 
+    console.log("Usuário autenticado:", result.rows[0].email);
     res.json({ usuario: result.rows[0] });
   } catch (error) {
+    console.error("Erro ao verificar token:", error);
     res.status(500).json({ error: "Erro ao verificar token" });
   }
 });
