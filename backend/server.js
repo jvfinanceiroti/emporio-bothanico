@@ -437,13 +437,16 @@ app.post("/pagamento/pix/gerar", async (req, res) => {
 
     const pedido = pedidoResult.rows[0];
 
+    // Converter total para número
+    const valorTotal = parseFloat(pedido.total) || 0;
+
     // Gerar código PIX (Pix copia e cola - formato simplificado)
     // Em produção, você deve usar uma API de pagamento real (Mercado Pago, PagSeguro, etc)
     const pixData = {
       chave: process.env.PIX_CHAVE || "emporiobothanico@gmail.com", // Sua chave PIX
       nome: "Emporio Bothanico LTDA",
       cidade: "Belo Horizonte",
-      valor: pedido.total.toFixed(2),
+      valor: valorTotal.toFixed(2),
       identificador: `PED${pedido.id}`,
     };
 
@@ -468,7 +471,7 @@ app.post("/pagamento/pix/gerar", async (req, res) => {
     res.json({
       qrCode: qrCodeBase64,
       copiaCola: pixString,
-      valor: pedido.total,
+      valor: valorTotal,
       expiraEm: expiraEm.toISOString(),
     });
   } catch (error) {
