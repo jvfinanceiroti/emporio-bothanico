@@ -12,6 +12,7 @@ function PagamentoContent() {
   const router = useRouter();
 
   const pedidoId = params.get("pedido");
+  const token = params.get("token");
 
   const pagar = async (aprovado: boolean) => {
     await fetch(`${API_URL}/pagamento-fake`, {
@@ -25,7 +26,7 @@ function PagamentoContent() {
       }),
     });
 
-    router.push(`/sucesso?pedido=${pedidoId}`);
+    router.push(`/sucesso?pedido=${pedidoId}&token=${token}`);
   };
 
   return (

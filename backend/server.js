@@ -4,11 +4,18 @@ const pool = require("./db");
 const multer = require("multer");
 const path = require("path");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const { 
+  verificarToken, 
+  verificarAdmin,
+  verificarTentativasLogin,
+  registrarTentativaFalha,
+  limparTentativas,
+  gerarToken,
+  JWT_SECRET
+} = require("./middleware/auth");
 const cloudinary = require("cloudinary").v2;
 
 const app = express();
-const JWT_SECRET = process.env.JWT_SECRET || "emporio-bothanico-secret-key-2026";
 
 // Configurar Cloudinary
 cloudinary.config({
@@ -256,12 +263,16 @@ app.post("/pedidos", async (req, res) => {
       0
     ) + (frete || 0);
 
+    // Gerar token de acesso único
+    const crypto = require('crypto');
+    const accessToken = crypto.randomBytes(32).toString('hex');
+
     const pedidoResult = await pool.query(
       `INSERT INTO pedidos
       (status, total, cliente_nome, cliente_email, cliente_telefone,
        endereco_cep, endereco_rua, endereco_numero, endereco_complemento,
-       endereco_bairro, endereco_cidade, endereco_estado, frete, forma_pagamento)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+       endereco_bairro, endereco_cidade, endereco_estado, frete, forma_pagamento, access_token)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
       RETURNING *`,
       [
         "aguardando_pagamento",
@@ -277,7 +288,8 @@ app.post("/pedidos", async (req, res) => {
         endereco?.cidade || null,
         endereco?.estado || null,
         frete || 0,
-        formaPagamento || null
+        formaPagamento || null,
+        accessToken
       ]
     );
 
@@ -303,7 +315,11 @@ for (const item of itens) {
 }
 
 
-    res.json(pedido);
+    // Retornar pedido com token de acesso
+    res.json({
+      ...pedido,
+      access_token: accessToken
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Erro ao criar pedido");
@@ -331,14 +347,25 @@ app.post("/pagamento-fake", async (req, res) => {
 
 // PEDIDOS POR ID 
 
+// BUSCAR PEDIDO POR ID E TOKEN (PÚBLICO - PARA PÁGINA DE SUCESSO)
 app.get("/pedidos/:id", async (req, res) => {
   try {
     const { id } = req.params;
+    const { token } = req.query;
+
+    // Exigir token de acesso
+    if (!token) {
+      return res.status(401).json({ error: "Token de acesso não fornecido" });
+    }
 
     const result = await pool.query(
-      "SELECT * FROM pedidos WHERE id = $1",
-      [id]
+      "SELECT * FROM pedidos WHERE id = $1 AND access_token = $2",
+      [id, token]
     );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Pedido não encontrado ou token inválido" });
+    }
 
     res.json(result.rows[0]);
   } catch (error) {

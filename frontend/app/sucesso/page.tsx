@@ -21,15 +21,25 @@ interface Pedido {
 function SucessoContent() {
   const params = useSearchParams();
   const pedidoId = params.get("pedido");
+  const token = params.get("token");
   const [pedido, setPedido] = useState<Pedido | null>(null);
   const [carregando, setCarregando] = useState(true);
 
   // Função para buscar pedido
   const buscarPedido = async () => {
-    if (!pedidoId) return;
+    if (!pedidoId || !token) {
+      setCarregando(false);
+      return;
+    }
 
     try {
-      const res = await fetch(`${API_URL}/pedidos/${pedidoId}`);
+      const res = await fetch(`${API_URL}/pedidos/${pedidoId}?token=${token}`);
+      
+      if (!res.ok) {
+        setCarregando(false);
+        return;
+      }
+      
       const data = await res.json();
       setPedido(data);
       setCarregando(false);

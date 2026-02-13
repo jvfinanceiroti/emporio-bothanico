@@ -286,7 +286,7 @@ export default function CheckoutPage() {
       if (response.ok) {
         localStorage.removeItem("carrinho");
         const data = await response.json();
-        router.push(`/pagamento?pedido=${data.id}`);
+        router.push(`/pagamento?pedido=${data.id}&token=${data.access_token}`);
       } else {
         setMensagemAlerta("Erro ao finalizar pedido. Tente novamente.");
         setMostrarPagamento(false);
