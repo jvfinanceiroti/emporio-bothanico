@@ -1945,14 +1945,24 @@ export default function CheckoutPage() {
 
                       // Buscar método de pagamento
                       const bin = numeroLimpo.substring(0, 6);
+                      console.log("🔍 BIN do cartão:", bin);
+                      
                       const paymentMethodResponse = await fetch(
                         `https://api.mercadopago.com/v1/payment_methods?public_key=APP_USR-73e9a69c-931e-415d-bfcc-4138c8893bc4&bin=${bin}`
                       );
+                      
+                      console.log("📡 Status da resposta:", paymentMethodResponse.status);
+                      
                       const paymentMethods = await paymentMethodResponse.json();
+                      console.log("📦 Resposta completa da API:", paymentMethods);
+                      
                       const paymentMethod = paymentMethods.results?.[0];
+                      console.log("💳 Payment method encontrado:", paymentMethod);
 
                       if (!paymentMethod) {
-                        throw new Error("Cartão não reconhecido");
+                        console.error("❌ Nenhum payment method encontrado!");
+                        console.error("Resposta da API:", JSON.stringify(paymentMethods, null, 2));
+                        throw new Error(`Cartão não reconhecido. BIN: ${bin}. Verifique se está usando um cartão de teste válido do Mercado Pago.`);
                       }
 
                       console.log("💳 Método de pagamento:", paymentMethod.name);
