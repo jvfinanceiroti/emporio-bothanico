@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminHeader from "../components/AdminHeader";
 import { ProtegerRota } from "@/lib/ProtegerRota";
+import { usePermissoes } from "@/lib/usePermissoes";
 
 export default function AdminDashboard() {
   return (
@@ -18,6 +19,7 @@ export default function AdminDashboard() {
 function DashboardConteudo() {
   const router = useRouter();
   const [dados, setDados] = useState<any>(null);
+  const { temPermissao } = usePermissoes();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -126,45 +128,55 @@ function DashboardConteudo() {
             gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
             gap: "clamp(12px, 3vw, 20px)"
           }}>
-            <ActionButton
-              href="/admin/produtos"
-              icon="➕"
-              title="Adicionar Produto"
-              description="Cadastre novos produtos"
-              color="#10b981"
-            />
+            {temPermissao('pode_criar_produtos') && (
+              <ActionButton
+                href="/admin/produtos"
+                icon="➕"
+                title="Adicionar Produto"
+                description="Cadastre novos produtos"
+                color="#10b981"
+              />
+            )}
 
-            <ActionButton
-              href="/admin/produtos"
-              icon="📝"
-              title="Gerenciar Produtos"
-              description="Edite e organize produtos"
-              color="#3b82f6"
-            />
+            {temPermissao('pode_editar_produtos') && (
+              <ActionButton
+                href="/admin/produtos"
+                icon="📝"
+                title="Gerenciar Produtos"
+                description="Edite e organize produtos"
+                color="#3b82f6"
+              />
+            )}
 
-            <ActionButton
-              href="/admin/pedidos"
-              icon="🛒"
-              title="Ver Pedidos"
-              description="Gerencie pedidos realizados"
-              color="#f59e0b"
-            />
+            {temPermissao('pode_visualizar_pedidos') && (
+              <ActionButton
+                href="/admin/pedidos"
+                icon="🛒"
+                title="Ver Pedidos"
+                description="Gerencie pedidos realizados"
+                color="#f59e0b"
+              />
+            )}
 
-            <ActionButton
-              href="/admin/usuarios"
-              icon="👥"
-              title="Ver Usuários"
-              description="Administre usuários do sistema"
-              color="#8b5cf6"
-            />
+            {temPermissao('pode_visualizar_usuarios') && (
+              <ActionButton
+                href="/admin/usuarios"
+                icon="👥"
+                title="Ver Usuários"
+                description="Administre usuários do sistema"
+                color="#8b5cf6"
+              />
+            )}
 
-            <ActionButton
-              href="/admin/funcionarios"
-              icon="🔧"
-              title="Gerenciar Funcionários"
-              description="Gerencie funcionários e permissões"
-              color="#ec4899"
-            />
+            {temPermissao('pode_gerenciar_funcionarios') && (
+              <ActionButton
+                href="/admin/funcionarios"
+                icon="🔧"
+                title="Gerenciar Funcionários"
+                description="Gerencie funcionários e permissões"
+                color="#ec4899"
+              />
+            )}
           </div>
         </div>
       </div>
