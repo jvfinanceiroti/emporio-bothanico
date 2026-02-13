@@ -351,28 +351,56 @@ app.get("/pedidos/:id", async (req, res) => {
 
 app.get("/admin/pedidos", verificarToken, async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT
-        id,
-        cliente_nome,
-        cliente_email,
-        cliente_telefone,
-        total,
-        status,
-        created_at as criado_em,
-        endereco_cep,
-        endereco_rua,
-        endereco_numero,
-        endereco_complemento,
-        endereco_bairro,
-        endereco_cidade,
-        endereco_estado,
-        frete,
-        forma_pagamento,
-        codigo_rastreio
-      FROM pedidos
-      ORDER BY created_at DESC
-    `);
+    // Tentar com codigo_rastreio primeiro
+    let result;
+    try {
+      result = await pool.query(`
+        SELECT
+          id,
+          cliente_nome,
+          cliente_email,
+          cliente_telefone,
+          total,
+          status,
+          created_at as criado_em,
+          endereco_cep,
+          endereco_rua,
+          endereco_numero,
+          endereco_complemento,
+          endereco_bairro,
+          endereco_cidade,
+          endereco_estado,
+          frete,
+          forma_pagamento,
+          codigo_rastreio
+        FROM pedidos
+        ORDER BY created_at DESC
+      `);
+    } catch (columnError) {
+      // Se falhar, buscar sem codigo_rastreio
+      console.log("Coluna codigo_rastreio não existe, buscando sem ela");
+      result = await pool.query(`
+        SELECT
+          id,
+          cliente_nome,
+          cliente_email,
+          cliente_telefone,
+          total,
+          status,
+          created_at as criado_em,
+          endereco_cep,
+          endereco_rua,
+          endereco_numero,
+          endereco_complemento,
+          endereco_bairro,
+          endereco_cidade,
+          endereco_estado,
+          frete,
+          forma_pagamento
+        FROM pedidos
+        ORDER BY created_at DESC
+      `);
+    }
 
     res.json(result.rows);
   } catch (error) {
