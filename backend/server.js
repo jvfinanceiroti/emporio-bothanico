@@ -563,7 +563,7 @@ app.post("/upload", verificarToken, upload.single("imagem"), (req, res) => {
 // criar produto admin
 app.post("/admin/produtos", verificarToken, async (req, res) => {
   try {
-    const { nome, preco, estoque, imagem_url, peso_kg, altura_cm, largura_cm, comprimento_cm } = req.body;
+    const { nome, descricao, preco, estoque, imagem_url, peso_kg, altura_cm, largura_cm, comprimento_cm } = req.body;
 
     const result = await pool.query(
       `INSERT INTO produtos 
@@ -572,7 +572,7 @@ app.post("/admin/produtos", verificarToken, async (req, res) => {
        RETURNING *`,
       [
         nome, 
-        null, 
+        descricao || null, 
         preco, 
         null, 
         null, 
@@ -595,13 +595,13 @@ app.post("/admin/produtos", verificarToken, async (req, res) => {
 app.put("/admin/produtos/:id", verificarToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { nome, preco, estoque, imagem_url, peso_kg, altura_cm, largura_cm, comprimento_cm } = req.body;
+    const { nome, descricao, preco, estoque, imagem_url, peso_kg, altura_cm, largura_cm, comprimento_cm } = req.body;
 
     await pool.query(
       `UPDATE produtos
-       SET nome=$1, preco=$2, estoque=$3, imagem_url=$4, peso_kg=$5, altura_cm=$6, largura_cm=$7, comprimento_cm=$8
-       WHERE id=$9`,
-      [nome, preco, estoque, imagem_url || null, peso_kg || null, altura_cm || null, largura_cm || null, comprimento_cm || null, id]
+       SET nome=$1, descricao=$2, preco=$3, estoque=$4, imagem_url=$5, peso_kg=$6, altura_cm=$7, largura_cm=$8, comprimento_cm=$9
+       WHERE id=$10`,
+      [nome, descricao || null, preco, estoque, imagem_url || null, peso_kg || null, altura_cm || null, largura_cm || null, comprimento_cm || null, id]
     );
 
     res.json({ ok: true });

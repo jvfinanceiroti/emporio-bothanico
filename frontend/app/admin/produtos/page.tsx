@@ -16,6 +16,7 @@ export default function AdminProdutos() {
   const [filtroStatus, setFiltroStatus] = useState("todos");
 
   const [novoNome, setNovoNome] = useState("");
+  const [novaDescricao, setNovaDescricao] = useState("");
   const [novoPreco, setNovoPreco] = useState("");
   const [novoEstoque, setNovoEstoque] = useState("");
   const [novaImagem, setNovaImagem] = useState("");
@@ -27,6 +28,7 @@ export default function AdminProdutos() {
 
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [editNome, setEditNome] = useState("");
+  const [editDescricao, setEditDescricao] = useState("");
   const [editPreco, setEditPreco] = useState("");
   const [editEstoque, setEditEstoque] = useState("");
   const [editImagem, setEditImagem] = useState("");
@@ -162,6 +164,7 @@ export default function AdminProdutos() {
         },
         body: JSON.stringify({
           nome: novoNome,
+          descricao: novaDescricao || null,
           preco: Number(formatarPreco(novoPreco)),
           estoque: Number(novoEstoque),
           imagem_url: imagemUrl || null,
@@ -177,6 +180,7 @@ export default function AdminProdutos() {
       }
 
       setNovoNome("");
+      setNovaDescricao("");
       setNovoPreco("");
       setNovoEstoque("");
       setNovaImagem("");
@@ -197,6 +201,7 @@ export default function AdminProdutos() {
   const iniciarEdicao = (produto: any) => {
     setEditandoId(produto.id);
     setEditNome(produto.nome);
+    setEditDescricao(produto.descricao || "");
     setEditPreco((Number(produto.preco) * 100).toFixed(0));
     setEditEstoque(produto.estoque);
     setEditImagem(produto.imagem_url || "");
@@ -254,6 +259,7 @@ export default function AdminProdutos() {
         },
         body: JSON.stringify({
           nome: editNome,
+          descricao: editDescricao || null,
           preco: Number(formatarPreco(editPreco)),
           estoque: Number(editEstoque),
           imagem_url: imagemUrl || null,
@@ -372,6 +378,17 @@ export default function AdminProdutos() {
                 placeholder="Nome do produto"
                 value={novoNome}
                 onChange={e => setNovoNome(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+              <textarea
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Descrição do produto (opcional)"
+                rows={3}
+                value={novaDescricao}
+                onChange={e => setNovaDescricao(e.target.value)}
               />
             </div>
 
@@ -547,6 +564,17 @@ export default function AdminProdutos() {
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             value={editNome}
                             onChange={e => setEditNome(e.target.value)}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                          <textarea
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Descrição do produto"
+                            rows={3}
+                            value={editDescricao}
+                            onChange={e => setEditDescricao(e.target.value)}
                           />
                         </div>
 
