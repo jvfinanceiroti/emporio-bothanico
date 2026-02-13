@@ -77,30 +77,50 @@ export default function Home() {
         <div style={{
           maxWidth: "1440px",
           margin: "0 auto",
-          padding: "20px 48px",
+          padding: "16px 20px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between"
+          justifyContent: "space-between",
+          gap: "12px"
         }}>
-          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "20px" }}>
-            <img src="/logo.png" alt="Logo" style={{ height: "56px", objectFit: "contain" }} />
-            <div>
+          <Link href="/" style={{ 
+            textDecoration: "none", 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "12px",
+            flex: "1",
+            minWidth: 0
+          }}>
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              style={{ 
+                height: "48px", 
+                width: "48px",
+                objectFit: "contain",
+                flexShrink: 0
+              }} 
+            />
+            <div style={{ minWidth: 0, overflow: "hidden" }}>
               <h1 style={{
-                fontSize: "28px",
+                fontSize: "clamp(16px, 4vw, 28px)",
                 fontWeight: "800",
                 color: "#0a0a0a",
                 margin: 0,
-                letterSpacing: "-0.8px",
-                fontFamily: "system-ui, -apple-system, sans-serif"
+                letterSpacing: "-0.5px",
+                fontFamily: "system-ui, -apple-system, sans-serif",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis"
               }}>
                 Empório Bothanico
               </h1>
               <p style={{ 
-                fontSize: "12px", 
+                fontSize: "9px", 
                 color: "#888", 
                 margin: 0, 
                 fontWeight: 500,
-                letterSpacing: "1px",
+                letterSpacing: "0.5px",
                 textTransform: "uppercase"
               }}>
                 Delicadezas & Banho
@@ -108,23 +128,24 @@ export default function Home() {
             </div>
           </Link>
 
-          <nav style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+          <nav style={{ display: "flex", gap: "12px", alignItems: "center", flexShrink: 0 }}>
             <Link 
               href="/carrinho"
               style={{
                 position: "relative",
-                padding: "14px 32px",
+                padding: "10px 16px",
                 background: "#0a0a0a",
                 color: "white",
-                borderRadius: "12px",
+                borderRadius: "10px",
                 textDecoration: "none",
                 fontWeight: "600",
-                fontSize: "15px",
+                fontSize: "13px",
                 transition: "all 0.3s ease",
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
-                border: "2px solid #0a0a0a"
+                gap: "6px",
+                border: "2px solid #0a0a0a",
+                whiteSpace: "nowrap"
               }}
               onMouseOver={(e) => {
                 e.currentTarget.style.background = "white";
@@ -135,7 +156,7 @@ export default function Home() {
                 e.currentTarget.style.color = "white";
               }}
             >
-              <svg style={{ width: "20px", height: "20px" }} fill="currentColor" viewBox="0 0 20 20">
+              <svg style={{ width: "16px", height: "16px" }} fill="currentColor" viewBox="0 0 20 20">
                 <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
               </svg>
               Carrinho
@@ -209,12 +230,13 @@ export default function Home() {
           margin: "0 auto", 
           textAlign: "center",
           position: "relative",
-          zIndex: 2
+          zIndex: 2,
+          padding: "0 20px"
         }}>
 
           
           <h2 style={{
-            fontSize: "64px",
+            fontSize: "clamp(32px, 8vw, 64px)",
             fontWeight: "900",
             color: "#0a0a0a",
             marginBottom: "24px",
@@ -226,7 +248,7 @@ export default function Home() {
           </h2>
           
           <p style={{
-            fontSize: "20px",
+            fontSize: "clamp(16px, 3vw, 20px)",
             color: "#666",
             lineHeight: "1.7",
             maxWidth: "700px",
