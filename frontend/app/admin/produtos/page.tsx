@@ -48,6 +48,15 @@ export default function AdminProdutos() {
     return numero.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
+  const converterParaBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const mostrarToast = (message: string, type: "success" | "error" = "success") => {
     setToast({ show: true, message, type });
     setTimeout(() => {
@@ -125,15 +134,15 @@ export default function AdminProdutos() {
       const token = localStorage.getItem("token");
 
       if (novaImagemArquivo) {
-        const formData = new FormData();
-        formData.append("imagem", novaImagemArquivo);
+        const base64 = await converterParaBase64(novaImagemArquivo);
 
         const uploadRes = await fetch(`${API_URL}/upload`, {
           method: "POST",
           headers: {
+            "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
-          body: formData
+          body: JSON.stringify({ imagem: base64 })
         });
 
         if (!uploadRes.ok) {
@@ -217,15 +226,15 @@ export default function AdminProdutos() {
       const token = localStorage.getItem("token");
 
       if (editImagemArquivo) {
-        const formData = new FormData();
-        formData.append("imagem", editImagemArquivo);
+        const base64 = await converterParaBase64(editImagemArquivo);
 
         const uploadRes = await fetch(`${API_URL}/upload`, {
           method: "POST",
           headers: {
+            "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
-          body: formData
+          body: JSON.stringify({ imagem: base64 })
         });
 
         if (!uploadRes.ok) {
