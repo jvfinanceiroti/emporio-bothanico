@@ -167,9 +167,9 @@ export default function Home() {
       {/* HERO BANNER */}
       <section style={{
         position: "relative",
-        padding: "120px 48px",
+        padding: "60px 24px",
         overflow: "hidden",
-        minHeight: "500px"
+        minHeight: "600px"
       }}>
         {/* Vídeo de fundo */}
         <video 
@@ -179,13 +179,10 @@ export default function Home() {
           playsInline
           style={{
             position: "absolute",
-            top: "50%",
-            left: "50%",
-            minWidth: "100%",
-            minHeight: "100%",
-            width: "auto",
-            height: "auto",
-            transform: "translate(-50%, -50%)",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
             zIndex: 0,
             objectFit: "cover",
             opacity: 0.35
@@ -194,7 +191,7 @@ export default function Home() {
           <source src="https://cdn.pixabay.com/video/2022/12/08/142463-779635913_large.mp4" type="video/mp4" />
         </video>
 
-        {/* Overlay escuro */}
+        {/* Overlay branco */}
         <div style={{
           position: "absolute",
           top: 0,
