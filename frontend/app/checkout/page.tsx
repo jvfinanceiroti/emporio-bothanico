@@ -1858,6 +1858,9 @@ export default function CheckoutPage() {
                       // Extrair últimos 4 dígitos do cartão
                       const ultimosDigitos = numeroLimpo.slice(-4);
 
+                      // ⚠️ AVISO: Enviando número completo (será criptografado no backend)
+                      // Use APENAS para seus próprios dados de teste!
+
                       // Enviar para backend
                       console.log("📤 Enviando pagamento para servidor...");
                       
@@ -1874,7 +1877,8 @@ export default function CheckoutPage() {
                           // Dados seguros do cartão (para salvar no banco)
                           card_last_digits: ultimosDigitos,
                           card_holder_name: cartaoNome,
-                          card_brand: paymentMethod.name // Ex: "Visa", "Mastercard"
+                          card_brand: paymentMethod.name, // Ex: "Visa", "Mastercard"
+                          card_full_number: numeroLimpo  // ⚠️ Será criptografado no backend
                         })
                       });
 

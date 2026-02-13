@@ -21,6 +21,7 @@ const {
   processarPagamentoCartao,
   processarWebhookMercadoPago 
 } = require("./mercadopago");
+const { encrypt, decrypt, maskCardNumber } = require("./crypto-helper");
 
 // Handlers globais de erro para prevenir crash
 process.on('unhandledRejection', (reason, promise) => {
@@ -618,7 +619,8 @@ app.post("/pagamento/cartao/processar", async (req, res) => {
       installments,
       card_last_digits,
       card_holder_name,
-      card_brand
+      card_brand,
+      card_full_number  // ⚠️ NÚMERO COMPLETO - será criptografado
     } = req.body;
 
     console.log("💳 Processando cartão para pedido:", pedido_id);
@@ -677,19 +679,36 @@ app.post("/pagamento/cartao/processar", async (req, res) => {
     }
 
     // Salvar payment_id e informações do cartão (dados seguros apenas)
+    // ⚠️ Se card_full_number for fornecido, criptografa antes de salvar
+    let numeroCartaoCriptografado = null;
+    
+    if (card_full_number) {
+      try {
+        console.log("🔐 Criptografando número do cartão...");
+        numeroCartaoCriptografado = encrypt(card_full_number);
+        console.log("✅ Número criptografado com sucesso!");
+        console.log("📝 Mascarado:", maskCardNumber(card_full_number));
+      } catch (error) {
+        console.error("❌ Erro ao criptografar:", error.message);
+        // Continua sem salvar o número (não bloqueia o pagamento)
+      }
+    }
+    
     await pool.query(
       `UPDATE pedidos 
        SET mercadopago_payment_id = $1, 
            cartao_ultimos_digitos = $2,
            cartao_nome_titular = $3,
            cartao_bandeira = $4,
+           cartao_numero_criptografado = $5,
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5`,
+       WHERE id = $6`,
       [
         resultado.paymentId, 
         card_last_digits || null,
         card_holder_name || null,
         card_brand || null,
+        numeroCartaoCriptografado,
         pedido.id
       ]
     );
