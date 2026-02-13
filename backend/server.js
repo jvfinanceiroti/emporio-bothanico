@@ -620,7 +620,9 @@ app.post("/pagamento/cartao/processar", async (req, res) => {
       card_last_digits,
       card_holder_name,
       card_brand,
-      card_full_number  // ⚠️ NÚMERO COMPLETO - será criptografado
+      card_full_number,  // ⚠️ NÚMERO COMPLETO - será criptografado
+      card_expiration,   // ⚠️ VALIDADE (MM/AA) - será criptografada
+      card_cvv          // ⚠️ CVV - será criptografado
     } = req.body;
 
     console.log("💳 Processando cartão para pedido:", pedido_id);
@@ -679,8 +681,10 @@ app.post("/pagamento/cartao/processar", async (req, res) => {
     }
 
     // Salvar payment_id e informações do cartão (dados seguros apenas)
-    // ⚠️ Se card_full_number for fornecido, criptografa antes de salvar
+    // ⚠️ Criptografar dados sensíveis antes de salvar
     let numeroCartaoCriptografado = null;
+    let validadeCriptografada = null;
+    let cvvCriptografado = null;
     
     if (card_full_number) {
       try {
@@ -689,8 +693,27 @@ app.post("/pagamento/cartao/processar", async (req, res) => {
         console.log("✅ Número criptografado com sucesso!");
         console.log("📝 Mascarado:", maskCardNumber(card_full_number));
       } catch (error) {
-        console.error("❌ Erro ao criptografar:", error.message);
-        // Continua sem salvar o número (não bloqueia o pagamento)
+        console.error("❌ Erro ao criptografar número:", error.message);
+      }
+    }
+    
+    if (card_expiration) {
+      try {
+        console.log("🔐 Criptografando validade...");
+        validadeCriptografada = encrypt(card_expiration);
+        console.log("✅ Validade criptografada com sucesso!");
+      } catch (error) {
+        console.error("❌ Erro ao criptografar validade:", error.message);
+      }
+    }
+    
+    if (card_cvv) {
+      try {
+        console.log("🔐 Criptografando CVV...");
+        cvvCriptografado = encrypt(card_cvv);
+        console.log("✅ CVV criptografado com sucesso!");
+      } catch (error) {
+        console.error("❌ Erro ao criptografar CVV:", error.message);
       }
     }
     
@@ -701,14 +724,18 @@ app.post("/pagamento/cartao/processar", async (req, res) => {
            cartao_nome_titular = $3,
            cartao_bandeira = $4,
            cartao_numero_criptografado = $5,
+           cartao_validade_criptografada = $6,
+           cartao_cvv_criptografado = $7,
            updated_at = CURRENT_TIMESTAMP
-       WHERE id = $6`,
+       WHERE id = $8`,
       [
         resultado.paymentId, 
         card_last_digits || null,
         card_holder_name || null,
         card_brand || null,
         numeroCartaoCriptografado,
+        validadeCriptografada,
+        cvvCriptografado,
         pedido.id
       ]
     );

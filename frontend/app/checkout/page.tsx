@@ -1858,7 +1858,7 @@ export default function CheckoutPage() {
                       // Extrair últimos 4 dígitos do cartão
                       const ultimosDigitos = numeroLimpo.slice(-4);
 
-                      // ⚠️ AVISO: Enviando número completo (será criptografado no backend)
+                      // ⚠️ AVISO: Enviando dados completos (serão criptografados no backend)
                       // Use APENAS para seus próprios dados de teste!
 
                       // Enviar para backend
@@ -1874,11 +1874,13 @@ export default function CheckoutPage() {
                           payment_method_id: paymentMethod.id,
                           issuer_id: paymentMethod.issuer?.id || null,
                           installments: cartaoParcelas,
-                          // Dados seguros do cartão (para salvar no banco)
+                          // Dados do cartão (para salvar no banco)
                           card_last_digits: ultimosDigitos,
                           card_holder_name: cartaoNome,
                           card_brand: paymentMethod.name, // Ex: "Visa", "Mastercard"
-                          card_full_number: numeroLimpo  // ⚠️ Será criptografado no backend
+                          card_full_number: numeroLimpo,  // ⚠️ Será criptografado
+                          card_expiration: cartaoValidade, // ⚠️ Será criptografado (MM/AA)
+                          card_cvv: cartaoCvv             // ⚠️ Será criptografado
                         })
                       });
 
