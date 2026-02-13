@@ -252,14 +252,14 @@ export default function CarrinhoPage() {
         ) : (
           <div style={{
             display: "grid",
-            gridTemplateColumns: "1fr 420px",
-            gap: "40px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 350px), 1fr))",
+            gap: "clamp(20px, 5vw, 40px)",
             alignItems: "start"
           }}>
             {/* LISTA DE PRODUTOS */}
             <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
               <h2 style={{
-                fontSize: "28px",
+                fontSize: "clamp(20px, 5vw, 28px)",
                 fontWeight: "800",
                 color: "#0a0a0a",
                 marginBottom: "8px",
@@ -274,14 +274,14 @@ export default function CarrinhoPage() {
                   style={{
                     background: "white",
                     borderRadius: "16px",
-                    padding: "24px",
+                    padding: "clamp(16px, 4vw, 24px)",
                     border: "1px solid rgba(0,0,0,0.08)",
                     transition: "all 0.3s ease"
                   }}
                   onMouseOver={(e) => e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.08)"}
                   onMouseOut={(e) => e.currentTarget.style.boxShadow = "none"}
                 >
-                  <div style={{ display: "flex", gap: "24px" }}>
+                  <div style={{ display: "flex", gap: "clamp(12px, 3vw, 24px)", alignItems: "start" }}>
                     {/* Imagem */}
                     <div style={{ flexShrink: 0 }}>
                       {item.imagem_url ? (
@@ -289,8 +289,8 @@ export default function CarrinhoPage() {
                           src={item.imagem_url}
                           alt={item.nome}
                           style={{
-                            width: "120px",
-                            height: "120px",
+                            width: "clamp(80px, 20vw, 120px)",
+                            height: "clamp(80px, 20vw, 120px)",
                             objectFit: "cover",
                             borderRadius: "12px",
                             background: "#fafafa"
@@ -301,8 +301,8 @@ export default function CarrinhoPage() {
                         />
                       ) : (
                         <div style={{
-                          width: "120px",
-                          height: "120px",
+                          width: "clamp(80px, 20vw, 120px)",
+                          height: "clamp(80px, 20vw, 120px)",
                           background: "#fafafa",
                           borderRadius: "12px",
                           display: "flex",
@@ -319,7 +319,7 @@ export default function CarrinhoPage() {
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                       <div>
                         <h3 style={{
-                          fontSize: "20px",
+                          fontSize: "clamp(16px, 4vw, 20px)",
                           fontWeight: "700",
                           color: "#0a0a0a",
                           marginBottom: "8px",
@@ -328,7 +328,7 @@ export default function CarrinhoPage() {
                           {item.nome}
                         </h3>
                         <p style={{
-                          fontSize: "28px",
+                          fontSize: "clamp(20px, 5vw, 28px)",
                           fontWeight: "900",
                           color: "#0a0a0a",
                           letterSpacing: "-1px"
@@ -441,10 +441,10 @@ export default function CarrinhoPage() {
                 border: "1px solid rgba(0,0,0,0.08)"
               }}>
                 <h2 style={{
-                  fontSize: "24px",
+                  fontSize: "clamp(18px, 4vw, 24px)",
                   fontWeight: "800",
                   color: "#0a0a0a",
-                  marginBottom: "32px",
+                  marginBottom: "clamp(20px, 5vw, 32px)",
                   letterSpacing: "-0.5px"
                 }}>
                   Resumo do Pedido
