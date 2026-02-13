@@ -4,9 +4,28 @@ import { API_URL } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminHeader from "../components/AdminHeader";
+import { usePermissoes } from "@/lib/usePermissoes";
+import { ProtegerRota, usePodeExecutar } from "@/lib/ProtegerRota";
 
 export default function AdminProdutos() {
+  return (
+    <ProtegerRota 
+      permissoesRequeridas={['pode_editar_produtos', 'pode_criar_produtos']} 
+      modoOr={true}
+    >
+      <ProdutosConteudo />
+    </ProtegerRota>
+  );
+}
+
+function ProdutosConteudo() {
   const router = useRouter();
+  const podeCriar = usePodeExecutar('pode_criar_produtos');
+  const podeEditar = usePodeExecutar('pode_editar_produtos');
+  const podeDeletar = usePodeExecutar('pode_deletar_produtos');
+  const podeGerenciarEstoque = usePodeExecutar('pode_gerenciar_estoque');
+  const podeUploadImagens = usePodeExecutar('pode_upload_imagens');
+  
   const [autenticado, setAutenticado] = useState(false);
   const [nomeUsuario, setNomeUsuario] = useState("");
   const [produtos, setProdutos] = useState<any[]>([]);
@@ -396,8 +415,9 @@ export default function AdminProdutos() {
         </div>
       </div>
 
-        <div className="bg-white shadow-md mb-8" style={{ padding: "clamp(16px, 4vw, 24px)", borderRadius: "clamp(12px, 2vw, 16px)" }}>
-          <h2 style={{ fontSize: "clamp(18px, 4vw, 24px)", fontWeight: "600", color: "#374151", marginBottom: "16px" }}>Novo Produto</h2>
+        {podeCriar && (
+          <div className="bg-white shadow-md mb-8" style={{ padding: "clamp(16px, 4vw, 24px)", borderRadius: "clamp(12px, 2vw, 16px)" }}>
+            <h2 style={{ fontSize: "clamp(18px, 4vw, 24px)", fontWeight: "600", color: "#374151", marginBottom: "16px" }}>Novo Produto</h2>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 250px), 1fr))", gap: "clamp(12px, 3vw, 16px)", marginBottom: "16px" }}>
             <div style={{ gridColumn: "1 / -1" }}>
@@ -549,6 +569,7 @@ export default function AdminProdutos() {
             ✓ Criar Produto
           </button>
         </div>
+        )}
 
         <div className="bg-white shadow-md mb-8" style={{ padding: "clamp(16px, 4vw, 24px)", borderRadius: "clamp(12px, 2vw, 16px)" }}>
           <h2 style={{ fontSize: "clamp(18px, 4vw, 24px)", fontWeight: "600", color: "#374151", marginBottom: "16px" }}>🔍 Filtros</h2>
@@ -818,24 +839,30 @@ export default function AdminProdutos() {
                       </div>
 
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(8px, 2vw, 12px)", paddingTop: "clamp(8px, 2vw, 12px)", borderTop: "1px solid #e5e7eb" }}>
-                        <button
-                          onClick={() => iniciarEdicao(p)}
-                          style={{ flex: "1 1 auto", minWidth: "100px", background: "#eab308", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => alternarStatus(p.id, p.ativo)}
-                          style={{ flex: "1 1 auto", minWidth: "100px", background: p.ativo ? "#f97316" : "#16a34a", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
-                        >
-                          {p.ativo ? '✕ Inativar' : '✓ Ativar'}
-                        </button>
-                        <button
-                          onClick={() => deletarProduto(p.id)}
-                          style={{ flex: "1 1 auto", minWidth: "100px", background: "#dc2626", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
-                        >
-                          Deletar
-                        </button>
+                        {podeEditar && (
+                          <button
+                            onClick={() => iniciarEdicao(p)}
+                            style={{ flex: "1 1 auto", minWidth: "100px", background: "#eab308", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
+                          >
+                            Editar
+                          </button>
+                        )}
+                        {podeGerenciarEstoque && (
+                          <button
+                            onClick={() => alternarStatus(p.id, p.ativo)}
+                            style={{ flex: "1 1 auto", minWidth: "100px", background: p.ativo ? "#f97316" : "#16a34a", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
+                          >
+                            {p.ativo ? '✕ Inativar' : '✓ Ativar'}
+                          </button>
+                        )}
+                        {podeDeletar && (
+                          <button
+                            onClick={() => deletarProduto(p.id)}
+                            style={{ flex: "1 1 auto", minWidth: "100px", background: "#dc2626", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
+                          >
+                            Deletar
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
