@@ -172,9 +172,41 @@ app.get("/auth/verificar", verificarToken, async (req, res) => {
 });
 
 // 🔥 BUSCAR PRODUTOS DO BANCO
+// LISTAR CATEGORIAS
+app.get("/categorias", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM categorias WHERE ativo = true ORDER BY nome ASC"
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Erro ao listar categorias");
+  }
+});
+
+// LISTAR PRODUTOS (COM FILTRO POR CATEGORIA)
 app.get("/produtos", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM produtos");
+    const { categoria } = req.query;
+    
+    let query = `
+      SELECT p.*, c.nome as categoria_nome, c.slug as categoria_slug
+      FROM produtos p
+      LEFT JOIN categorias c ON p.categoria_id = c.id
+      WHERE p.ativo = true
+    `;
+    
+    const params = [];
+    
+    if (categoria) {
+      query += " AND c.slug = $1";
+      params.push(categoria);
+    }
+    
+    query += " ORDER BY p.id DESC";
+    
+    const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (error) {
     console.error(error);

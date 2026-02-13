@@ -28,6 +28,9 @@ export default function AdminProdutos() {
   const [novaLargura, setNovaLargura] = useState("");
   const [novoComprimento, setNovoComprimento] = useState("");
 
+  const [categorias, setCategorias] = useState<any[]>([]);
+  const [novaCategoria, setNovaCategoria] = useState("");
+
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [editNome, setEditNome] = useState("");
   const [editDescricao, setEditDescricao] = useState("");
@@ -39,6 +42,7 @@ export default function AdminProdutos() {
   const [editAltura, setEditAltura] = useState("");
   const [editLargura, setEditLargura] = useState("");
   const [editComprimento, setEditComprimento] = useState("");
+  const [editandoCategoria, setEditandoCategoria] = useState("");
 
   const formatarPreco = (valor: string) => {
     const numeros = valor.replace(/\D/g, '');
@@ -91,6 +95,16 @@ export default function AdminProdutos() {
       });
   };
 
+  const carregarCategorias = async () => {
+    try {
+      const res = await fetch(`${API_URL}/categorias`);
+      const data = await res.json();
+      setCategorias(data);
+    } catch (error) {
+      console.error("Erro ao carregar categorias:", error);
+    }
+  };
+
   useEffect(() => {
     let resultado = produtos;
 
@@ -126,6 +140,7 @@ export default function AdminProdutos() {
     
     setAutenticado(true);
     carregarProdutos();
+    carregarCategorias();
   }, [router]);
 
   const criarProduto = async () => {
@@ -174,7 +189,8 @@ export default function AdminProdutos() {
           peso_kg: novoPeso ? Number(novoPeso) : null,
           altura_cm: novaAltura ? Number(novaAltura) : null,
           largura_cm: novaLargura ? Number(novaLargura) : null,
-          comprimento_cm: novoComprimento ? Number(novoComprimento) : null
+          comprimento_cm: novoComprimento ? Number(novoComprimento) : null,
+          categoria_id: novaCategoria || null
         })
       });
 
@@ -192,6 +208,7 @@ export default function AdminProdutos() {
       setNovaAltura("");
       setNovaLargura("");
       setNovoComprimento("");
+      setNovaCategoria("");
 
       carregarProdutos();
       mostrarToast("✓ Produto criado com sucesso!");
@@ -213,6 +230,7 @@ export default function AdminProdutos() {
     setEditAltura(produto.altura_cm || "");
     setEditLargura(produto.largura_cm || "");
     setEditComprimento(produto.comprimento_cm || "");
+    setEditandoCategoria(produto.categoria_id || "");
   };
 
   const cancelarEdicao = () => {
@@ -269,7 +287,8 @@ export default function AdminProdutos() {
           peso_kg: editPeso ? Number(editPeso) : null,
           altura_cm: editAltura ? Number(editAltura) : null,
           largura_cm: editLargura ? Number(editLargura) : null,
-          comprimento_cm: editComprimento ? Number(editComprimento) : null
+          comprimento_cm: editComprimento ? Number(editComprimento) : null,
+          categoria_id: editandoCategoria || null
         })
       });
 
@@ -414,6 +433,28 @@ export default function AdminProdutos() {
                 value={novoEstoque}
                 onChange={e => setNovoEstoque(e.target.value)}
               />
+            </div>
+
+            <div>
+              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Categoria</label>
+              <select
+                value={novaCategoria}
+                onChange={(e) => setNovaCategoria(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#0a0a0a"
+                }}
+              >
+                <option value="">Selecione uma categoria</option>
+                {categorias.map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.nome}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -599,6 +640,28 @@ export default function AdminProdutos() {
                             value={editEstoque}
                             onChange={e => setEditEstoque(e.target.value)}
                           />
+                        </div>
+
+                        <div>
+                          <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Categoria</label>
+                          <select
+                            value={editandoCategoria}
+                            onChange={(e) => setEditandoCategoria(e.target.value)}
+                            style={{
+                              width: "100%",
+                              padding: "10px",
+                              border: "1px solid #d1d5db",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontWeight: "600",
+                              color: "#0a0a0a"
+                            }}
+                          >
+                            <option value="">Sem categoria</option>
+                            {categorias.map((cat) => (
+                              <option key={cat.id} value={cat.id}>{cat.nome}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
 
