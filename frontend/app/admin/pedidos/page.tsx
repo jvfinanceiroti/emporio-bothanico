@@ -188,21 +188,21 @@ export default function AdminPedidos() {
       <div style={{
         maxWidth: "1400px",
         margin: "0 auto",
-        padding: "40px"
+        padding: "clamp(16px, 4vw, 40px)"
       }}>
         {/* Título e Filtros */}
         <div style={{
           background: "white",
-          borderRadius: "20px",
-          padding: "32px",
-          marginBottom: "24px",
+          borderRadius: "clamp(12px, 3vw, 20px)",
+          padding: "clamp(16px, 4vw, 32px)",
+          marginBottom: "clamp(16px, 4vw, 24px)",
           border: "1px solid rgba(0,0,0,0.08)"
         }}>
           <h2 style={{
-            fontSize: "28px",
+            fontSize: "clamp(18px, 4.5vw, 28px)",
             fontWeight: "800",
             color: "#0a0a0a",
-            marginBottom: "24px",
+            marginBottom: "clamp(16px, 4vw, 24px)",
             letterSpacing: "-0.8px"
           }}>
             Pedidos Realizados
@@ -210,20 +210,20 @@ export default function AdminPedidos() {
 
           <div style={{
             display: "grid",
-            gridTemplateColumns: "1fr auto",
-            gap: "16px"
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
+            gap: "clamp(12px, 3vw, 16px)"
           }}>
             {/* Busca */}
             <input
               type="text"
-              placeholder="Buscar por nome ou email do cliente..."
+              placeholder="Buscar por nome ou email..."
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
               style={{
-                padding: "14px 20px",
+                padding: "clamp(10px, 2.5vw, 14px) clamp(12px, 3vw, 20px)",
                 border: "1px solid rgba(0,0,0,0.1)",
-                borderRadius: "12px",
-                fontSize: "15px",
+                borderRadius: "clamp(8px, 2vw, 12px)",
+                fontSize: "clamp(12px, 2.5vw, 15px)",
                 fontWeight: "500",
                 outline: "none",
                 transition: "border-color 0.2s"
@@ -237,14 +237,13 @@ export default function AdminPedidos() {
               value={statusFiltro}
               onChange={(e) => setStatusFiltro(e.target.value)}
               style={{
-                padding: "14px 20px",
+                padding: "clamp(10px, 2.5vw, 14px) clamp(12px, 3vw, 20px)",
                 border: "1px solid rgba(0,0,0,0.1)",
-                borderRadius: "12px",
-                fontSize: "15px",
+                borderRadius: "clamp(8px, 2vw, 12px)",
+                fontSize: "clamp(12px, 2.5vw, 15px)",
                 fontWeight: "600",
                 outline: "none",
                 cursor: "pointer",
-                minWidth: "180px",
                 background: "white"
               }}
             >
@@ -256,8 +255,8 @@ export default function AdminPedidos() {
           </div>
 
           <div style={{
-            marginTop: "16px",
-            fontSize: "14px",
+            marginTop: "clamp(12px, 3vw, 16px)",
+            fontSize: "clamp(11px, 2.2vw, 14px)",
             color: "#666"
           }}>
             <span style={{ fontWeight: "600" }}>{pedidosFiltrados.length}</span> pedido(s) encontrado(s)
@@ -269,244 +268,151 @@ export default function AdminPedidos() {
           </div>
         </div>
 
-        {/* Tabela */}
+        {/* Lista de Pedidos - Cards Mobile-First */}
         {carregando ? (
           <div style={{
             background: "white",
-            borderRadius: "20px",
-            padding: "80px",
+            borderRadius: "clamp(12px, 3vw, 20px)",
+            padding: "clamp(40px, 10vw, 80px)",
             textAlign: "center",
             border: "1px solid rgba(0,0,0,0.08)"
           }}>
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>⏳</div>
-            <p style={{ color: "#666", fontSize: "16px" }}>Carregando pedidos...</p>
+            <div style={{ fontSize: "clamp(32px, 8vw, 48px)", marginBottom: "16px" }}>⏳</div>
+            <p style={{ color: "#666", fontSize: "clamp(12px, 2.5vw, 16px)" }}>Carregando pedidos...</p>
           </div>
         ) : pedidosFiltrados.length === 0 ? (
           <div style={{
             background: "white",
-            borderRadius: "20px",
-            padding: "80px",
+            borderRadius: "clamp(12px, 3vw, 20px)",
+            padding: "clamp(40px, 10vw, 80px)",
             textAlign: "center",
             border: "1px solid rgba(0,0,0,0.08)"
           }}>
-            <div style={{ fontSize: "64px", marginBottom: "16px" }}>📦</div>
+            <div style={{ fontSize: "clamp(48px, 12vw, 64px)", marginBottom: "16px" }}>📦</div>
             <h3 style={{
-              fontSize: "20px",
+              fontSize: "clamp(16px, 4vw, 20px)",
               fontWeight: "700",
               color: "#0a0a0a",
               marginBottom: "8px"
             }}>
               Nenhum pedido encontrado
             </h3>
-            <p style={{ color: "#666", fontSize: "15px" }}>
+            <p style={{ color: "#666", fontSize: "clamp(12px, 2.5vw, 15px)" }}>
               {filtro || statusFiltro !== "todos" 
                 ? "Tente ajustar os filtros de busca" 
                 : "Ainda não há pedidos realizados"}
             </p>
           </div>
         ) : (
-          <div style={{
-            background: "white",
-            borderRadius: "20px",
-            overflow: "hidden",
-            border: "1px solid rgba(0,0,0,0.08)"
-          }}>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{
-                width: "100%",
-                borderCollapse: "collapse"
-              }}>
-                <thead>
-                  <tr style={{
-                    background: "#fafafa",
-                    borderBottom: "2px solid rgba(0,0,0,0.06)"
-                  }}>
-                    <th style={{
-                      padding: "20px 24px",
-                      textAlign: "left",
-                      fontSize: "13px",
-                      fontWeight: "700",
-                      color: "#666",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px"
-                    }}>
-                      ID
-                    </th>
-                    <th style={{
-                      padding: "20px 24px",
-                      textAlign: "left",
-                      fontSize: "13px",
-                      fontWeight: "700",
-                      color: "#666",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px"
-                    }}>
-                      Cliente
-                    </th>
-                    <th style={{
-                      padding: "20px 24px",
-                      textAlign: "left",
-                      fontSize: "13px",
-                      fontWeight: "700",
-                      color: "#666",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px"
-                    }}>
-                      Contato
-                    </th>
-                    <th style={{
-                      padding: "20px 24px",
-                      textAlign: "left",
-                      fontSize: "13px",
-                      fontWeight: "700",
-                      color: "#666",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px"
-                    }}>
-                      Valor
-                    </th>
-                    <th style={{
-                      padding: "20px 24px",
-                      textAlign: "left",
-                      fontSize: "13px",
-                      fontWeight: "700",
-                      color: "#666",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px"
-                    }}>
-                      Status
-                    </th>
-                    <th style={{
-                      padding: "20px 24px",
-                      textAlign: "left",
-                      fontSize: "13px",
-                      fontWeight: "700",
-                      color: "#666",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px"
-                    }}>
-                      Data
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pedidosPaginados.map((pedido, index) => {
-                    const statusInfo = getStatusColor(pedido.status);
-                    return (
-                      <tr
-                        key={pedido.id}
-                        onClick={() => carregarDetalhesPedido(pedido.id)}
-                        style={{
-                          borderBottom: index < pedidosPaginados.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none",
-                          transition: "all 0.2s",
-                          cursor: "pointer"
-                        }}
-                        onMouseOver={(e) => {
-                          e.currentTarget.style.background = "#fafafa";
-                          e.currentTarget.style.transform = "scale(1.01)";
-                        }}
-                        onMouseOut={(e) => {
-                          e.currentTarget.style.background = "white";
-                          e.currentTarget.style.transform = "scale(1)";
-                        }}
-                      >
-                        <td style={{
-                          padding: "24px",
-                          fontSize: "15px",
-                          fontWeight: "700",
-                          color: "#0a0a0a"
-                        }}>
-                          #{pedido.id}
-                        </td>
-                        <td style={{
-                          padding: "24px",
-                          fontSize: "15px",
-                          fontWeight: "600",
-                          color: "#0a0a0a"
-                        }}>
-                          {pedido.cliente_nome}
-                        </td>
-                        <td style={{
-                          padding: "24px",
-                          fontSize: "14px",
-                          color: "#666"
-                        }}>
-                          <div>{pedido.cliente_email}</div>
-                          <div style={{ marginTop: "4px", fontSize: "13px" }}>
+          <>
+            {/* NO MOBILE: Cards empilhados verticalmente */}
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "clamp(12px, 3vw, 16px)"
+            }}>
+              {pedidosPaginados.map((pedido) => {
+                const statusInfo = getStatusColor(pedido.status);
+                return (
+                  <div
+                    key={pedido.id}
+                    onClick={() => carregarDetalhesPedido(pedido.id)}
+                    style={{
+                      background: "white",
+                      borderRadius: "clamp(8px, 2vw, 12px)",
+                      padding: "clamp(12px, 3vw, 16px)",
+                      border: "1px solid rgba(0,0,0,0.08)",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.background = "#fafafa";
+                      e.currentTarget.style.transform = "scale(1.01)";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.background = "white";
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
+                  >
+                    <div style={{ display: "flex", flexDirection: "column", gap: "clamp(8px, 2vw, 12px)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "8px" }}>
+                        <div style={{ flex: "1", minWidth: "150px" }}>
+                          <div style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#666", marginBottom: "4px" }}>
+                            Pedido #{pedido.id}
+                          </div>
+                          <div style={{ fontSize: "clamp(13px, 2.8vw, 15px)", fontWeight: "600", color: "#0a0a0a", marginBottom: "4px" }}>
+                            {pedido.cliente_nome}
+                          </div>
+                          <div style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#666" }}>
+                            {pedido.cliente_email}
+                          </div>
+                          <div style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#666", marginTop: "2px" }}>
                             {pedido.cliente_telefone}
                           </div>
-                        </td>
-                        <td style={{
-                          padding: "24px",
-                          fontSize: "18px",
-                          fontWeight: "800",
-                          color: "#10b981",
-                          letterSpacing: "-0.5px"
-                        }}>
-                          R$ {Number(pedido.total).toFixed(2)}
-                        </td>
-                        <td style={{ padding: "24px" }}>
+                        </div>
+                        
+                        <div style={{ textAlign: "right" }}>
+                          <div style={{ fontSize: "clamp(16px, 4vw, 20px)", fontWeight: "800", color: "#10b981", marginBottom: "8px" }}>
+                            R$ {Number(pedido.total).toFixed(2)}
+                          </div>
                           <span style={{
-                            padding: "8px 16px",
+                            padding: "clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)",
                             background: statusInfo.bg,
                             color: statusInfo.color,
-                            borderRadius: "8px",
-                            fontSize: "13px",
+                            borderRadius: "clamp(6px, 1.5vw, 8px)",
+                            fontSize: "clamp(10px, 2vw, 11px)",
                             fontWeight: "700",
-                            display: "inline-block"
+                            display: "inline-block",
+                            whiteSpace: "nowrap"
                           }}>
                             {statusInfo.label}
                           </span>
-                        </td>
-                        <td style={{
-                          padding: "24px",
-                          fontSize: "14px",
-                          color: "#666",
-                          whiteSpace: "nowrap"
-                        }}>
-                          {formatarData(pedido.criado_em)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                        </div>
+                      </div>
+                      
+                      <div style={{ fontSize: "clamp(10px, 2vw, 12px)", color: "#999", paddingTop: "8px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+                        {formatarData(pedido.criado_em)}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          </div>
+          </>
         )}
 
         {/* Resumo */}
         {pedidosFiltrados.length > 0 && (
           <div style={{
-            marginTop: "24px",
+            marginTop: "clamp(16px, 4vw, 24px)",
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "16px"
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
+            gap: "clamp(12px, 3vw, 16px)"
           }}>
             <div style={{
               background: "white",
-              borderRadius: "16px",
-              padding: "24px",
+              borderRadius: "clamp(12px, 3vw, 16px)",
+              padding: "clamp(16px, 4vw, 24px)",
               border: "1px solid rgba(0,0,0,0.08)"
             }}>
-              <div style={{ fontSize: "13px", color: "#666", marginBottom: "8px", fontWeight: "600" }}>
+              <div style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#666", marginBottom: "8px", fontWeight: "600" }}>
                 Total de Pedidos
               </div>
-              <div style={{ fontSize: "32px", fontWeight: "900", color: "#0a0a0a", letterSpacing: "-1px" }}>
+              <div style={{ fontSize: "clamp(24px, 6vw, 32px)", fontWeight: "900", color: "#0a0a0a", letterSpacing: "-1px" }}>
                 {pedidosFiltrados.length}
               </div>
             </div>
 
             <div style={{
               background: "white",
-              borderRadius: "16px",
-              padding: "24px",
+              borderRadius: "clamp(12px, 3vw, 16px)",
+              padding: "clamp(16px, 4vw, 24px)",
               border: "1px solid rgba(0,0,0,0.08)"
             }}>
-              <div style={{ fontSize: "13px", color: "#666", marginBottom: "8px", fontWeight: "600" }}>
+              <div style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#666", marginBottom: "8px", fontWeight: "600" }}>
                 Valor Total
               </div>
-              <div style={{ fontSize: "32px", fontWeight: "900", color: "#10b981", letterSpacing: "-1px" }}>
+              <div style={{ fontSize: "clamp(24px, 6vw, 32px)", fontWeight: "900", color: "#10b981", letterSpacing: "-1px" }}>
                 R$ {pedidosFiltrados.reduce((acc, p) => acc + Number(p.total), 0).toFixed(2)}
               </div>
             </div>
@@ -516,23 +422,24 @@ export default function AdminPedidos() {
         {/* PAGINAÇÃO */}
         {totalPaginas > 1 && (
           <div style={{
-            marginTop: "24px",
+            marginTop: "clamp(16px, 4vw, 24px)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            gap: "12px"
+            gap: "clamp(8px, 2vw, 12px)",
+            flexWrap: "wrap"
           }}>
             {/* Botão Anterior */}
             <button
               onClick={() => setPaginaAtual(Math.max(1, paginaAtual - 1))}
               disabled={paginaAtual === 1}
               style={{
-                padding: "12px 24px",
+                padding: "clamp(8px, 2vw, 12px) clamp(12px, 3vw, 20px)",
                 background: paginaAtual === 1 ? "#e5e5e5" : "white",
                 color: paginaAtual === 1 ? "#999" : "#0a0a0a",
                 border: "1px solid rgba(0,0,0,0.08)",
-                borderRadius: "12px",
-                fontSize: "15px",
+                borderRadius: "clamp(8px, 2vw, 12px)",
+                fontSize: "clamp(11px, 2.2vw, 13px)",
                 fontWeight: "700",
                 cursor: paginaAtual === 1 ? "not-allowed" : "pointer",
                 transition: "all 0.2s"
@@ -554,11 +461,11 @@ export default function AdminPedidos() {
             {/* Números de página */}
             <div style={{
               display: "flex",
-              gap: "8px",
-              alignItems: "center"
+              gap: "clamp(6px, 1.5vw, 8px)",
+              alignItems: "center",
+              flexWrap: "wrap"
             }}>
               {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((numPagina) => {
-                // Mostrar apenas algumas páginas (primeira, última, atual e adjacentes)
                 const mostrar = 
                   numPagina === 1 ||
                   numPagina === totalPaginas ||
@@ -570,7 +477,7 @@ export default function AdminPedidos() {
 
                 if (mostrarReticencias) {
                   return (
-                    <span key={numPagina} style={{ color: "#999", fontSize: "18px", fontWeight: "700" }}>
+                    <span key={numPagina} style={{ color: "#999", fontSize: "clamp(14px, 3vw, 18px)", fontWeight: "700" }}>
                       ...
                     </span>
                   );
@@ -583,18 +490,18 @@ export default function AdminPedidos() {
                     key={numPagina}
                     onClick={() => setPaginaAtual(numPagina)}
                     style={{
-                      padding: "12px 16px",
+                      padding: "clamp(8px, 2vw, 12px) clamp(10px, 2.5vw, 14px)",
                       background: paginaAtual === numPagina 
                         ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" 
                         : "white",
                       color: paginaAtual === numPagina ? "white" : "#0a0a0a",
                       border: "1px solid rgba(0,0,0,0.08)",
-                      borderRadius: "12px",
-                      fontSize: "15px",
+                      borderRadius: "clamp(8px, 2vw, 12px)",
+                      fontSize: "clamp(11px, 2.2vw, 13px)",
                       fontWeight: "700",
                       cursor: "pointer",
                       transition: "all 0.2s",
-                      minWidth: "48px"
+                      minWidth: "clamp(36px, 9vw, 48px)"
                     }}
                     onMouseOver={(e) => {
                       if (paginaAtual !== numPagina) {
@@ -618,12 +525,12 @@ export default function AdminPedidos() {
               onClick={() => setPaginaAtual(Math.min(totalPaginas, paginaAtual + 1))}
               disabled={paginaAtual === totalPaginas}
               style={{
-                padding: "12px 24px",
+                padding: "clamp(8px, 2vw, 12px) clamp(12px, 3vw, 20px)",
                 background: paginaAtual === totalPaginas ? "#e5e5e5" : "white",
                 color: paginaAtual === totalPaginas ? "#999" : "#0a0a0a",
                 border: "1px solid rgba(0,0,0,0.08)",
-                borderRadius: "12px",
-                fontSize: "15px",
+                borderRadius: "clamp(8px, 2vw, 12px)",
+                fontSize: "clamp(11px, 2.2vw, 13px)",
                 fontWeight: "700",
                 cursor: paginaAtual === totalPaginas ? "not-allowed" : "pointer",
                 transition: "all 0.2s"
@@ -644,12 +551,11 @@ export default function AdminPedidos() {
 
             {/* Info de página */}
             <div style={{
-              marginLeft: "16px",
-              padding: "12px 20px",
+              padding: "clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px)",
               background: "white",
               border: "1px solid rgba(0,0,0,0.08)",
-              borderRadius: "12px",
-              fontSize: "14px",
+              borderRadius: "clamp(8px, 2vw, 12px)",
+              fontSize: "clamp(10px, 2vw, 12px)",
               color: "#666",
               fontWeight: "600"
             }}>

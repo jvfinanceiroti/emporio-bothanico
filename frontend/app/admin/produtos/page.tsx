@@ -344,7 +344,7 @@ export default function AdminProdutos() {
     }}>
       <AdminHeader />
 
-      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "40px" }}>
+      <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "clamp(16px, 4vw, 40px)" }}>
       {/* TOAST NOTIFICATION */}
       <div
         className={`fixed top-6 right-6 z-50 transform transition-all duration-300 ${
@@ -353,7 +353,8 @@ export default function AdminProdutos() {
       >
         <div className={`${
           toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-        } text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px]`}>
+        } text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 min-w-[300px]`}
+        style={{ fontSize: "clamp(12px, 2.5vw, 14px)" }}>
           {toast.type === 'success' ? (
             <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -367,24 +368,24 @@ export default function AdminProdutos() {
         </div>
       </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Novo Produto</h2>
+        <div className="bg-white shadow-md mb-8" style={{ padding: "clamp(16px, 4vw, 24px)", borderRadius: "clamp(12px, 2vw, 16px)" }}>
+          <h2 style={{ fontSize: "clamp(18px, 4vw, 24px)", fontWeight: "600", color: "#374151", marginBottom: "16px" }}>Novo Produto</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            <div className="lg:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 250px), 1fr))", gap: "clamp(12px, 3vw, 16px)", marginBottom: "16px" }}>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Nome *</label>
               <input
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)" }}
                 placeholder="Nome do produto"
                 value={novoNome}
                 onChange={e => setNovoNome(e.target.value)}
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Descrição</label>
               <textarea
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)" }}
                 placeholder="Descrição do produto (opcional)"
                 rows={3}
                 value={novaDescricao}
@@ -393,9 +394,9 @@ export default function AdminProdutos() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Preço (R$) *</label>
+              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Preço (R$) *</label>
               <input
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)" }}
                 placeholder="0,00"
                 type="text"
                 value={formatarPrecoExibicao(novoPreco)}
@@ -407,9 +408,9 @@ export default function AdminProdutos() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Estoque *</label>
+              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Estoque *</label>
               <input
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)" }}
                 placeholder="0"
                 type="number"
                 value={novoEstoque}
@@ -418,16 +419,16 @@ export default function AdminProdutos() {
             </div>
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Imagem do Produto</label>
-            <label className="flex items-center justify-center w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
-              <span className="text-gray-600">
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "8px" }}>Imagem do Produto</label>
+            <label style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "clamp(10px, 2.5vw, 12px)", border: "2px dashed #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", cursor: "pointer", fontSize: "clamp(12px, 2.5vw, 14px)", color: "#6b7280" }}>
+              <span>
                 {novaImagemArquivo ? `📷 ${novaImagemArquivo.name}` : "📷 Escolher Imagem"}
               </span>
               <input
                 type="file"
                 accept="image/*"
-                className="hidden"
+                style={{ display: "none" }}
                 onChange={e => {
                   if (e.target.files && e.target.files[0]) {
                     setNovaImagemArquivo(e.target.files[0]);
@@ -439,26 +440,26 @@ export default function AdminProdutos() {
           </div>
 
           {novaImagemArquivo && (
-            <div className="mb-4">
-              <p className="text-sm text-gray-600 mb-2">Preview:</p>
+            <div style={{ marginBottom: "16px" }}>
+              <p style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#6b7280", marginBottom: "8px" }}>Preview:</p>
               <img 
                 src={URL.createObjectURL(novaImagemArquivo)} 
                 alt="Preview" 
-                className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                style={{ width: "clamp(80px, 20vw, 128px)", height: "clamp(80px, 20vw, 128px)", objectFit: "cover", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db" }}
               />
             </div>
           )}
 
-          <div className="border-t border-gray-200 pt-4 mb-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-1">📦 Dimensões para Cálculo de Frete</h3>
-            <p className="text-xs text-gray-500 mb-3">
+          <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "16px", marginBottom: "16px" }}>
+            <h3 style={{ fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "600", color: "#374151", marginBottom: "4px" }}>📦 Dimensões para Cálculo de Frete</h3>
+            <p style={{ fontSize: "clamp(11px, 2.2vw, 12px)", color: "#9ca3af", marginBottom: "12px" }}>
               Campos opcionais - podem ser preenchidos depois
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 120px), 1fr))", gap: "clamp(8px, 2vw, 12px)" }}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
+                <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Peso (kg)</label>
                 <input
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
                   placeholder="0.0"
                   type="number"
                   step="0.001"
@@ -468,9 +469,9 @@ export default function AdminProdutos() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Altura (cm)</label>
+                <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Altura (cm)</label>
                 <input
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
                   placeholder="0"
                   type="number"
                   value={novaAltura}
@@ -479,9 +480,9 @@ export default function AdminProdutos() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Largura (cm)</label>
+                <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Largura (cm)</label>
                 <input
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
                   placeholder="0"
                   type="number"
                   value={novaLargura}
@@ -490,9 +491,9 @@ export default function AdminProdutos() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Comprimento (cm)</label>
+                <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Comprimento (cm)</label>
                 <input
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
                   placeholder="0"
                   type="number"
                   value={novoComprimento}
@@ -504,33 +505,33 @@ export default function AdminProdutos() {
 
           <button
             onClick={criarProduto}
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium"
+            style={{ width: "100%", background: "#2563eb", color: "white", padding: "clamp(10px, 2.5vw, 14px) clamp(16px, 4vw, 24px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500" }}
           >
             ✓ Criar Produto
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">🔍 Filtros</h2>
+        <div className="bg-white shadow-md mb-8" style={{ padding: "clamp(16px, 4vw, 24px)", borderRadius: "clamp(12px, 2vw, 16px)" }}>
+          <h2 style={{ fontSize: "clamp(18px, 4vw, 24px)", fontWeight: "600", color: "#374151", marginBottom: "16px" }}>🔍 Filtros</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 250px), 1fr))", gap: "clamp(12px, 3vw, 16px)" }}>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Buscar por nome</label>
+              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "8px" }}>Buscar por nome</label>
               <input
                 type="text"
                 placeholder="Digite o nome do produto..."
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)" }}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "8px" }}>Status</label>
               <select
                 value={filtroStatus}
                 onChange={(e) => setFiltroStatus(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)", cursor: "pointer" }}
               >
                 <option value="todos">📦 Todos os produtos</option>
                 <option value="ativos">✅ Apenas ativos</option>
@@ -539,38 +540,38 @@ export default function AdminProdutos() {
             </div>
           </div>
 
-          <div className="mt-4 text-sm text-gray-600">
+          <div style={{ marginTop: "16px", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#6b7280" }}>
             Exibindo <strong>{produtosFiltrados.length}</strong> de <strong>{produtos.length}</strong> produtos
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Lista de Produtos</h2>
+        <div className="bg-white shadow-md" style={{ padding: "clamp(16px, 4vw, 24px)", borderRadius: "clamp(12px, 2vw, 16px)" }}>
+          <h2 style={{ fontSize: "clamp(18px, 4vw, 24px)", fontWeight: "600", color: "#374151", marginBottom: "16px" }}>Lista de Produtos</h2>
 
           {produtosFiltrados.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">
+            <p style={{ color: "#9ca3af", textAlign: "center", padding: "32px 0", fontSize: "clamp(12px, 2.5vw, 14px)" }}>
               {produtos.length === 0 ? "Nenhum produto cadastrado" : "Nenhum produto encontrado com esses filtros"}
             </p>
           ) : (
-            <div className="space-y-4">
+            <div style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 16px)" }}>
               {produtosFiltrados.map(p => (
-                <div key={p.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                <div key={p.id} style={{ border: "1px solid #e5e7eb", borderRadius: "clamp(8px, 2vw, 12px)", padding: "clamp(12px, 3vw, 16px)" }}>
                   {editandoId === p.id ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="lg:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 16px)" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: "clamp(8px, 2vw, 12px)" }}>
+                        <div style={{ gridColumn: "1 / -1" }}>
+                          <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Nome</label>
                           <input
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
                             value={editNome}
                             onChange={e => setEditNome(e.target.value)}
                           />
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                        <div style={{ gridColumn: "1 / -1" }}>
+                          <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Descrição</label>
                           <textarea
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
                             placeholder="Descrição do produto"
                             rows={3}
                             value={editDescricao}
@@ -579,9 +580,9 @@ export default function AdminProdutos() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Preço (R$)</label>
+                          <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Preço (R$)</label>
                           <input
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
                             type="text"
                             placeholder="0,00"
                             value={formatarPrecoExibicao(editPreco)}
@@ -593,9 +594,9 @@ export default function AdminProdutos() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Estoque</label>
+                          <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Estoque</label>
                           <input
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
                             type="number"
                             value={editEstoque}
                             onChange={e => setEditEstoque(e.target.value)}
@@ -604,15 +605,15 @@ export default function AdminProdutos() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Imagem</label>
-                        <label className="flex items-center justify-center w-full px-3 py-2 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition text-sm">
-                          <span className="text-gray-600">
+                        <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "8px" }}>Imagem</label>
+                        <label style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "clamp(8px, 2vw, 10px)", border: "2px dashed #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#6b7280" }}>
+                          <span>
                             {editImagemArquivo ? `📷 ${editImagemArquivo.name}` : "📷 Alterar Imagem"}
                           </span>
                           <input
                             type="file"
                             accept="image/*"
-                            className="hidden"
+                            style={{ display: "none" }}
                             onChange={e => {
                               if (e.target.files && e.target.files[0]) {
                                 setEditImagemArquivo(e.target.files[0]);
@@ -624,11 +625,11 @@ export default function AdminProdutos() {
 
                       {(editImagemArquivo || editImagem) && (
                         <div>
-                          <p className="text-sm text-gray-600 mb-2">Preview da Imagem:</p>
+                          <p style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#6b7280", marginBottom: "8px" }}>Preview da Imagem:</p>
                           <img 
                             src={editImagemArquivo ? URL.createObjectURL(editImagemArquivo) : editImagem} 
                             alt="Preview" 
-                            className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                            style={{ width: "clamp(80px, 20vw, 128px)", height: "clamp(80px, 20vw, 128px)", objectFit: "cover", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db" }}
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                             }}
@@ -636,13 +637,13 @@ export default function AdminProdutos() {
                         </div>
                       )}
 
-                      <div className="border-t border-gray-200 pt-4">
-                        <h4 className="text-sm font-semibold text-gray-700 mb-3">📦 Dimensões</h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "12px" }}>
+                        <h4 style={{ fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "600", color: "#374151", marginBottom: "12px" }}>📦 Dimensões</h4>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 100px), 1fr))", gap: "clamp(8px, 2vw, 12px)" }}>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
+                            <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Peso (kg)</label>
                             <input
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)" }}
                               placeholder="0.0"
                               type="number"
                               step="0.001"
@@ -652,9 +653,9 @@ export default function AdminProdutos() {
                           </div>
 
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Altura (cm)</label>
+                            <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Altura (cm)</label>
                             <input
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)" }}
                               placeholder="0"
                               type="number"
                               value={editAltura}
@@ -663,9 +664,9 @@ export default function AdminProdutos() {
                           </div>
 
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Largura (cm)</label>
+                            <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Largura (cm)</label>
                             <input
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)" }}
                               placeholder="0"
                               type="number"
                               value={editLargura}
@@ -674,9 +675,9 @@ export default function AdminProdutos() {
                           </div>
 
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Comprimento (cm)</label>
+                            <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Comprimento (cm)</label>
                             <input
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)" }}
                               placeholder="0"
                               type="number"
                               value={editComprimento}
@@ -686,91 +687,91 @@ export default function AdminProdutos() {
                         </div>
                       </div>
 
-                      <div className="flex gap-2">
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(8px, 2vw, 12px)" }}>
                         <button
                           onClick={() => salvarEdicao(p.id)}
-                          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-medium"
+                          style={{ flex: "1 1 auto", background: "#16a34a", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
                         >
                           ✓ Salvar
                         </button>
                         <button
                           onClick={cancelarEdicao}
-                          className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition font-medium"
+                          style={{ flex: "1 1 auto", background: "#6b7280", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
                         >
                           Cancelar
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-start gap-4">
-                      {p.imagem_url && (
-                        <img 
-                          src={p.imagem_url} 
-                          alt={p.nome}
-                          className="w-24 h-24 object-cover rounded-lg border border-gray-200"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      )}
-                      
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold text-lg text-gray-800">{p.nome}</h3>
-                          {p.estoque === 0 ? (
-                            <span className="px-3 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full">
-                              SEM ESTOQUE
-                            </span>
-                          ) : p.ativo ? (
-                            <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                              ✓ ATIVO
-                            </span>
-                          ) : (
-                            <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
-                              ✕ INATIVO
-                            </span>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 16px)" }}>
+                      <div style={{ display: "flex", gap: "clamp(12px, 3vw, 16px)", flexWrap: "wrap" }}>
+                        {p.imagem_url && (
+                          <img 
+                            src={p.imagem_url} 
+                            alt={p.nome}
+                            style={{ width: "clamp(80px, 20vw, 96px)", height: "clamp(80px, 20vw, 96px)", objectFit: "cover", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "1px solid #e5e7eb" }}
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        )}
+                        
+                        <div style={{ flex: "1", minWidth: "200px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "clamp(8px, 2vw, 12px)", marginBottom: "8px", flexWrap: "wrap" }}>
+                            <h3 style={{ fontSize: "clamp(14px, 3vw, 18px)", fontWeight: "600", color: "#1f2937" }}>{p.nome}</h3>
+                            {p.estoque === 0 ? (
+                              <span style={{ padding: "clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)", background: "#fed7aa", color: "#c2410c", fontSize: "clamp(10px, 2vw, 11px)", fontWeight: "600", borderRadius: "clamp(6px, 1.5vw, 8px)" }}>
+                                SEM ESTOQUE
+                              </span>
+                            ) : p.ativo ? (
+                              <span style={{ padding: "clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)", background: "#d1fae5", color: "#065f46", fontSize: "clamp(10px, 2vw, 11px)", fontWeight: "600", borderRadius: "clamp(6px, 1.5vw, 8px)" }}>
+                                ✓ ATIVO
+                              </span>
+                            ) : (
+                              <span style={{ padding: "clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)", background: "#fee2e2", color: "#991b1b", fontSize: "clamp(10px, 2vw, 11px)", fontWeight: "600", borderRadius: "clamp(6px, 1.5vw, 8px)" }}>
+                                ✕ INATIVO
+                              </span>
+                            )}
+                          </div>
+                          <p style={{ color: "#6b7280", fontSize: "clamp(11px, 2.2vw, 13px)" }}>
+                            Preço: <span style={{ fontWeight: "500", color: "#16a34a" }}>R$ {Number(p.preco).toFixed(2)}</span>
+                          </p>
+                          <p style={{ color: "#6b7280", fontSize: "clamp(11px, 2.2vw, 13px)" }}>
+                            Estoque: <span style={{ fontWeight: "500" }}>{p.estoque} unidades</span>
+                          </p>
+                          {(p.peso_kg > 0 || p.altura_cm > 0 || p.largura_cm > 0 || p.comprimento_cm > 0) && (
+                            <div style={{ marginTop: "8px", fontSize: "clamp(10px, 2vw, 12px)", color: "#9ca3af" }}>
+                              📦 Dimensões: 
+                              {p.peso_kg > 0 && ` ${p.peso_kg}kg`}
+                              {p.altura_cm > 0 && ` | ${p.altura_cm}cm (A)`}
+                              {p.largura_cm > 0 && ` x ${p.largura_cm}cm (L)`}
+                              {p.comprimento_cm > 0 && ` x ${p.comprimento_cm}cm (C)`}
+                            </div>
+                          )}
+                          {p.imagem_url && (
+                            <p style={{ fontSize: "clamp(9px, 1.8vw, 11px)", color: "#d1d5db", marginTop: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              Imagem: {p.imagem_url}
+                            </p>
                           )}
                         </div>
-                        <p className="text-gray-600">
-                          Preço: <span className="font-medium text-green-600">R$ {Number(p.preco).toFixed(2)}</span>
-                        </p>
-                        <p className="text-gray-600">
-                          Estoque: <span className="font-medium">{p.estoque} unidades</span>
-                        </p>
-                        {(p.peso_kg > 0 || p.altura_cm > 0 || p.largura_cm > 0 || p.comprimento_cm > 0) && (
-                          <div className="mt-2 text-sm text-gray-500">
-                            📦 Dimensões: 
-                            {p.peso_kg > 0 && ` ${p.peso_kg}kg`}
-                            {p.altura_cm > 0 && ` | ${p.altura_cm}cm (A)`}
-                            {p.largura_cm > 0 && ` x ${p.largura_cm}cm (L)`}
-                            {p.comprimento_cm > 0 && ` x ${p.comprimento_cm}cm (C)`}
-                          </div>
-                        )}
-                        {p.imagem_url && (
-                          <p className="text-xs text-gray-400 mt-1 truncate max-w-md">
-                            Imagem: {p.imagem_url}
-                          </p>
-                        )}
                       </div>
 
-                      <div className="flex flex-col gap-2">
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(8px, 2vw, 12px)", paddingTop: "clamp(8px, 2vw, 12px)", borderTop: "1px solid #e5e7eb" }}>
                         <button
                           onClick={() => iniciarEdicao(p)}
-                          className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition font-medium"
+                          style={{ flex: "1 1 auto", minWidth: "100px", background: "#eab308", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
                         >
                           Editar
                         </button>
                         <button
                           onClick={() => alternarStatus(p.id, p.ativo)}
-                          className={`${
-                            p.ativo ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600'
-                          } text-white px-4 py-2 rounded-lg transition font-medium`}
+                          style={{ flex: "1 1 auto", minWidth: "100px", background: p.ativo ? "#f97316" : "#16a34a", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
                         >
                           {p.ativo ? '✕ Inativar' : '✓ Ativar'}
                         </button>
                         <button
                           onClick={() => deletarProduto(p.id)}
-                          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium"
+                          style={{ flex: "1 1 auto", minWidth: "100px", background: "#dc2626", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
                         >
                           Deletar
                         </button>
