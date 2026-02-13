@@ -2,10 +2,12 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { usePermissoes } from "@/lib/usePermissoes";
 
 export default function AdminHeader() {
   const router = useRouter();
   const pathname = usePathname();
+  const { permissoes, temPermissao, isAdmin } = usePermissoes();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -18,6 +20,7 @@ export default function AdminHeader() {
     if (pathname?.includes("/produtos")) return "produtos";
     if (pathname?.includes("/pedidos")) return "pedidos";
     if (pathname?.includes("/usuarios")) return "usuarios";
+    if (pathname?.includes("/funcionarios")) return "funcionarios";
     return "";
   };
 
@@ -55,15 +58,27 @@ export default function AdminHeader() {
               flexShrink: 0
             }}
           />
-          <h1 style={{
-            fontSize: "clamp(16px, 4vw, 24px)",
-            fontWeight: "700",
-            color: "#1f2937",
-            margin: 0,
-            whiteSpace: "nowrap"
-          }}>
-            Painel Admin
-          </h1>
+          <div>
+            <h1 style={{
+              fontSize: "clamp(16px, 4vw, 24px)",
+              fontWeight: "700",
+              color: "#1f2937",
+              margin: 0,
+              whiteSpace: "nowrap"
+            }}>
+              Painel Admin
+            </h1>
+            {permissoes && (
+              <p style={{
+                fontSize: "clamp(10px, 2.5vw, 12px)",
+                color: "#6b7280",
+                margin: 0,
+                marginTop: "2px"
+              }}>
+                {isAdmin() ? "👑 Administrador" : "👤 Funcionário"}
+              </p>
+            )}
+          </div>
         </div>
 
         <button
@@ -104,29 +119,45 @@ export default function AdminHeader() {
           scrollbarWidth: "none",
           WebkitOverflowScrolling: "touch"
         }}>
-          <MenuLink
-            href="/admin/dashboard"
-            label="📊 Dashboard"
-            ativo={menuAtivo === "dashboard"}
-          />
+          {temPermissao('pode_acessar_dashboard') && (
+            <MenuLink
+              href="/admin/dashboard"
+              label="📊 Dashboard"
+              ativo={menuAtivo === "dashboard"}
+            />
+          )}
 
-          <MenuLink
-            href="/admin/produtos"
-            label="📦 Produtos"
-            ativo={menuAtivo === "produtos"}
-          />
+          {(temPermissao('pode_editar_produtos') || temPermissao('pode_criar_produtos')) && (
+            <MenuLink
+              href="/admin/produtos"
+              label="📦 Produtos"
+              ativo={menuAtivo === "produtos"}
+            />
+          )}
 
-          <MenuLink
-            href="/admin/pedidos"
-            label="🛒 Pedidos"
-            ativo={menuAtivo === "pedidos"}
-          />
+          {temPermissao('pode_visualizar_pedidos') && (
+            <MenuLink
+              href="/admin/pedidos"
+              label="🛒 Pedidos"
+              ativo={menuAtivo === "pedidos"}
+            />
+          )}
 
-          <MenuLink
-            href="/admin/usuarios"
-            label="👥 Usuários"
-            ativo={menuAtivo === "usuarios"}
-          />
+          {temPermissao('pode_visualizar_usuarios') && (
+            <MenuLink
+              href="/admin/usuarios"
+              label="👥 Usuários"
+              ativo={menuAtivo === "usuarios"}
+            />
+          )}
+
+          {temPermissao('pode_gerenciar_funcionarios') && (
+            <MenuLink
+              href="/admin/funcionarios"
+              label="👔 Funcionários"
+              ativo={menuAtivo === "funcionarios"}
+            />
+          )}
         </nav>
       </div>
     </div>

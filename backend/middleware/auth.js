@@ -86,6 +86,7 @@ function verificarToken(req, res, next) {
     }
 
     req.user = decoded;
+    req.userId = decoded.id; // Adicionar userId
     next();
   });
 }
