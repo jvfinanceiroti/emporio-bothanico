@@ -294,7 +294,8 @@ export default function CheckoutPage() {
       if (response.ok) {
         localStorage.removeItem("carrinho");
         const data = await response.json();
-        router.push(`/pagamento?pedido=${data.id}&token=${data.access_token}`);
+        // Ir direto para página de sucesso
+        router.push(`/sucesso?pedido=${data.id}&token=${data.access_token}`);
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("❌ Erro do servidor:", errorData);
