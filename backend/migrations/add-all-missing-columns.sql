@@ -19,10 +19,18 @@ ADD COLUMN IF NOT EXISTS codigo_rastreio VARCHAR(50);
 ALTER TABLE pedidos 
 ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
+-- 5. Adicionar colunas PIX
+ALTER TABLE pedidos 
+ADD COLUMN IF NOT EXISTS pix_codigo TEXT;
+
+ALTER TABLE pedidos 
+ADD COLUMN IF NOT EXISTS pix_expira_em TIMESTAMP;
+
 -- Criar índices para melhorar performance
 CREATE INDEX IF NOT EXISTS idx_pedidos_cpf ON pedidos(cliente_cpf);
 CREATE INDEX IF NOT EXISTS idx_pedidos_access_token ON pedidos(access_token);
 CREATE INDEX IF NOT EXISTS idx_pedidos_rastreio ON pedidos(codigo_rastreio);
+CREATE INDEX IF NOT EXISTS idx_pedidos_pix_expira ON pedidos(pix_expira_em);
 
 -- Feedback
 SELECT 

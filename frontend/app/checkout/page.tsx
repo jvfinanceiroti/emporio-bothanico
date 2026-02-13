@@ -294,8 +294,14 @@ export default function CheckoutPage() {
       if (response.ok) {
         localStorage.removeItem("carrinho");
         const data = await response.json();
-        // Ir direto para página de sucesso
-        router.push(`/sucesso?pedido=${data.id}&token=${data.access_token}`);
+        
+        // Se forma de pagamento for PIX, ir para página de pagamento PIX
+        if (formaPagamento === "pix") {
+          router.push(`/pagamento-pix?pedido=${data.id}&token=${data.access_token}`);
+        } else {
+          // Outras formas: ir direto para sucesso
+          router.push(`/sucesso?pedido=${data.id}&token=${data.access_token}`);
+        }
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error("❌ Erro do servidor:", errorData);

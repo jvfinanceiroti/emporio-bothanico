@@ -4,6 +4,7 @@ const pool = require("./db");
 const multer = require("multer");
 const path = require("path");
 const bcrypt = require("bcrypt");
+const QRCode = require("qrcode");
 const { 
   verificarToken, 
   verificarAdmin,
@@ -414,6 +415,159 @@ app.post("/pagamento-fake", async (req, res) => {
     res.status(500).send("Erro pagamento fake");
   }
 });
+
+// ============================================
+// ROTAS DE PAGAMENTO PIX
+// ============================================
+
+// Gerar QR Code PIX para o pedido
+app.post("/pagamento/pix/gerar", async (req, res) => {
+  try {
+    const { pedido_id, token } = req.body;
+
+    // Buscar pedido
+    const pedidoResult = await pool.query(
+      "SELECT * FROM pedidos WHERE id = $1 AND access_token = $2",
+      [pedido_id, token]
+    );
+
+    if (pedidoResult.rows.length === 0) {
+      return res.status(404).json({ error: "Pedido não encontrado" });
+    }
+
+    const pedido = pedidoResult.rows[0];
+
+    // Gerar código PIX (Pix copia e cola - formato simplificado)
+    // Em produção, você deve usar uma API de pagamento real (Mercado Pago, PagSeguro, etc)
+    const pixData = {
+      chave: process.env.PIX_CHAVE || "emporiobothanico@gmail.com", // Sua chave PIX
+      nome: "Emporio Bothanico LTDA",
+      cidade: "Belo Horizonte",
+      valor: pedido.total.toFixed(2),
+      identificador: `PED${pedido.id}`,
+    };
+
+    // Gerar string PIX copia e cola (formato simplificado)
+    const pixString = gerarPixCopiaCola(pixData);
+
+    // Gerar QR Code
+    const qrCodeBase64 = await QRCode.toDataURL(pixString);
+
+    // Definir expiração (1 hora)
+    const expiraEm = new Date();
+    expiraEm.setHours(expiraEm.getHours() + 1);
+
+    // Salvar dados do PIX no pedido
+    await pool.query(
+      `UPDATE pedidos 
+       SET pix_codigo = $1, pix_expira_em = $2 
+       WHERE id = $3`,
+      [pixString, expiraEm, pedido.id]
+    );
+
+    res.json({
+      qrCode: qrCodeBase64,
+      copiaCola: pixString,
+      valor: pedido.total,
+      expiraEm: expiraEm.toISOString(),
+    });
+  } catch (error) {
+    console.error("❌ Erro ao gerar PIX:", error);
+    res.status(500).json({ error: "Erro ao gerar PIX" });
+  }
+});
+
+// Verificar status do pagamento PIX
+app.get("/pagamento/pix/status/:pedido_id", async (req, res) => {
+  try {
+    const { pedido_id } = req.params;
+    const { token } = req.query;
+
+    const result = await pool.query(
+      "SELECT status, pix_expira_em FROM pedidos WHERE id = $1 AND access_token = $2",
+      [pedido_id, token]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Pedido não encontrado" });
+    }
+
+    const pedido = result.rows[0];
+
+    // Verificar se expirou
+    const agora = new Date();
+    const expiraEm = new Date(pedido.pix_expira_em);
+    const expirado = agora > expiraEm;
+
+    // Se expirou e ainda está aguardando, marcar como expirado
+    if (expirado && pedido.status === "aguardando_pagamento") {
+      await pool.query(
+        "UPDATE pedidos SET status = $1 WHERE id = $2",
+        ["expirado", pedido_id]
+      );
+      return res.json({ status: "expirado", pago: false });
+    }
+
+    res.json({
+      status: pedido.status,
+      pago: pedido.status === "pago" || pedido.status === "aprovado",
+      expirado: expirado && pedido.status === "aguardando_pagamento",
+    });
+  } catch (error) {
+    console.error("❌ Erro ao verificar status:", error);
+    res.status(500).json({ error: "Erro ao verificar status" });
+  }
+});
+
+// Webhook para simular pagamento PIX (em produção, seria chamado pela API de pagamento)
+app.post("/pagamento/pix/confirmar", async (req, res) => {
+  try {
+    const { pedido_id, token } = req.body;
+
+    // Verificar se o pedido existe e não expirou
+    const result = await pool.query(
+      `SELECT id, status, pix_expira_em 
+       FROM pedidos 
+       WHERE id = $1 AND access_token = $2`,
+      [pedido_id, token]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Pedido não encontrado" });
+    }
+
+    const pedido = result.rows[0];
+
+    // Verificar expiração
+    const agora = new Date();
+    const expiraEm = new Date(pedido.pix_expira_em);
+
+    if (agora > expiraEm) {
+      return res.status(400).json({ error: "Pagamento expirado" });
+    }
+
+    // Marcar como pago
+    await pool.query(
+      "UPDATE pedidos SET status = $1 WHERE id = $2",
+      ["pago", pedido_id]
+    );
+
+    res.json({ success: true, message: "Pagamento confirmado!" });
+  } catch (error) {
+    console.error("❌ Erro ao confirmar pagamento:", error);
+    res.status(500).json({ error: "Erro ao confirmar pagamento" });
+  }
+});
+
+// Função auxiliar para gerar string PIX copia e cola (simplificado)
+function gerarPixCopiaCola(dados) {
+  // Em produção, use uma biblioteca como 'pix-utils' ou API de pagamento
+  // Este é um formato simplificado para demonstração
+  const { chave, nome, cidade, valor, identificador } = dados;
+  
+  // Formato: chave|nome|cidade|valor|id
+  return `00020126580014BR.GOV.BCB.PIX0136${chave}520400005303986540${valor}5802BR5913${nome}6009${cidade}62070503***${identificador}6304`;
+}
 
 // PEDIDOS POR ID 
 
