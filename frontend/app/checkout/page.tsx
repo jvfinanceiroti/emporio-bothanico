@@ -1917,7 +1917,18 @@ export default function CheckoutPage() {
                       const numeroLimpo = cartaoNumero.replace(/\s/g, "");
                       const cpfLimpo = cartaoDocumento.replace(/\D/g, "");
 
+                      // Validar CPF
+                      if (cpfLimpo.length !== 11) {
+                        throw new Error("CPF deve ter 11 dígitos");
+                      }
+
                       console.log("💳 Iniciando tokenização do cartão...");
+                      console.log("📋 Dados do cartão:", {
+                        numero: numeroLimpo.substring(0, 6) + "******",
+                        titular: cartaoNome,
+                        validade: `${mes}/${anoCompleto}`,
+                        cpf: cpfLimpo.substring(0, 3) + "*****" + cpfLimpo.substring(8)
+                      });
 
                       // Inicializar Mercado Pago
                       const mp = new (window as any).MercadoPago('APP_USR-73e9a69c-931e-415d-bfcc-4138c8893bc4');
