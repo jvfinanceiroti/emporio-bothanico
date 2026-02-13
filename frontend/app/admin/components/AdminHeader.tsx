@@ -16,13 +16,25 @@ export default function AdminHeader() {
     if (usuarioStr) {
       try {
         const usuario = JSON.parse(usuarioStr);
-        setNomeUsuario(usuario.nome || usuario.email || "Usuário");
+        // Se conseguiu parsear, verifica se tem a estrutura correta
+        if (typeof usuario === 'object' && usuario !== null) {
+          setNomeUsuario(usuario.nome || usuario.email || "Usuário");
+        } else {
+          // Formato antigo (string pura), força logout
+          console.warn("Formato de usuário desatualizado, fazendo logout...");
+          localStorage.removeItem("token");
+          localStorage.removeItem("usuario");
+          router.push("/admin/login");
+        }
       } catch (error) {
-        console.error("Erro ao parsear usuário:", error);
-        setNomeUsuario("Usuário");
+        // Falha no parse = formato antigo, força logout
+        console.warn("Formato de usuário inválido, fazendo logout...");
+        localStorage.removeItem("token");
+        localStorage.removeItem("usuario");
+        router.push("/admin/login");
       }
     }
-  }, []);
+  }, [router]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
