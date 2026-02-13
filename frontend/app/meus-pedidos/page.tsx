@@ -287,6 +287,37 @@ export default function MeusPedidos() {
         margin: "0 auto",
         padding: "clamp(32px, 8vw, 64px) clamp(20px, 5vw, 40px)"
       }}>
+        {/* Botão Voltar */}
+        <Link 
+          href="/"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "12px 24px",
+            background: "white",
+            color: "#0a0a0a",
+            borderRadius: "12px",
+            fontSize: "14px",
+            fontWeight: "600",
+            textDecoration: "none",
+            border: "2px solid #e5e7eb",
+            transition: "all 0.3s",
+            marginBottom: "24px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "#f9fafb";
+            e.currentTarget.style.borderColor = "#0a0a0a";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "white";
+            e.currentTarget.style.borderColor = "#e5e7eb";
+          }}
+        >
+          ← Voltar para a loja
+        </Link>
+
         {/* Título */}
         <h1 style={{
           fontSize: "clamp(28px, 7vw, 42px)",
