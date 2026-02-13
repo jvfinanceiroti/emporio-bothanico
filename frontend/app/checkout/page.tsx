@@ -336,10 +336,11 @@ export default function CheckoutPage() {
         <div style={{
           maxWidth: "1440px",
           margin: "0 auto",
-          padding: "20px 48px",
+          padding: "clamp(16px, 3vw, 20px) clamp(20px, 5vw, 48px)",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between"
+          justifyContent: "space-between",
+          gap: "12px"
         }}>
           <Link 
             href="/carrinho"
@@ -349,28 +350,45 @@ export default function CheckoutPage() {
               gap: "8px",
               color: "#666",
               textDecoration: "none",
-              fontSize: "15px",
+              fontSize: "clamp(13px, 2.5vw, 15px)",
               fontWeight: "600",
-              transition: "color 0.2s"
+              transition: "color 0.2s",
+              flexShrink: 0,
+              whiteSpace: "nowrap"
             }}
             onMouseOver={(e) => e.currentTarget.style.color = "#0a0a0a"}
             onMouseOut={(e) => e.currentTarget.style.color = "#666"}
           >
-            <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg style={{ width: "20px", height: "20px", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Voltar ao Carrinho
+            <span style={{ display: "inline" }}>Voltar ao Carrinho</span>
           </Link>
 
-          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "20px" }}>
-            <img src="/logo.png" alt="Logo" style={{ height: "56px", objectFit: "contain" }} />
-            <div>
+          <Link href="/" style={{ 
+            textDecoration: "none", 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "clamp(8px, 2vw, 20px)",
+            overflow: "hidden",
+            flexShrink: 1,
+            minWidth: 0
+          }}>
+            <img src="/logo.png" alt="Logo" style={{ 
+              height: "clamp(40px, 8vw, 56px)", 
+              objectFit: "contain",
+              flexShrink: 0
+            }} />
+            <div style={{ overflow: "hidden" }}>
               <h1 style={{
-                fontSize: "20px",
+                fontSize: "clamp(14px, 3vw, 20px)",
                 fontWeight: "800",
                 color: "#0a0a0a",
                 margin: 0,
-                letterSpacing: "-0.5px"
+                letterSpacing: "-0.5px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
               }}>
                 Empório Bothanico
               </h1>
@@ -378,17 +396,21 @@ export default function CheckoutPage() {
           </Link>
 
           <div style={{
-            fontSize: "20px",
+            fontSize: "clamp(14px, 3vw, 20px)",
             fontWeight: "800",
             color: "#0a0a0a",
-            letterSpacing: "-0.5px"
+            letterSpacing: "-0.5px",
+            flexShrink: 0,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis"
           }}>
             Finalizar Pedido
           </div>
         </div>
       </header>
 
-      <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "80px 48px" }}>
+      <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "clamp(40px, 8vw, 80px) clamp(20px, 5vw, 48px)" }}>
         <div style={{
           display: "grid",
           gridTemplateColumns: "1fr 420px",

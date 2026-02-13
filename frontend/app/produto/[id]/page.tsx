@@ -106,10 +106,11 @@ function ProdutoContent() {
         <div style={{
           maxWidth: "1440px",
           margin: "0 auto",
-          padding: "20px 48px",
+          padding: "clamp(16px, 3vw, 20px) clamp(20px, 5vw, 48px)",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between"
+          justifyContent: "space-between",
+          gap: "12px"
         }}>
           <button
             onClick={() => router.back()}
@@ -120,29 +121,46 @@ function ProdutoContent() {
               color: "#666",
               background: "none",
               border: "none",
-              fontSize: "15px",
+              fontSize: "clamp(13px, 2.5vw, 15px)",
               fontWeight: "600",
               cursor: "pointer",
-              transition: "color 0.2s"
+              transition: "color 0.2s",
+              flexShrink: 0,
+              whiteSpace: "nowrap"
             }}
             onMouseOver={(e) => e.currentTarget.style.color = "#0a0a0a"}
             onMouseOut={(e) => e.currentTarget.style.color = "#666"}
           >
-            <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg style={{ width: "20px", height: "20px", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Voltar
+            <span style={{ display: "inline" }}>Voltar</span>
           </button>
 
-          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "20px" }}>
-            <img src="/logo.png" alt="Logo" style={{ height: "56px", objectFit: "contain" }} />
-            <div>
+          <Link href="/" style={{ 
+            textDecoration: "none", 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "clamp(8px, 2vw, 20px)",
+            overflow: "hidden",
+            flexShrink: 1,
+            minWidth: 0
+          }}>
+            <img src="/logo.png" alt="Logo" style={{ 
+              height: "clamp(40px, 8vw, 56px)", 
+              objectFit: "contain",
+              flexShrink: 0
+            }} />
+            <div style={{ overflow: "hidden" }}>
               <h1 style={{
-                fontSize: "20px",
+                fontSize: "clamp(14px, 3vw, 20px)",
                 fontWeight: "800",
                 color: "#0a0a0a",
                 margin: 0,
-                letterSpacing: "-0.5px"
+                letterSpacing: "-0.5px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
               }}>
                 Empório Bothanico
               </h1>
@@ -152,18 +170,20 @@ function ProdutoContent() {
           <Link 
             href="/carrinho"
             style={{
-              padding: "14px 32px",
+              padding: "clamp(10px, 2vw, 14px) clamp(16px, 3vw, 32px)",
               background: "#0a0a0a",
               color: "white",
               borderRadius: "12px",
               textDecoration: "none",
               fontWeight: "600",
-              fontSize: "15px",
+              fontSize: "clamp(13px, 2.5vw, 15px)",
               transition: "all 0.3s ease",
               display: "flex",
               alignItems: "center",
               gap: "10px",
-              border: "2px solid #0a0a0a"
+              border: "2px solid #0a0a0a",
+              flexShrink: 0,
+              whiteSpace: "nowrap"
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.background = "white";
@@ -174,16 +194,16 @@ function ProdutoContent() {
               e.currentTarget.style.color = "white";
             }}
           >
-            <svg style={{ width: "20px", height: "20px" }} fill="currentColor" viewBox="0 0 20 20">
+            <svg style={{ width: "20px", height: "20px", flexShrink: 0 }} fill="currentColor" viewBox="0 0 20 20">
               <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
             </svg>
-            Carrinho
+            <span style={{ display: "inline" }}>Carrinho</span>
           </Link>
         </div>
       </header>
 
       {/* CONTEÚDO PRODUTO */}
-      <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "80px 48px" }}>
+      <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "clamp(40px, 8vw, 80px) clamp(20px, 5vw, 48px)" }}>
         <div style={{
           background: "white",
           borderRadius: "20px",
