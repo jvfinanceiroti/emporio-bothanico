@@ -538,6 +538,113 @@ app.get("/admin/usuarios", verificarToken, async (req, res) => {
   }
 });
 
+// ===== ENDPOINTS PÚBLICOS PARA CLIENTES =====
+
+// BUSCAR PEDIDOS POR EMAIL OU CPF
+app.get("/pedidos/buscar", async (req, res) => {
+  try {
+    const { tipo, valor } = req.query;
+
+    if (!tipo || !valor) {
+      return res.status(400).json({ error: "Tipo e valor são obrigatórios" });
+    }
+
+    let query;
+    let params;
+
+    if (tipo === "email") {
+      query = `
+        SELECT 
+          id, cliente_nome, cliente_email, cliente_telefone, 
+          total, status, created_at as criado_em,
+          forma_pagamento
+        FROM pedidos 
+        WHERE LOWER(cliente_email) = LOWER($1)
+        ORDER BY created_at DESC
+      `;
+      params = [valor];
+    } else if (tipo === "cpf") {
+      query = `
+        SELECT 
+          id, cliente_nome, cliente_email, cliente_telefone, 
+          total, status, created_at as criado_em,
+          forma_pagamento
+        FROM pedidos 
+        WHERE cliente_cpf = $1
+        ORDER BY created_at DESC
+      `;
+      params = [valor];
+    } else {
+      return res.status(400).json({ error: "Tipo inválido. Use 'email' ou 'cpf'" });
+    }
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Erro ao buscar pedidos:", error);
+    res.status(500).json({ error: "Erro ao buscar pedidos" });
+  }
+});
+
+// DETALHES COMPLETOS DO PEDIDO (PÚBLICO)
+app.get("/pedidos/:id/detalhes", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    let pedido;
+    try {
+      pedido = await pool.query(
+        `SELECT 
+          id, cliente_nome, cliente_email, cliente_telefone,
+          total, status, created_at as criado_em,
+          endereco_cep, endereco_rua, endereco_numero,
+          endereco_complemento, endereco_bairro,
+          endereco_cidade, endereco_estado,
+          frete, forma_pagamento, codigo_rastreio
+        FROM pedidos 
+        WHERE id = $1`,
+        [id]
+      );
+    } catch (columnError) {
+      // Se falhar (codigo_rastreio não existe), buscar sem essa coluna
+      pedido = await pool.query(
+        `SELECT 
+          id, cliente_nome, cliente_email, cliente_telefone,
+          total, status, created_at as criado_em,
+          endereco_cep, endereco_rua, endereco_numero,
+          endereco_complemento, endereco_bairro,
+          endereco_cidade, endereco_estado,
+          frete, forma_pagamento
+        FROM pedidos 
+        WHERE id = $1`,
+        [id]
+      );
+    }
+
+    if (pedido.rows.length === 0) {
+      return res.status(404).json({ error: "Pedido não encontrado" });
+    }
+
+    const itens = await pool.query(
+      `SELECT 
+        pi.id, pi.produto_id, pi.quantidade, pi.preco_unitario,
+        p.nome
+      FROM pedido_itens pi
+      JOIN produtos p ON p.id = pi.produto_id
+      WHERE pi.pedido_id = $1`,
+      [id]
+    );
+
+    res.json({
+      pedido: pedido.rows[0],
+      itens: itens.rows
+    });
+  } catch (error) {
+    console.error("Erro ao buscar detalhes do pedido:", error);
+    res.status(500).json({ error: "Erro ao buscar detalhes do pedido" });
+  }
+});
+
 // Dashboard
 app.get("/admin/dashboard", verificarToken, async (req, res) => {
   try {

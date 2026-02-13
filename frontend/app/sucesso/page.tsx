@@ -503,7 +503,7 @@ function SucessoContent() {
             </Link>
 
             <Link
-              href={`/pedido/${pedido.id}`}
+              href="/meus-pedidos"
               className="success-button"
               style={{
                 display: "inline-flex",
