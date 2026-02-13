@@ -384,7 +384,7 @@ export default function AdminProdutos() {
             <div style={{ gridColumn: "1 / -1" }}>
               <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Nome *</label>
               <input
-                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)" }}
+                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)", color: "#0a0a0a" }}
                 placeholder="Nome do produto"
                 value={novoNome}
                 onChange={e => setNovoNome(e.target.value)}
@@ -394,7 +394,7 @@ export default function AdminProdutos() {
             <div>
               <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Preço (R$) *</label>
               <input
-                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)" }}
+                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)", color: "#0a0a0a" }}
                 placeholder="0,00"
                 type="text"
                 value={formatarPrecoExibicao(novoPreco)}
@@ -408,7 +408,7 @@ export default function AdminProdutos() {
             <div>
               <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Estoque *</label>
               <input
-                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)" }}
+                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)", color: "#0a0a0a" }}
                 placeholder="0"
                 type="number"
                 value={novoEstoque}
@@ -457,7 +457,7 @@ export default function AdminProdutos() {
               <div>
                 <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Peso (kg)</label>
                 <input
-                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
+                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
                   placeholder="0.0"
                   type="number"
                   step="0.001"
@@ -469,7 +469,7 @@ export default function AdminProdutos() {
               <div>
                 <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Altura (cm)</label>
                 <input
-                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
+                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
                   placeholder="0"
                   type="number"
                   value={novaAltura}
@@ -480,7 +480,7 @@ export default function AdminProdutos() {
               <div>
                 <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Largura (cm)</label>
                 <input
-                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
+                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
                   placeholder="0"
                   type="number"
                   value={novaLargura}
@@ -491,7 +491,7 @@ export default function AdminProdutos() {
               <div>
                 <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Comprimento (cm)</label>
                 <input
-                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
+                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
                   placeholder="0"
                   type="number"
                   value={novoComprimento}
@@ -520,7 +520,7 @@ export default function AdminProdutos() {
                 placeholder="Digite o nome do produto..."
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
-                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)" }}
+                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)", color: "#0a0a0a" }}
               />
             </div>
 
@@ -529,7 +529,7 @@ export default function AdminProdutos() {
               <select
                 value={filtroStatus}
                 onChange={(e) => setFiltroStatus(e.target.value)}
-                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)", cursor: "pointer" }}
+                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)", color: "#0a0a0a", cursor: "pointer" }}
               >
                 <option value="todos">📦 Todos os produtos</option>
                 <option value="ativos">✅ Apenas ativos</option>
@@ -560,7 +560,7 @@ export default function AdminProdutos() {
                         <div style={{ gridColumn: "1 / -1" }}>
                           <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Nome</label>
                           <input
-                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
+                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
                             value={editNome}
                             onChange={e => setEditNome(e.target.value)}
                           />
@@ -569,7 +569,7 @@ export default function AdminProdutos() {
                         <div style={{ gridColumn: "1 / -1" }}>
                           <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Descrição</label>
                           <textarea
-                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
+                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
                             placeholder="Descrição do produto"
                             rows={3}
                             value={editDescricao}
@@ -580,7 +580,7 @@ export default function AdminProdutos() {
                         <div>
                           <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Preço (R$)</label>
                           <input
-                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
+                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
                             type="text"
                             placeholder="0,00"
                             value={formatarPrecoExibicao(editPreco)}
@@ -594,7 +594,7 @@ export default function AdminProdutos() {
                         <div>
                           <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Estoque</label>
                           <input
-                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)" }}
+                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
                             type="number"
                             value={editEstoque}
                             onChange={e => setEditEstoque(e.target.value)}
@@ -641,7 +641,7 @@ export default function AdminProdutos() {
                           <div>
                             <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Peso (kg)</label>
                             <input
-                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)" }}
+                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
                               placeholder="0.0"
                               type="number"
                               step="0.001"
@@ -653,7 +653,7 @@ export default function AdminProdutos() {
                           <div>
                             <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Altura (cm)</label>
                             <input
-                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)" }}
+                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
                               placeholder="0"
                               type="number"
                               value={editAltura}
@@ -664,7 +664,7 @@ export default function AdminProdutos() {
                           <div>
                             <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Largura (cm)</label>
                             <input
-                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)" }}
+                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
                               placeholder="0"
                               type="number"
                               value={editLargura}
@@ -675,7 +675,7 @@ export default function AdminProdutos() {
                           <div>
                             <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Comprimento (cm)</label>
                             <input
-                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)" }}
+                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
                               placeholder="0"
                               type="number"
                               value={editComprimento}

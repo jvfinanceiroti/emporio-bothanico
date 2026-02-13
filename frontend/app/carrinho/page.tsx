@@ -481,6 +481,7 @@ export default function CarrinhoPage() {
                         borderRadius: "10px",
                         fontSize: "15px",
                         fontWeight: "500",
+                        color: "#0a0a0a",
                         outline: "none",
                         transition: "border-color 0.2s"
                       }}
