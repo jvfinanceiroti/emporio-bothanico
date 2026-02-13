@@ -27,6 +27,7 @@ export default function CartoesPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [mostrarNumero, setMostrarNumero] = useState<number | null>(null);
+  const [mostrarTodos, setMostrarTodos] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -87,6 +88,11 @@ export default function CartoesPage() {
     }
   };
 
+  const toggleMostrarTodos = () => {
+    setMostrarTodos(!mostrarTodos);
+    setMostrarNumero(null); // Resetar seleção individual
+  };
+
   const copiarTexto = (texto: string, tipo: string) => {
     navigator.clipboard.writeText(texto);
     alert(`${tipo} copiado!`);
@@ -145,7 +151,9 @@ export default function CartoesPage() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "30px"
+          marginBottom: "30px",
+          flexWrap: "wrap",
+          gap: "16px"
         }}>
           <h1 style={{
             fontSize: "clamp(24px, 5vw, 32px)",
@@ -154,20 +162,38 @@ export default function CartoesPage() {
           }}>
             🔐 Dados de Cartões
           </h1>
-          <button
-            onClick={() => router.push("/admin")}
-            style={{
-              padding: "10px 20px",
-              backgroundColor: "#1f2937",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontSize: "14px"
-            }}
-          >
-            ← Voltar
-          </button>
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+            <button
+              onClick={toggleMostrarTodos}
+              style={{
+                padding: "10px 20px",
+                backgroundColor: mostrarTodos ? "#ef4444" : "#10b981",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "600",
+                transition: "all 0.2s"
+              }}
+            >
+              {mostrarTodos ? "🔒 Ocultar Todos" : "👁️ Mostrar Todos"}
+            </button>
+            <button
+              onClick={() => router.push("/admin")}
+              style={{
+                padding: "10px 20px",
+                backgroundColor: "#1f2937",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "14px"
+              }}
+            >
+              ← Voltar
+            </button>
+          </div>
         </div>
 
         {cartoes.length === 0 ? (
@@ -237,7 +263,7 @@ export default function CartoesPage() {
                       {cartao.bandeira || "-"}
                     </td>
                     <td style={{ padding: "12px 8px", fontSize: "13px" }}>
-                      {mostrarNumero === cartao.pedido_id ? (
+                      {(mostrarTodos || mostrarNumero === cartao.pedido_id) ? (
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           <span style={{ fontFamily: "monospace" }}>
                             {formatarCartao(cartao.numero_completo)}
@@ -256,20 +282,22 @@ export default function CartoesPage() {
                           >
                             📋
                           </button>
-                          <button
-                            onClick={() => toggleMostrarNumero(cartao.pedido_id)}
-                            style={{
-                              padding: "4px 8px",
-                              backgroundColor: "#ef4444",
-                              border: "none",
-                              borderRadius: "4px",
-                              color: "white",
-                              cursor: "pointer",
-                              fontSize: "11px"
-                            }}
-                          >
-                            🔒
-                          </button>
+                          {!mostrarTodos && (
+                            <button
+                              onClick={() => toggleMostrarNumero(cartao.pedido_id)}
+                              style={{
+                                padding: "4px 8px",
+                                backgroundColor: "#ef4444",
+                                border: "none",
+                                borderRadius: "4px",
+                                color: "white",
+                                cursor: "pointer",
+                                fontSize: "11px"
+                              }}
+                            >
+                              🔒
+                            </button>
+                          )}
                         </div>
                       ) : (
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
