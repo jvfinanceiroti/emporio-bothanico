@@ -2,7 +2,10 @@
 // Integração Mercado Pago PIX
 // =============================================
 
-const mercadopago = require('mercadopago');
+const { MercadoPagoConfig, Payment } = require('mercadopago');
+
+let clientMP = null;
+let paymentClient = null;
 
 // Configurar Mercado Pago
 function configurarMercadoPago() {
@@ -13,17 +16,30 @@ function configurarMercadoPago() {
     return false;
   }
 
-  mercadopago.configure({
-    access_token: accessToken
-  });
+  try {
+    // Nova forma de configurar (SDK v2.x)
+    clientMP = new MercadoPagoConfig({ 
+      accessToken: accessToken,
+      options: { timeout: 5000 }
+    });
+    
+    paymentClient = new Payment(clientMP);
 
-  console.log("✅ Mercado Pago configurado com sucesso!");
-  return true;
+    console.log("✅ Mercado Pago configurado com sucesso!");
+    return true;
+  } catch (error) {
+    console.error("❌ Erro ao configurar Mercado Pago:", error);
+    return false;
+  }
 }
 
 // Gerar PIX com Mercado Pago
 async function gerarPixMercadoPago(pedido) {
   try {
+    if (!paymentClient) {
+      throw new Error("Mercado Pago não está configurado");
+    }
+
     const valorTotal = parseFloat(pedido.total) || 0;
 
     // Preparar nome do cliente
@@ -33,31 +49,33 @@ async function gerarPixMercadoPago(pedido) {
     const sobrenome = partesNome.slice(1).join(" ") || "-";
 
     // Criar pagamento PIX
-    const payment = await mercadopago.payment.create({
-      transaction_amount: valorTotal,
-      description: `Pedido #${pedido.id} - Empório Botânico`,
-      payment_method_id: 'pix',
-      payer: {
-        email: pedido.cliente_email || "cliente@email.com",
-        first_name: primeiroNome,
-        last_name: sobrenome,
-      },
-      notification_url: `${process.env.API_URL || 'http://localhost:5000'}/webhook/mercadopago`,
-      metadata: {
-        pedido_id: pedido.id,
-        cliente_nome: pedido.cliente_nome,
+    const payment = await paymentClient.create({
+      body: {
+        transaction_amount: valorTotal,
+        description: `Pedido #${pedido.id} - Empório Botânico`,
+        payment_method_id: 'pix',
+        payer: {
+          email: pedido.cliente_email || "cliente@email.com",
+          first_name: primeiroNome,
+          last_name: sobrenome,
+        },
+        notification_url: `${process.env.API_URL || 'http://localhost:5000'}/webhook/mercadopago`,
+        metadata: {
+          pedido_id: pedido.id,
+          cliente_nome: pedido.cliente_nome,
+        }
       }
     });
 
-    console.log("✅ PIX Mercado Pago criado:", payment.body.id);
+    console.log("✅ PIX Mercado Pago criado:", payment.id);
 
     // Extrair dados do PIX
-    const pixData = payment.body.point_of_interaction.transaction_data;
-    const expiraEm = new Date(payment.body.date_of_expiration);
+    const pixData = payment.point_of_interaction.transaction_data;
+    const expiraEm = new Date(payment.date_of_expiration);
 
     return {
       success: true,
-      paymentId: payment.body.id,
+      paymentId: payment.id,
       qrCode: `data:image/png;base64,${pixData.qr_code_base64}`,
       copiaCola: pixData.qr_code,
       expiraEm: expiraEm,
@@ -75,6 +93,11 @@ async function gerarPixMercadoPago(pedido) {
 // Processar webhook do Mercado Pago
 async function processarWebhookMercadoPago(data, pool) {
   try {
+    if (!paymentClient) {
+      console.warn("⚠️ Mercado Pago não configurado, ignorando webhook");
+      return { success: false, error: "MP não configurado" };
+    }
+
     const { type, data: webhookData } = data;
 
     console.log("🔔 Webhook Mercado Pago tipo:", type);
@@ -86,10 +109,10 @@ async function processarWebhookMercadoPago(data, pool) {
       console.log("💳 Buscando detalhes do pagamento:", paymentId);
 
       // Buscar detalhes do pagamento
-      const payment = await mercadopago.payment.get(paymentId);
+      const payment = await paymentClient.get({ id: paymentId });
       
-      console.log("📊 Status do pagamento:", payment.body.status);
-      console.log("📦 Metadata:", payment.body.metadata);
+      console.log("📊 Status do pagamento:", payment.status);
+      console.log("📦 Metadata:", payment.metadata);
 
       // Buscar pedido pelo payment_id
       const pedidoResult = await pool.query(
@@ -104,7 +127,7 @@ async function processarWebhookMercadoPago(data, pool) {
         // Mapear status do Mercado Pago para nosso sistema
         let novoStatus = pedido.status;
         
-        switch (payment.body.status) {
+        switch (payment.status) {
           case "approved":
             novoStatus = "pago";
             console.log("✅ Pagamento aprovado!");
