@@ -12,9 +12,15 @@ export default function AdminHeader() {
   const [nomeUsuario, setNomeUsuario] = useState("");
 
   useEffect(() => {
-    const usuario = localStorage.getItem("usuario");
-    if (usuario) {
-      setNomeUsuario(usuario);
+    const usuarioStr = localStorage.getItem("usuario");
+    if (usuarioStr) {
+      try {
+        const usuario = JSON.parse(usuarioStr);
+        setNomeUsuario(usuario.nome || usuario.email || "Usuário");
+      } catch (error) {
+        console.error("Erro ao parsear usuário:", error);
+        setNomeUsuario("Usuário");
+      }
     }
   }, []);
 
