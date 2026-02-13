@@ -1958,9 +1958,21 @@ export default function CheckoutPage() {
 
                     } catch (error: any) {
                       console.error("❌ Erro no pagamento:", error);
-                      setMensagemAlerta(
-                        error.message || "Erro ao processar pagamento. Verifique os dados do cartão."
-                      );
+                      
+                      // Extrair mensagem de erro mais específica
+                      let mensagemErro = "Erro ao processar pagamento. ";
+                      
+                      if (error.message) {
+                        mensagemErro += error.message;
+                      } else if (error.cause && error.cause[0]) {
+                        mensagemErro += error.cause[0].description || "Erro desconhecido";
+                      } else if (typeof error === 'object') {
+                        mensagemErro += JSON.stringify(error);
+                      } else {
+                        mensagemErro += "Verifique os dados do cartão e tente novamente.";
+                      }
+                      
+                      setMensagemAlerta(mensagemErro);
                       setMostrarAlerta(true);
                     } finally {
                       setProcessandoCartao(false);
