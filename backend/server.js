@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const app = express();
-const JWT_SECRET = "emporio-bothanico-secret-key-2026";
+const JWT_SECRET = process.env.JWT_SECRET || "emporio-bothanico-secret-key-2026";
 
 app.use(cors());
 app.use(express.json());
