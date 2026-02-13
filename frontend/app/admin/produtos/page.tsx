@@ -110,7 +110,9 @@ export default function AdminProdutos() {
       }
     })
       .then(res => {
+        console.log("Status verificar:", res.status);
         if (!res.ok) {
+          console.error("Erro na verificação:", res.status, res.statusText);
           localStorage.removeItem("token");
           localStorage.removeItem("usuario");
           router.push("/admin/login");
@@ -120,12 +122,14 @@ export default function AdminProdutos() {
       })
       .then(data => {
         if (data) {
+          console.log("Autenticação OK:", data);
           setAutenticado(true);
           setNomeUsuario(data.usuario.nome);
           carregarProdutos();
         }
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Erro catch verificar:", err);
         router.push("/admin/login");
       });
   }, [router]);
