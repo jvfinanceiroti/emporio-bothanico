@@ -410,6 +410,7 @@ app.get("/admin/pedidos", verificarToken, async (req, res) => {
           id,
           cliente_nome,
           cliente_email,
+          cliente_cpf,
           cliente_telefone,
           total,
           status,
@@ -435,6 +436,7 @@ app.get("/admin/pedidos", verificarToken, async (req, res) => {
           id,
           cliente_nome,
           cliente_email,
+          cliente_cpf,
           cliente_telefone,
           total,
           status,
@@ -472,6 +474,7 @@ app.get("/admin/pedidos/:id", verificarToken, async (req, res) => {
           id,
           cliente_nome,
           cliente_email,
+          cliente_cpf,
           cliente_telefone,
           total,
           status,
@@ -498,6 +501,7 @@ app.get("/admin/pedidos/:id", verificarToken, async (req, res) => {
           id,
           cliente_nome,
           cliente_email,
+          cliente_cpf,
           cliente_telefone,
           total,
           status,
@@ -667,7 +671,7 @@ app.get("/pedidos/:id/detalhes", async (req, res) => {
     try {
       pedido = await pool.query(
         `SELECT 
-          id, cliente_nome, cliente_email, cliente_telefone,
+          id, cliente_nome, cliente_email, cliente_cpf, cliente_telefone,
           total, status, created_at as criado_em,
           endereco_cep, endereco_rua, endereco_numero,
           endereco_complemento, endereco_bairro,
@@ -681,7 +685,7 @@ app.get("/pedidos/:id/detalhes", async (req, res) => {
       // Se falhar (codigo_rastreio não existe), buscar sem essa coluna
       pedido = await pool.query(
         `SELECT 
-          id, cliente_nome, cliente_email, cliente_telefone,
+          id, cliente_nome, cliente_email, cliente_cpf, cliente_telefone,
           total, status, created_at as criado_em,
           endereco_cep, endereco_rua, endereco_numero,
           endereco_complemento, endereco_bairro,

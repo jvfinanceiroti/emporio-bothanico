@@ -10,6 +10,7 @@ interface Pedido {
   id: number;
   cliente_nome: string;
   cliente_email: string;
+  cliente_cpf?: string;
   cliente_telefone: string;
   total: number;
   status: string;
@@ -934,6 +935,14 @@ function PedidosConteudo() {
                           {pedidoSelecionado.pedido.cliente_email}
                         </span>
                       </div>
+                      {pedidoSelecionado.pedido.cliente_cpf && (
+                        <div>
+                          <span style={{ fontSize: "13px", color: "#666" }}>CPF: </span>
+                          <span style={{ fontSize: "15px", fontWeight: "600", color: "#0a0a0a" }}>
+                            {pedidoSelecionado.pedido.cliente_cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")}
+                          </span>
+                        </div>
+                      )}
                       <div>
                         <span style={{ fontSize: "13px", color: "#666" }}>Telefone: </span>
                         <span style={{ fontSize: "15px", fontWeight: "600", color: "#0a0a0a" }}>
