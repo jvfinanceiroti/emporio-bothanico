@@ -117,15 +117,37 @@ export default function MeusPedidos() {
   };
 
   const carregarDetalhesPedido = async (id: number) => {
-    if (!apiUrl) return;
+    console.log("🔍 Carregando detalhes do pedido ID:", id);
+    console.log("🌐 API URL:", apiUrl);
+    
+    if (!apiUrl) {
+      console.error("❌ API URL não está definida!");
+      alert("Erro: API URL não configurada. Aguarde um momento e tente novamente.");
+      return;
+    }
     
     setCarregandoDetalhes(true);
     try {
-      const response = await fetch(`${apiUrl}/pedidos/${id}/detalhes`);
+      const url = `${apiUrl}/pedidos/${id}/detalhes`;
+      console.log("📡 Fazendo requisição para:", url);
+      
+      const response = await fetch(url);
+      console.log("📊 Status da resposta:", response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Erro na resposta:", errorText);
+        throw new Error(`Erro ${response.status}: ${errorText}`);
+      }
+      
       const data = await response.json();
+      console.log("✅ Dados recebidos:", data);
+      
       setPedidoSelecionado(data);
-    } catch (error) {
-      alert("Erro ao carregar detalhes do pedido");
+      console.log("✅ Modal deve abrir agora!");
+    } catch (error: any) {
+      console.error("❌ Erro completo:", error);
+      alert("Erro ao carregar detalhes do pedido: " + error.message);
     } finally {
       setCarregandoDetalhes(false);
     }
