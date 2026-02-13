@@ -164,7 +164,7 @@ export default function AdminProdutos() {
         },
         body: JSON.stringify({
           nome: novoNome,
-          descricao: novaDescricao || null,
+          descricao: null,
           preco: Number(formatarPreco(novoPreco)),
           estoque: Number(novoEstoque),
           imagem_url: imagemUrl || null,
@@ -379,17 +379,6 @@ export default function AdminProdutos() {
                 placeholder="Nome do produto"
                 value={novoNome}
                 onChange={e => setNovoNome(e.target.value)}
-              />
-            </div>
-
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Descrição</label>
-              <textarea
-                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)" }}
-                placeholder="Descrição do produto (opcional)"
-                rows={3}
-                value={novaDescricao}
-                onChange={e => setNovaDescricao(e.target.value)}
               />
             </div>
 
