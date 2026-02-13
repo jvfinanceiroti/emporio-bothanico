@@ -52,20 +52,25 @@ function SucessoContent() {
         background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
         display: "flex",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        padding: "clamp(16px, 4vw, 20px)"
       }}>
         <div style={{
           textAlign: "center",
           color: "white"
         }}>
           <div style={{
-            fontSize: "48px",
-            marginBottom: "16px",
+            fontSize: "clamp(32px, 8vw, 48px)",
+            marginBottom: "clamp(12px, 3vw, 16px)",
             animation: "spin 1s linear infinite"
           }}>
             ⏳
           </div>
-          <p style={{ fontSize: "18px", fontWeight: "600" }}>Carregando informações...</p>
+          <p style={{ 
+            fontSize: "clamp(14px, 3.5vw, 18px)", 
+            fontWeight: "600",
+            wordBreak: "break-word"
+          }}>Carregando informações...</p>
         </div>
       </div>
     );
@@ -79,21 +84,26 @@ function SucessoContent() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "20px"
+        padding: "clamp(16px, 4vw, 20px)"
       }}>
         <div style={{
           background: "white",
-          borderRadius: "24px",
-          padding: "60px 40px",
+          borderRadius: "clamp(16px, 4vw, 24px)",
+          padding: "clamp(32px, 8vw, 60px) clamp(24px, 6vw, 40px)",
           textAlign: "center",
-          maxWidth: "500px"
+          maxWidth: "500px",
+          width: "100%"
         }}>
-          <div style={{ fontSize: "64px", marginBottom: "24px" }}>❌</div>
+          <div style={{ 
+            fontSize: "clamp(48px, 12vw, 64px)", 
+            marginBottom: "clamp(16px, 4vw, 24px)" 
+          }}>❌</div>
           <h2 style={{
-            fontSize: "24px",
+            fontSize: "clamp(20px, 5vw, 24px)",
             fontWeight: "800",
             color: "#0a0a0a",
-            marginBottom: "16px"
+            marginBottom: "clamp(12px, 3vw, 16px)",
+            wordBreak: "break-word"
           }}>
             Pedido não encontrado
           </h2>
@@ -101,13 +111,14 @@ function SucessoContent() {
             href="/"
             style={{
               display: "inline-block",
-              marginTop: "24px",
-              padding: "14px 32px",
+              marginTop: "clamp(16px, 4vw, 24px)",
+              padding: "clamp(12px, 3vw, 14px) clamp(24px, 6vw, 32px)",
+              minHeight: "44px",
               background: "#0a0a0a",
               color: "white",
               textDecoration: "none",
-              borderRadius: "12px",
-              fontSize: "16px",
+              borderRadius: "clamp(8px, 2vw, 12px)",
+              fontSize: "clamp(14px, 3.5vw, 16px)",
               fontWeight: "700",
               transition: "all 0.3s"
             }}
@@ -159,7 +170,7 @@ function SucessoContent() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "20px",
+        padding: "clamp(16px, 4vw, 20px)",
         position: "relative",
         overflow: "hidden"
       }}>
@@ -168,8 +179,8 @@ function SucessoContent() {
           position: "absolute",
           top: "-50%",
           right: "-20%",
-          width: "800px",
-          height: "800px",
+          width: "clamp(400px, 80vw, 800px)",
+          height: "clamp(400px, 80vw, 800px)",
           background: "radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%)",
           borderRadius: "50%",
           pointerEvents: "none"
@@ -179,8 +190,8 @@ function SucessoContent() {
           position: "absolute",
           bottom: "-30%",
           left: "-10%",
-          width: "600px",
-          height: "600px",
+          width: "clamp(300px, 60vw, 600px)",
+          height: "clamp(300px, 60vw, 600px)",
           background: "radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)",
           borderRadius: "50%",
           pointerEvents: "none"
@@ -191,8 +202,8 @@ function SucessoContent() {
           className="fade-in-up"
           style={{
             background: "white",
-            borderRadius: "32px",
-            padding: "60px 48px",
+            borderRadius: "clamp(20px, 5vw, 32px)",
+            padding: "clamp(32px, 8vw, 60px) clamp(24px, 6vw, 48px)",
             maxWidth: "600px",
             width: "100%",
             textAlign: "center",
@@ -205,36 +216,41 @@ function SucessoContent() {
           <div
             className="checkmark-circle"
             style={{
-              width: "120px",
-              height: "120px",
+              width: "clamp(80px, 20vw, 120px)",
+              height: "clamp(80px, 20vw, 120px)",
               background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
               borderRadius: "50%",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              margin: "0 auto 32px",
+              margin: "0 auto clamp(24px, 6vw, 32px)",
               boxShadow: "0 20px 40px rgba(16, 185, 129, 0.3)"
             }}
           >
-            <div style={{ fontSize: "64px", color: "white" }}>✓</div>
+            <div style={{ 
+              fontSize: "clamp(40px, 10vw, 64px)", 
+              color: "white" 
+            }}>✓</div>
           </div>
 
           {/* Título */}
           <h1 style={{
-            fontSize: "36px",
+            fontSize: "clamp(24px, 6vw, 36px)",
             fontWeight: "900",
             color: "#0a0a0a",
-            marginBottom: "16px",
-            letterSpacing: "-1px"
+            marginBottom: "clamp(12px, 3vw, 16px)",
+            letterSpacing: "-1px",
+            wordBreak: "break-word"
           }}>
             Pedido Confirmado!
           </h1>
 
           <p style={{
-            fontSize: "18px",
+            fontSize: "clamp(14px, 3.5vw, 18px)",
             color: "#666",
-            marginBottom: "40px",
-            lineHeight: "1.6"
+            marginBottom: "clamp(24px, 6vw, 40px)",
+            lineHeight: "1.6",
+            wordBreak: "break-word"
           }}>
             Obrigado pela sua compra! Seu pedido foi registrado com sucesso e está sendo processado.
           </p>
@@ -242,21 +258,21 @@ function SucessoContent() {
           {/* Detalhes do pedido */}
           <div style={{
             background: "#fafafa",
-            borderRadius: "20px",
-            padding: "32px",
-            marginBottom: "40px",
+            borderRadius: "clamp(12px, 3vw, 20px)",
+            padding: "clamp(20px, 5vw, 32px)",
+            marginBottom: "clamp(24px, 6vw, 40px)",
             border: "1px solid rgba(0,0,0,0.06)"
           }}>
             {/* Número do pedido */}
             <div style={{
-              marginBottom: "24px",
-              paddingBottom: "24px",
+              marginBottom: "clamp(16px, 4vw, 24px)",
+              paddingBottom: "clamp(16px, 4vw, 24px)",
               borderBottom: "2px solid rgba(0,0,0,0.06)"
             }}>
               <div style={{
-                fontSize: "13px",
+                fontSize: "clamp(11px, 2.8vw, 13px)",
                 color: "#666",
-                marginBottom: "8px",
+                marginBottom: "clamp(6px, 1.5vw, 8px)",
                 fontWeight: "600",
                 textTransform: "uppercase",
                 letterSpacing: "0.5px"
@@ -264,10 +280,11 @@ function SucessoContent() {
                 Número do Pedido
               </div>
               <div style={{
-                fontSize: "32px",
+                fontSize: "clamp(24px, 6vw, 32px)",
                 fontWeight: "900",
                 color: "#0a0a0a",
-                letterSpacing: "-1px"
+                letterSpacing: "-1px",
+                wordBreak: "break-word"
               }}>
                 #{pedido.id}
               </div>
@@ -276,23 +293,24 @@ function SucessoContent() {
             {/* Grid de informações */}
             <div style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "24px",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(140px, 100%), 1fr))",
+              gap: "clamp(16px, 4vw, 24px)",
               textAlign: "left"
             }}>
               <div>
                 <div style={{
-                  fontSize: "13px",
+                  fontSize: "clamp(11px, 2.8vw, 13px)",
                   color: "#666",
-                  marginBottom: "8px",
+                  marginBottom: "clamp(6px, 1.5vw, 8px)",
                   fontWeight: "600"
                 }}>
                   Cliente
                 </div>
                 <div style={{
-                  fontSize: "16px",
+                  fontSize: "clamp(14px, 3.5vw, 16px)",
                   fontWeight: "700",
-                  color: "#0a0a0a"
+                  color: "#0a0a0a",
+                  wordBreak: "break-word"
                 }}>
                   {pedido.cliente_nome}
                 </div>
@@ -300,17 +318,18 @@ function SucessoContent() {
 
               <div>
                 <div style={{
-                  fontSize: "13px",
+                  fontSize: "clamp(11px, 2.8vw, 13px)",
                   color: "#666",
-                  marginBottom: "8px",
+                  marginBottom: "clamp(6px, 1.5vw, 8px)",
                   fontWeight: "600"
                 }}>
                   Forma de Pagamento
                 </div>
                 <div style={{
-                  fontSize: "16px",
+                  fontSize: "clamp(14px, 3.5vw, 16px)",
                   fontWeight: "700",
-                  color: "#0a0a0a"
+                  color: "#0a0a0a",
+                  wordBreak: "break-word"
                 }}>
                   {getFormaPagamentoLabel(pedido.forma_pagamento)}
                 </div>
@@ -318,22 +337,23 @@ function SucessoContent() {
 
               <div>
                 <div style={{
-                  fontSize: "13px",
+                  fontSize: "clamp(11px, 2.8vw, 13px)",
                   color: "#666",
-                  marginBottom: "8px",
+                  marginBottom: "clamp(6px, 1.5vw, 8px)",
                   fontWeight: "600"
                 }}>
                   Status
                 </div>
                 <div>
                   <span style={{
-                    padding: "8px 16px",
+                    padding: "clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px)",
                     background: "rgba(245, 158, 11, 0.1)",
                     color: "#f59e0b",
-                    borderRadius: "8px",
-                    fontSize: "14px",
+                    borderRadius: "clamp(6px, 1.5vw, 8px)",
+                    fontSize: "clamp(12px, 3vw, 14px)",
                     fontWeight: "700",
-                    display: "inline-block"
+                    display: "inline-block",
+                    wordBreak: "break-word"
                   }}>
                     ⏳ Aguardando Pagamento
                   </span>
@@ -342,18 +362,19 @@ function SucessoContent() {
 
               <div>
                 <div style={{
-                  fontSize: "13px",
+                  fontSize: "clamp(11px, 2.8vw, 13px)",
                   color: "#666",
-                  marginBottom: "8px",
+                  marginBottom: "clamp(6px, 1.5vw, 8px)",
                   fontWeight: "600"
                 }}>
                   Valor Total
                 </div>
                 <div style={{
-                  fontSize: "24px",
+                  fontSize: "clamp(20px, 5vw, 24px)",
                   fontWeight: "900",
                   color: "#10b981",
-                  letterSpacing: "-0.5px"
+                  letterSpacing: "-0.5px",
+                  wordBreak: "break-word"
                 }}>
                   R$ {Number(pedido.total).toFixed(2)}
                 </div>
@@ -364,17 +385,21 @@ function SucessoContent() {
           {/* Mensagem adicional */}
           <div style={{
             background: "linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%)",
-            borderRadius: "16px",
-            padding: "20px",
-            marginBottom: "32px",
+            borderRadius: "clamp(12px, 3vw, 16px)",
+            padding: "clamp(16px, 4vw, 20px)",
+            marginBottom: "clamp(24px, 6vw, 32px)",
             border: "1px solid rgba(139, 92, 246, 0.2)"
           }}>
-            <div style={{ fontSize: "24px", marginBottom: "8px" }}>📧</div>
+            <div style={{ 
+              fontSize: "clamp(20px, 5vw, 24px)", 
+              marginBottom: "clamp(6px, 1.5vw, 8px)" 
+            }}>📧</div>
             <p style={{
-              fontSize: "15px",
+              fontSize: "clamp(13px, 3.2vw, 15px)",
               color: "#666",
               lineHeight: "1.6",
-              margin: 0
+              margin: 0,
+              wordBreak: "break-word"
             }}>
               Um e-mail de confirmação foi enviado para <strong style={{ color: "#0a0a0a" }}>{pedido.cliente_email}</strong> com todos os detalhes do seu pedido.
             </p>
@@ -383,7 +408,7 @@ function SucessoContent() {
           {/* Botões de ação */}
           <div style={{
             display: "flex",
-            gap: "16px",
+            gap: "clamp(12px, 3vw, 16px)",
             justifyContent: "center",
             flexWrap: "wrap"
           }}>
@@ -391,17 +416,21 @@ function SucessoContent() {
               href="/"
               className="success-button"
               style={{
-                display: "inline-block",
-                padding: "16px 40px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "clamp(12px, 3vw, 16px) clamp(24px, 6vw, 40px)",
+                minHeight: "44px",
                 background: "#0a0a0a",
                 color: "white",
                 textDecoration: "none",
-                borderRadius: "12px",
-                fontSize: "16px",
+                borderRadius: "clamp(8px, 2vw, 12px)",
+                fontSize: "clamp(14px, 3.5vw, 16px)",
                 fontWeight: "700",
                 transition: "all 0.3s",
                 border: "none",
-                cursor: "pointer"
+                cursor: "pointer",
+                wordBreak: "break-word"
               }}
             >
               Voltar para a loja
@@ -411,17 +440,21 @@ function SucessoContent() {
               href={`/pedido/${pedido.id}`}
               className="success-button"
               style={{
-                display: "inline-block",
-                padding: "16px 40px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "clamp(12px, 3vw, 16px) clamp(24px, 6vw, 40px)",
+                minHeight: "44px",
                 background: "white",
                 color: "#0a0a0a",
                 textDecoration: "none",
-                borderRadius: "12px",
-                fontSize: "16px",
+                borderRadius: "clamp(8px, 2vw, 12px)",
+                fontSize: "clamp(14px, 3.5vw, 16px)",
                 fontWeight: "700",
                 transition: "all 0.3s",
                 border: "2px solid #0a0a0a",
-                cursor: "pointer"
+                cursor: "pointer",
+                wordBreak: "break-word"
               }}
             >
               Ver meus pedidos
@@ -441,11 +474,19 @@ export default function SucessoPage() {
         background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
         display: "flex",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        padding: "clamp(16px, 4vw, 20px)"
       }}>
         <div style={{ textAlign: "center", color: "white" }}>
-          <div style={{ fontSize: "48px", marginBottom: "16px" }}>⏳</div>
-          <p style={{ fontSize: "18px", fontWeight: "600" }}>Carregando...</p>
+          <div style={{ 
+            fontSize: "clamp(32px, 8vw, 48px)", 
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>⏳</div>
+          <p style={{ 
+            fontSize: "clamp(14px, 3.5vw, 18px)", 
+            fontWeight: "600",
+            wordBreak: "break-word"
+          }}>Carregando...</p>
         </div>
       </div>
     }>
