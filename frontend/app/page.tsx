@@ -575,7 +575,7 @@ export default function Home() {
       <footer style={{
         background: "#0a0a0a",
         color: "white",
-        padding: "80px 48px 40px"
+        padding: "clamp(40px, 10vw, 80px) clamp(20px, 5vw, 48px) 40px"
       }}>
         <div style={{
           maxWidth: "1440px",
@@ -584,9 +584,9 @@ export default function Home() {
           {/* Footer Content */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "2fr 1fr 1fr 1fr",
-            gap: "64px",
-            marginBottom: "64px"
+            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+            gap: "clamp(32px, 8vw, 64px)",
+            marginBottom: "clamp(32px, 8vw, 64px)"
           }}>
             {/* Coluna 1 - Logo e Descrição */}
             <div>
@@ -594,13 +594,13 @@ export default function Home() {
                 src="/logo.png" 
                 alt="Logo" 
                 style={{ 
-                  height: "64px", 
-                  marginBottom: "24px",
+                  height: "clamp(48px, 10vw, 64px)", 
+                  marginBottom: "20px",
                   filter: "brightness(0) invert(1)"
                 }} 
               />
               <h3 style={{
-                fontSize: "24px",
+                fontSize: "clamp(18px, 4vw, 24px)",
                 fontWeight: "800",
                 marginBottom: "12px",
                 letterSpacing: "-0.5px"
@@ -608,10 +608,10 @@ export default function Home() {
                 Empório Bothanico
               </h3>
               <p style={{
-                fontSize: "14px",
+                fontSize: "clamp(13px, 2.5vw, 14px)",
                 color: "#999",
                 lineHeight: "1.7",
-                marginBottom: "24px"
+                marginBottom: "20px"
               }}>
                 Oferecemos uma experiência única em fragrâncias e produtos de banho, cuidadosamente selecionados para você.
               </p>
@@ -620,11 +620,11 @@ export default function Home() {
             {/* Coluna 2 - Links */}
             <div>
               <h4 style={{
-                fontSize: "13px",
+                fontSize: "clamp(11px, 2.2vw, 13px)",
                 fontWeight: "700",
                 letterSpacing: "1px",
                 textTransform: "uppercase",
-                marginBottom: "20px",
+                marginBottom: "16px",
                 color: "#fff"
               }}>
                 Navegação
@@ -638,11 +638,11 @@ export default function Home() {
             {/* Coluna 3 - Atendimento */}
             <div>
               <h4 style={{
-                fontSize: "13px",
+                fontSize: "clamp(11px, 2.2vw, 13px)",
                 fontWeight: "700",
                 letterSpacing: "1px",
                 textTransform: "uppercase",
-                marginBottom: "20px",
+                marginBottom: "16px",
                 color: "#fff"
               }}>
                 Atendimento
@@ -656,19 +656,19 @@ export default function Home() {
             {/* Coluna 4 - Contato */}
             <div>
               <h4 style={{
-                fontSize: "13px",
+                fontSize: "clamp(11px, 2.2vw, 13px)",
                 fontWeight: "700",
                 letterSpacing: "1px",
                 textTransform: "uppercase",
-                marginBottom: "20px",
+                marginBottom: "16px",
                 color: "#fff"
               }}>
                 Fale Conosco
               </h4>
-              <p style={{ fontSize: "14px", color: "#999", marginBottom: "12px" }}>
+              <p style={{ fontSize: "clamp(12px, 2.5vw, 14px)", color: "#999", marginBottom: "12px", wordBreak: "break-word" }}>
                 📧 contato@emporiobothanico.com.br
               </p>
-              <p style={{ fontSize: "14px", color: "#999", marginBottom: "12px" }}>
+              <p style={{ fontSize: "clamp(12px, 2.5vw, 14px)", color: "#999", marginBottom: "12px", wordBreak: "break-word" }}>
                 📱 (11) 99999-9999
               </p>
               <p style={{ fontSize: "14px", color: "#999" }}>
