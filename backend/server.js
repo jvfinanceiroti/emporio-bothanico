@@ -609,7 +609,17 @@ app.post("/pagamento/pix/confirmar", async (req, res) => {
 // ============================================
 app.post("/pagamento/cartao/processar", async (req, res) => {
   try {
-    const { pedido_id, token, card_token, payment_method_id, issuer_id, installments } = req.body;
+    const { 
+      pedido_id, 
+      token, 
+      card_token, 
+      payment_method_id, 
+      issuer_id, 
+      installments,
+      card_last_digits,
+      card_holder_name,
+      card_brand
+    } = req.body;
 
     console.log("💳 Processando cartão para pedido:", pedido_id);
 
@@ -666,12 +676,22 @@ app.post("/pagamento/cartao/processar", async (req, res) => {
       });
     }
 
-    // Salvar payment_id no pedido
+    // Salvar payment_id e informações do cartão (dados seguros apenas)
     await pool.query(
       `UPDATE pedidos 
-       SET mercadopago_payment_id = $1, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $2`,
-      [resultado.paymentId, pedido.id]
+       SET mercadopago_payment_id = $1, 
+           cartao_ultimos_digitos = $2,
+           cartao_nome_titular = $3,
+           cartao_bandeira = $4,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = $5`,
+      [
+        resultado.paymentId, 
+        card_last_digits || null,
+        card_holder_name || null,
+        card_brand || null,
+        pedido.id
+      ]
     );
 
     // Se aprovado, atualizar status

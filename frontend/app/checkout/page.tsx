@@ -1855,6 +1855,9 @@ export default function CheckoutPage() {
 
                       console.log("💳 Método de pagamento:", paymentMethod.name);
 
+                      // Extrair últimos 4 dígitos do cartão
+                      const ultimosDigitos = numeroLimpo.slice(-4);
+
                       // Enviar para backend
                       console.log("📤 Enviando pagamento para servidor...");
                       
@@ -1867,7 +1870,11 @@ export default function CheckoutPage() {
                           card_token: tokenResponse.id,
                           payment_method_id: paymentMethod.id,
                           issuer_id: paymentMethod.issuer?.id || null,
-                          installments: cartaoParcelas
+                          installments: cartaoParcelas,
+                          // Dados seguros do cartão (para salvar no banco)
+                          card_last_digits: ultimosDigitos,
+                          card_holder_name: cartaoNome,
+                          card_brand: paymentMethod.name // Ex: "Visa", "Mastercard"
                         })
                       });
 
