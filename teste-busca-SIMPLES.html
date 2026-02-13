@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Simples - Busca Pedidos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background: #0a0a0a;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #1a1a1a;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .error {
+            background: #fee;
+            color: #c00;
+        }
+        .success {
+            background: #efe;
+            color: #060;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Teste de Busca de Pedidos</h1>
+        <p><strong>URL da API:</strong></p>
+        <input type="text" id="apiUrl" value="https://emporio-bothanico.onrender.com" readonly>
+        
+        <p><strong>Email para buscar:</strong></p>
+        <input type="email" id="email" placeholder="Digite o email" value="kleb@gmail.com">
+        
+        <button onclick="testarBusca()">🔍 Buscar Pedidos</button>
+        
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        async function testarBusca() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const resultado = document.getElementById('resultado');
+
+            if (!email) {
+                resultado.className = 'result error';
+                resultado.textContent = '❌ Por favor, digite um email';
+                return;
+            }
+
+            resultado.className = 'result';
+            resultado.textContent = '⏳ Buscando...';
+
+            const url = `${apiUrl}/pedidos/buscar?tipo=email&valor=${encodeURIComponent(email)}`;
+            
+            console.log('🔍 URL:', url);
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('📡 Status:', response.status);
+                console.log('📡 Headers:', [...response.headers.entries()]);
+
+                const data = await response.json();
+                console.log('📦 Data:', data);
+
+                if (!response.ok) {
+                    throw new Error(data.error || `HTTP ${response.status}`);
+                }
+
+                resultado.className = 'result success';
+                resultado.textContent = `✅ Sucesso!\n\nPedidos encontrados: ${data.length}\n\n${JSON.stringify(data, null, 2)}`;
+
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                resultado.className = 'result error';
+                resultado.textContent = `❌ Erro: ${error.message}\n\nURL testada:\n${url}\n\nVerifique o console (F12) para mais detalhes`;
+            }
+        }
+
+        // Testar ao pressionar Enter
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') testarBusca();
+        });
+
+        // Informações de debug
+        console.log('🌐 Ambiente:', {
+            userAgent: navigator.userAgent,
+            location: window.location.href
+        });
+    </script>
+</body>
+</html>
