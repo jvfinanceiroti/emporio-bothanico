@@ -413,10 +413,58 @@ app.get("/admin/pedidos/:id", verificarToken, async (req, res) => {
   try {
     const { id } = req.params;
 
-    const pedido = await pool.query(
-      "SELECT * FROM pedidos WHERE id = $1",
-      [id]
-    );
+    let pedido;
+    try {
+      // Tentar buscar com codigo_rastreio
+      pedido = await pool.query(
+        `SELECT 
+          id,
+          cliente_nome,
+          cliente_email,
+          cliente_telefone,
+          total,
+          status,
+          created_at as criado_em,
+          endereco_cep,
+          endereco_rua,
+          endereco_numero,
+          endereco_complemento,
+          endereco_bairro,
+          endereco_cidade,
+          endereco_estado,
+          frete,
+          forma_pagamento,
+          codigo_rastreio
+        FROM pedidos 
+        WHERE id = $1`,
+        [id]
+      );
+    } catch (columnError) {
+      // Se falhar, buscar sem codigo_rastreio
+      console.log("Coluna codigo_rastreio não existe, buscando sem ela");
+      pedido = await pool.query(
+        `SELECT 
+          id,
+          cliente_nome,
+          cliente_email,
+          cliente_telefone,
+          total,
+          status,
+          created_at as criado_em,
+          endereco_cep,
+          endereco_rua,
+          endereco_numero,
+          endereco_complemento,
+          endereco_bairro,
+          endereco_cidade,
+          endereco_estado,
+          frete,
+          forma_pagamento
+        FROM pedidos 
+        WHERE id = $1`,
+        [id]
+      );
+    }
 
     const itens = await pool.query(`
       SELECT
