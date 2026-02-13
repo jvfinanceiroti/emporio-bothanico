@@ -770,7 +770,7 @@ export default function Home() {
               © 2026 Empório Bothanico - Delicadezas e Banho. Todos os direitos reservados.
             </p>
             <p style={{ fontSize: "12px", color: "#555", marginTop: "8px" }}>
-              CNPJ: 00.000.000/0001-00 | Razão Social: Empório Bothanico LTDA
+              CNPJ: 04.280.033/0001-93 | Razão Social: LAMBARI PERFUMARIA LTDA - ME
             </p>
           </div>
         </div>
