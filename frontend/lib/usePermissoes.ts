@@ -31,6 +31,7 @@ export function usePermissoes() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
+        console.log('⚠️ usePermissoes: Sem token, pulando busca de permissões');
         setCarregando(false);
         return;
       }
@@ -44,6 +45,8 @@ export function usePermissoes() {
       if (response.ok) {
         const data = await response.json();
         setPermissoes(data);
+      } else {
+        console.warn('⚠️ Falha ao carregar permissões, mas não é crítico');
       }
     } catch (error) {
       console.error('Erro ao carregar permissões:', error);
