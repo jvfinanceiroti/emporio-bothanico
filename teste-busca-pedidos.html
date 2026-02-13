@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Busca de Pedidos</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0a0a0a;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #0a0a0a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #1a1a1a;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        .info {
+            margin-top: 30px;
+            padding: 15px;
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Teste de Busca de Pedidos</h1>
+        
+        <div class="form-group">
+            <label for="apiUrl">URL da API:</label>
+            <input type="text" id="apiUrl" value="https://emporio-bothanico.onrender.com" placeholder="URL do backend">
+        </div>
+
+        <div class="form-group">
+            <label for="tipoBusca">Tipo de Busca:</label>
+            <select id="tipoBusca">
+                <option value="email">Email</option>
+                <option value="cpf">CPF</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="valor">Valor:</label>
+            <input type="text" id="valor" placeholder="Digite o email ou CPF">
+        </div>
+
+        <button id="btnBuscar" onclick="buscarPedidos()">Buscar Pedidos</button>
+
+        <div id="resultado"></div>
+
+        <div class="info">
+            <h3>📋 Emails de Teste</h3>
+            <p><strong>Email teste:</strong> kleb@gmail.com</p>
+            <p><strong>Backend esperado:</strong> https://emporio-bothanico.onrender.com</p>
+        </div>
+    </div>
+
+    <script>
+        async function buscarPedidos() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const tipo = document.getElementById('tipoBusca').value;
+            const valor = document.getElementById('valor').value.trim();
+            const resultado = document.getElementById('resultado');
+            const btnBuscar = document.getElementById('btnBuscar');
+
+            if (!valor) {
+                alert('Por favor, digite um email ou CPF');
+                return;
+            }
+
+            btnBuscar.disabled = true;
+            btnBuscar.textContent = 'Buscando...';
+
+            const valorLimpo = tipo === 'cpf' ? valor.replace(/\D/g, '') : valor;
+            const url = `${apiUrl}/pedidos/buscar?tipo=${tipo}&valor=${encodeURIComponent(valorLimpo)}`;
+
+            console.log('🔍 Fazendo requisição para:', url);
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || `Erro ${response.status}`);
+                }
+
+                console.log('✅ Resposta:', data);
+
+                resultado.className = 'result success';
+                resultado.innerHTML = `
+                    <h3>✅ Sucesso!</h3>
+                    <p><strong>Pedidos encontrados:</strong> ${data.length}</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('❌ Erro:', error);
+
+                resultado.className = 'result error';
+                resultado.innerHTML = `
+                    <h3>❌ Erro</h3>
+                    <p><strong>Mensagem:</strong> ${error.message}</p>
+                    <p><strong>URL testada:</strong> ${url}</p>
+                    <p><strong>Dica:</strong> Verifique se o backend está rodando e se a URL está correta.</p>
+                `;
+            } finally {
+                btnBuscar.disabled = false;
+                btnBuscar.textContent = 'Buscar Pedidos';
+            }
+        }
+
+        // Permitir buscar ao pressionar Enter
+        document.getElementById('valor').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                buscarPedidos();
+            }
+        });
+    </script>
+</body>
+</html>
