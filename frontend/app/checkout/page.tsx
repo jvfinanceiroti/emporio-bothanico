@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_URL } from "@/lib/api";
+import { validarNumeroCartao, detectarBandeira, validarValidade, formatarNumeroCartao, formatarValidade } from "@/utils/cartao-validacao";
 
 interface ItemCarrinho {
   id: number;
@@ -59,6 +60,9 @@ export default function CheckoutPage() {
   const [cartaoParcelas, setCartaoParcelas] = useState(1);
   const [processandoCartao, setProcessandoCartao] = useState(false);
   const [mercadoPagoReady, setMercadoPagoReady] = useState(false);
+  const [cartaoBandeira, setCartaoBandeira] = useState<string | null>(null);
+  const [numeroValido, setNumeroValido] = useState<boolean | null>(null);
+  const [validadeValida, setValidadeValida] = useState<boolean | null>(null);
 
   // Carregar SDK do Mercado Pago
   useEffect(() => {
@@ -1634,21 +1638,47 @@ export default function CheckoutPage() {
                     value={cartaoNumero}
                     onChange={(e) => {
                       const valor = e.target.value.replace(/\D/g, "");
-                      const formatado = valor.replace(/(\d{4})(?=\d)/g, "$1 ");
-                      setCartaoNumero(formatado.trim());
+                      const formatado = formatarNumeroCartao(valor);
+                      setCartaoNumero(formatado);
+                      
+                      // Validar número
+                      if (valor.length >= 13) {
+                        const valido = validarNumeroCartao(valor);
+                        setNumeroValido(valido);
+                        
+                        // Detectar bandeira
+                        if (valido) {
+                          const bandeira = detectarBandeira(valor);
+                          setCartaoBandeira(bandeira);
+                        }
+                      } else {
+                        setNumeroValido(null);
+                        setCartaoBandeira(null);
+                      }
                     }}
                     placeholder="1234 5678 9012 3456"
                     maxLength={19}
                     style={{
                       width: "100%",
                       padding: "12px 16px",
-                      border: "2px solid #e5e7eb",
+                      border: `2px solid ${numeroValido === false ? "#ef4444" : numeroValido === true ? "#10b981" : "#e5e7eb"}`,
                       borderRadius: "8px",
                       fontSize: "15px",
                       color: "#0a0a0a",
                       backgroundColor: "white"
                     }}
                   />
+                  {/* Feedback visual */}
+                  {cartaoBandeira && numeroValido && (
+                    <div style={{ marginTop: "8px", fontSize: "13px", color: "#10b981", fontWeight: "600" }}>
+                      ✓ {cartaoBandeira}
+                    </div>
+                  )}
+                  {numeroValido === false && (
+                    <div style={{ marginTop: "8px", fontSize: "13px", color: "#ef4444" }}>
+                      ✗ Número de cartão inválido
+                    </div>
+                  )}
                 </div>
 
                 {/* Nome no Cartão */}
@@ -1701,24 +1731,35 @@ export default function CheckoutPage() {
                       type="text"
                       value={cartaoValidade}
                       onChange={(e) => {
-                        let valor = e.target.value.replace(/\D/g, "");
-                        if (valor.length >= 2) {
-                          valor = valor.slice(0, 2) + "/" + valor.slice(2, 4);
+                        const valor = e.target.value.replace(/\D/g, "");
+                        const formatado = formatarValidade(valor);
+                        setCartaoValidade(formatado);
+                        
+                        // Validar validade
+                        if (valor.length === 4) {
+                          const resultado = validarValidade(formatado);
+                          setValidadeValida(resultado.valido);
+                        } else {
+                          setValidadeValida(null);
                         }
-                        setCartaoValidade(valor);
                       }}
                       placeholder="MM/AA"
                       maxLength={5}
                       style={{
                         width: "100%",
                         padding: "12px 16px",
-                        border: "2px solid #e5e7eb",
+                        border: `2px solid ${validadeValida === false ? "#ef4444" : validadeValida === true ? "#10b981" : "#e5e7eb"}`,
                         borderRadius: "8px",
                         fontSize: "15px",
                         color: "#0a0a0a",
                         backgroundColor: "white"
                       }}
                     />
+                    {validadeValida === false && (
+                      <div style={{ marginTop: "4px", fontSize: "12px", color: "#ef4444" }}>
+                        ✗ Validade inválida ou expirada
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label style={{
@@ -1835,6 +1876,21 @@ export default function CheckoutPage() {
                     // Validação básica
                     if (!cartaoNumero || !cartaoNome || !cartaoValidade || !cartaoCvv || !cartaoDocumento) {
                       setMensagemAlerta("Preencha todos os campos do cartão");
+                      setMostrarAlerta(true);
+                      return;
+                    }
+                    
+                    // Validar número do cartão
+                    if (!validarNumeroCartao(cartaoNumero.replace(/\D/g, ""))) {
+                      setMensagemAlerta("Número do cartão inválido. Verifique e tente novamente.");
+                      setMostrarAlerta(true);
+                      return;
+                    }
+                    
+                    // Validar validade
+                    const resultadoValidade = validarValidade(cartaoValidade);
+                    if (!resultadoValidade.valido) {
+                      setMensagemAlerta(`Validade inválida: ${resultadoValidade.mensagem || "Verifique a data"}`);
                       setMostrarAlerta(true);
                       return;
                     }
