@@ -767,23 +767,42 @@ app.get("/admin/dashboard", verificarToken, async (req, res) => {
 // LISTAR FUNCIONÁRIOS
 app.get("/admin/funcionarios", verificarToken, async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT 
-        u.id,
-        u.nome,
-        u.email,
-        u.role,
-        u.created_at,
-        p.*
-      FROM usuarios u
-      LEFT JOIN permissoes p ON u.id = p.usuario_id
-      WHERE u.role = 'funcionario'
-      ORDER BY u.created_at DESC
-    `);
-    
-    res.json(result.rows);
+    // Tentar com permissoes primeiro
+    try {
+      const result = await pool.query(`
+        SELECT 
+          u.id,
+          u.nome,
+          u.email,
+          u.role,
+          u.created_at,
+          p.*
+        FROM usuarios u
+        LEFT JOIN permissoes p ON u.id = p.usuario_id
+        WHERE u.role = 'funcionario'
+        ORDER BY u.created_at DESC
+      `);
+      
+      return res.json(result.rows);
+    } catch (joinError) {
+      // Se falhar, tentar sem a tabela permissoes
+      console.log("⚠️ Tabela permissoes não existe, buscando só usuários");
+      const result = await pool.query(`
+        SELECT 
+          id,
+          nome,
+          email,
+          role,
+          created_at
+        FROM usuarios
+        WHERE role = 'funcionario'
+        ORDER BY created_at DESC
+      `);
+      
+      return res.json(result.rows);
+    }
   } catch (error) {
-    console.error(error);
+    console.error("Erro ao listar funcionários:", error);
     res.status(500).json({ error: "Erro ao listar funcionários" });
   }
 });
