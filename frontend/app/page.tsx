@@ -363,12 +363,13 @@ export default function Home() {
             </p>
           </div>
         ) : (
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-            gap: "32px"
-          }}>
-            {produtos.map((produto) => (
+          <>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+              gap: "32px"
+            }}>
+              {produtos.map((produto) => (
               <Link 
                 key={produto.id} 
                 href={`/produto/${produto.id}`}
@@ -568,15 +569,15 @@ export default function Home() {
                   </div>
                 </div>
               </Link>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* Botão Ver Todos os Produtos */}
-          <div style={{
-            display: "flex",
-            justifyContent: "center",
-            marginTop: "clamp(48px, 12vw, 64px)"
-          }}>
+            {/* Botão Ver Todos os Produtos */}
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              marginTop: "clamp(48px, 12vw, 64px)"
+            }}>
             <Link
               href="/produtos"
               style={{
@@ -612,6 +613,7 @@ export default function Home() {
               <span style={{ fontSize: "clamp(16px, 4vw, 18px)" }}>→</span>
             </Link>
           </div>
+          </>
         )}
       </main>
 
