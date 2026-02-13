@@ -64,6 +64,14 @@ export default function Home() {
       minHeight: "100vh",
       background: "#ffffff"
     }}>
+      <style jsx global>{`
+        @media (min-width: 768px) {
+          .desktop-only {
+            display: flex !important;
+          }
+        }
+      `}</style>
+      
       {/* HEADER MODERNO */}
       <header style={{
         background: "rgba(255, 255, 255, 0.98)",
@@ -129,6 +137,54 @@ export default function Home() {
           </Link>
 
           <nav style={{ display: "flex", gap: "12px", alignItems: "center", flexShrink: 0 }}>
+            <Link 
+              href="/produtos"
+              style={{
+                padding: "10px 20px",
+                background: "transparent",
+                color: "#0a0a0a",
+                textDecoration: "none",
+                borderRadius: "12px",
+                fontSize: "14px",
+                fontWeight: "600",
+                transition: "all 0.3s",
+                display: "none"
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = "#f8f9fa";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+              className="desktop-only"
+            >
+              Produtos
+            </Link>
+            
+            <Link 
+              href="/meus-pedidos"
+              style={{
+                padding: "10px 20px",
+                background: "transparent",
+                color: "#0a0a0a",
+                textDecoration: "none",
+                borderRadius: "12px",
+                fontSize: "14px",
+                fontWeight: "600",
+                transition: "all 0.3s",
+                display: "none"
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = "#f8f9fa";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = "transparent";
+              }}
+              className="desktop-only"
+            >
+              Meus Pedidos
+            </Link>
+            
             <Link 
               href="/carrinho"
               style={{
@@ -669,7 +725,7 @@ export default function Home() {
                 📧 contato@emporiobothanico.com.br
               </p>
               <p style={{ fontSize: "clamp(12px, 2.5vw, 14px)", color: "#999", marginBottom: "12px", wordBreak: "break-word" }}>
-                📱 (11) 99999-9999
+                📱 (31) 3831-0866
               </p>
               <p style={{ fontSize: "14px", color: "#999" }}>
                 🕐 Seg-Sex: 9h às 18h
