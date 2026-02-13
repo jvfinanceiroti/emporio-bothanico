@@ -77,17 +77,21 @@ export default function AdminHeader() {
             }}>
               Painel Admin
             </h1>
-            {permissoes && (
-              <p style={{
-                fontSize: "clamp(10px, 2.5vw, 12px)",
-                color: "#6b7280",
-                margin: 0,
-                marginTop: "2px"
-              }}>
-                {isAdmin() ? "👑 Administrador" : "👤 Funcionário"}
-                {nomeUsuario && ` • Olá, ${nomeUsuario}`}
-              </p>
-            )}
+            <p style={{
+              fontSize: "clamp(11px, 2.8vw, 13px)",
+              color: "#667eea",
+              margin: 0,
+              marginTop: "4px",
+              fontWeight: "600"
+            }}>
+              {nomeUsuario ? (
+                <>
+                  {isAdmin() ? "👑" : "👤"} Olá, <strong>{nomeUsuario}</strong>
+                </>
+              ) : (
+                "Carregando..."
+              )}
+            </p>
           </div>
         </div>
 
@@ -97,29 +101,6 @@ export default function AdminHeader() {
           gap: "clamp(12px, 3vw, 16px)",
           flexWrap: "wrap"
         }}>
-          {nomeUsuario && (
-            <div style={{
-              padding: "clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px)",
-              background: "#f3f4f6",
-              borderRadius: "clamp(6px, 1.5vw, 8px)",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              minHeight: "44px"
-            }}>
-              <span style={{ fontSize: "20px" }}>
-                {isAdmin() ? "👑" : "👤"}
-              </span>
-              <span style={{
-                fontSize: "clamp(12px, 3vw, 14px)",
-                fontWeight: "600",
-                color: "#374151"
-              }}>
-                {nomeUsuario}
-              </span>
-            </div>
-          )}
-
           <button
             onClick={handleLogout}
             style={{
