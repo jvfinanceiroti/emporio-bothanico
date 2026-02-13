@@ -26,7 +26,6 @@ interface Funcionario {
   nome: string;
   email: string;
   role: string;
-  created_at: string;
   usuario_id?: number;
   pode_criar_produtos?: boolean;
   pode_editar_produtos?: boolean;
@@ -304,7 +303,6 @@ export default function FuncionariosPage() {
                 <tr style={{ borderBottom: "2px solid #e5e7eb" }}>
                   <th style={{ padding: "12px", textAlign: "left", color: "#374151", fontWeight: "600" }}>Nome</th>
                   <th style={{ padding: "12px", textAlign: "left", color: "#374151", fontWeight: "600" }}>Email</th>
-                  <th style={{ padding: "12px", textAlign: "left", color: "#374151", fontWeight: "600" }}>Cadastro</th>
                   <th style={{ padding: "12px", textAlign: "center", color: "#374151", fontWeight: "600" }}>Ações</th>
                 </tr>
               </thead>
@@ -313,9 +311,6 @@ export default function FuncionariosPage() {
                   <tr key={func.id} style={{ borderBottom: "1px solid #e5e7eb" }}>
                     <td style={{ padding: "12px", color: "#0a0a0a" }}>{func.nome}</td>
                     <td style={{ padding: "12px", color: "#0a0a0a" }}>{func.email}</td>
-                    <td style={{ padding: "12px", color: "#0a0a0a" }}>
-                      {new Date(func.created_at).toLocaleDateString("pt-BR")}
-                    </td>
                     <td style={{ padding: "12px", textAlign: "center" }}>
                       <button
                         onClick={() => abrirModalEditar(func)}
