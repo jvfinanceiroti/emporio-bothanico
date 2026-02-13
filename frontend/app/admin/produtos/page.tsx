@@ -14,6 +14,8 @@ export default function AdminProdutos() {
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
   const [busca, setBusca] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const produtosPorPagina = 30;
 
   const [novoNome, setNovoNome] = useState("");
   const [novaDescricao, setNovaDescricao] = useState("");
@@ -105,6 +107,7 @@ export default function AdminProdutos() {
     }
 
     setProdutosFiltrados(resultado);
+    setPaginaAtual(1); // Reset para primeira página quando filtrar
   }, [busca, filtroStatus, produtos]);
 
   useEffect(() => {
@@ -326,6 +329,12 @@ export default function AdminProdutos() {
     }
   };
 
+  // Cálculos de paginação
+  const totalPaginas = Math.ceil(produtosFiltrados.length / produtosPorPagina);
+  const indexUltimoProduto = paginaAtual * produtosPorPagina;
+  const indexPrimeiroProduto = indexUltimoProduto - produtosPorPagina;
+  const produtosPaginaAtual = produtosFiltrados.slice(indexPrimeiroProduto, indexUltimoProduto);
+
   if (!autenticado) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -543,7 +552,7 @@ export default function AdminProdutos() {
             </p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 16px)" }}>
-              {produtosFiltrados.map(p => (
+              {produtosPaginaAtual.map(p => (
                 <div key={p.id} style={{ border: "1px solid #e5e7eb", borderRadius: "clamp(8px, 2vw, 12px)", padding: "clamp(12px, 3vw, 16px)" }}>
                   {editandoId === p.id ? (
                     <div style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 16px)" }}>
@@ -771,6 +780,100 @@ export default function AdminProdutos() {
               ))}
             </div>
           )}
+
+          {/* PAGINAÇÃO */}
+          {totalPaginas > 1 && (
+            <div style={{
+              marginTop: "clamp(24px, 5vw, 32px)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "clamp(8px, 2vw, 12px)",
+              flexWrap: "wrap"
+            }}>
+              <button
+                onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
+                disabled={paginaAtual === 1}
+                style={{
+                  padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)",
+                  background: paginaAtual === 1 ? "#e5e7eb" : "#3b82f6",
+                  color: paginaAtual === 1 ? "#9ca3af" : "white",
+                  border: "none",
+                  borderRadius: "clamp(6px, 1.5vw, 8px)",
+                  fontSize: "clamp(12px, 2.5vw, 14px)",
+                  fontWeight: "600",
+                  cursor: paginaAtual === 1 ? "not-allowed" : "pointer",
+                  transition: "all 0.2s"
+                }}
+              >
+                ← Anterior
+              </button>
+
+              <div style={{
+                display: "flex",
+                gap: "clamp(4px, 1vw, 6px)",
+                alignItems: "center"
+              }}>
+                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(pagina => (
+                  <button
+                    key={pagina}
+                    onClick={() => setPaginaAtual(pagina)}
+                    style={{
+                      padding: "clamp(8px, 2vw, 10px)",
+                      minWidth: "clamp(32px, 8vw, 40px)",
+                      background: paginaAtual === pagina ? "#3b82f6" : "white",
+                      color: paginaAtual === pagina ? "white" : "#374151",
+                      border: `1px solid ${paginaAtual === pagina ? "#3b82f6" : "#d1d5db"}`,
+                      borderRadius: "clamp(6px, 1.5vw, 8px)",
+                      fontSize: "clamp(12px, 2.5vw, 14px)",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                    onMouseOver={(e) => {
+                      if (paginaAtual !== pagina) {
+                        e.currentTarget.style.background = "#f3f4f6";
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (paginaAtual !== pagina) {
+                        e.currentTarget.style.background = "white";
+                      }
+                    }}
+                  >
+                    {pagina}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setPaginaAtual(prev => Math.min(totalPaginas, prev + 1))}
+                disabled={paginaAtual === totalPaginas}
+                style={{
+                  padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)",
+                  background: paginaAtual === totalPaginas ? "#e5e7eb" : "#3b82f6",
+                  color: paginaAtual === totalPaginas ? "#9ca3af" : "white",
+                  border: "none",
+                  borderRadius: "clamp(6px, 1.5vw, 8px)",
+                  fontSize: "clamp(12px, 2.5vw, 14px)",
+                  fontWeight: "600",
+                  cursor: paginaAtual === totalPaginas ? "not-allowed" : "pointer",
+                  transition: "all 0.2s"
+                }}
+              >
+                Próxima →
+              </button>
+            </div>
+          )}
+
+          <p style={{
+            textAlign: "center",
+            marginTop: "clamp(12px, 3vw, 16px)",
+            fontSize: "clamp(11px, 2.2vw, 13px)",
+            color: "#6b7280"
+          }}>
+            Mostrando {indexPrimeiroProduto + 1} a {Math.min(indexUltimoProduto, produtosFiltrados.length)} de {produtosFiltrados.length} produtos
+          </p>
         </div>
       </div>
     </div>
