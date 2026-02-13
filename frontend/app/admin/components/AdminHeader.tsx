@@ -32,26 +32,35 @@ export default function AdminHeader() {
       <div style={{
         maxWidth: "1400px",
         margin: "0 auto",
-        padding: "20px 40px",
+        padding: "clamp(12px, 3vw, 20px) clamp(16px, 4vw, 40px)",
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center"
+        alignItems: "center",
+        gap: "clamp(12px, 3vw, 16px)",
+        flexWrap: "wrap"
       }}>
         <div style={{
           display: "flex",
           alignItems: "center",
-          gap: "15px"
+          gap: "clamp(8px, 2vw, 15px)",
+          flexShrink: 0,
+          minWidth: "min(200px, 100%)"
         }}>
           <img 
             src="/logo.png" 
             alt="Logo" 
-            style={{ height: "50px", objectFit: "contain" }}
+            style={{ 
+              height: "clamp(40px, 10vw, 50px)", 
+              objectFit: "contain",
+              flexShrink: 0
+            }}
           />
           <h1 style={{
-            fontSize: "24px",
+            fontSize: "clamp(16px, 4vw, 24px)",
             fontWeight: "700",
             color: "#1f2937",
-            margin: 0
+            margin: 0,
+            whiteSpace: "nowrap"
           }}>
             Painel Admin
           </h1>
@@ -63,12 +72,15 @@ export default function AdminHeader() {
             background: "#ef4444",
             color: "white",
             border: "none",
-            padding: "12px 24px",
-            borderRadius: "8px",
+            padding: "clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 24px)",
+            borderRadius: "clamp(6px, 1.5vw, 8px)",
             cursor: "pointer",
             fontWeight: "600",
-            fontSize: "14px",
-            transition: "all 0.2s"
+            fontSize: "clamp(12px, 3vw, 14px)",
+            transition: "all 0.2s",
+            minHeight: "44px",
+            whiteSpace: "nowrap",
+            flexShrink: 0
           }}
           onMouseOver={(e) => e.currentTarget.style.background = "#dc2626"}
           onMouseOut={(e) => e.currentTarget.style.background = "#ef4444"}
@@ -80,12 +92,17 @@ export default function AdminHeader() {
       <div style={{
         maxWidth: "1400px",
         margin: "0 auto",
-        padding: "0 40px 20px"
+        padding: "0 clamp(16px, 4vw, 40px) clamp(12px, 3vw, 20px)"
       }}>
         <nav style={{
           display: "flex",
-          gap: "10px",
-          borderBottom: "2px solid #e5e7eb"
+          gap: "clamp(4px, 1vw, 10px)",
+          borderBottom: "2px solid #e5e7eb",
+          overflowX: "auto",
+          overflowY: "hidden",
+          msOverflowStyle: "none",
+          scrollbarWidth: "none",
+          WebkitOverflowScrolling: "touch"
         }}>
           <MenuLink
             href="/admin/dashboard"
@@ -122,13 +139,20 @@ function MenuLink({ href, label, ativo }: { href: string; label: string; ativo: 
       href={href}
       style={{
         textDecoration: "none",
-        padding: "12px 24px",
+        padding: "clamp(10px, 2.5vw, 12px) clamp(12px, 3vw, 24px)",
         color: ativo ? "#667eea" : "#6b7280",
         fontWeight: "600",
+        fontSize: "clamp(12px, 3vw, 14px)",
         borderBottom: ativo ? "3px solid #667eea" : "3px solid transparent",
         transition: "all 0.2s",
         background: ativo ? "rgba(102, 126, 234, 0.1)" : "transparent",
-        borderRadius: "8px 8px 0 0"
+        borderRadius: "clamp(6px, 1.5vw, 8px) clamp(6px, 1.5vw, 8px) 0 0",
+        whiteSpace: "nowrap",
+        flexShrink: 0,
+        minHeight: "44px",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center"
       }}
       onMouseOver={(e) => {
         if (!ativo) {
