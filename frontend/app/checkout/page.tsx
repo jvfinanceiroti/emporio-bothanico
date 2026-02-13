@@ -1930,8 +1930,8 @@ export default function CheckoutPage() {
                         cpf: cpfLimpo.substring(0, 3) + "*****" + cpfLimpo.substring(8)
                       });
 
-                      // Inicializar Mercado Pago
-                      const mp = new (window as any).MercadoPago('APP_USR-73e9a69c-931e-415d-bfcc-4138c8893bc4');
+                      // Inicializar Mercado Pago (MODO TESTE)
+                      const mp = new (window as any).MercadoPago('TEST-9bd47a8a-40ec-49ad-ba72-f98afc2d0cc3');
 
                       // Criar token do cartão
                       const cardData = {
