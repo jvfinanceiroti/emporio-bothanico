@@ -85,19 +85,29 @@ export default function MeusPedidos() {
 
     try {
       const valor = tipoBusca === "cpf" ? busca.replace(/\D/g, "") : busca;
-      const url = `${apiUrl}/pedidos/buscar?tipo=${tipoBusca}&valor=${encodeURIComponent(valor)}`;
+      
+      // NOVO ENDPOINT SIMPLES!
+      const parametro = tipoBusca === "cpf" ? "cpf" : "email";
+      const url = `${apiUrl}/api/buscar-pedido-simples?${parametro}=${encodeURIComponent(valor)}`;
+      
+      console.log("🔥 Chamando endpoint SIMPLES:", url);
       
       const response = await fetch(url);
       
+      console.log("📡 Status da resposta:", response.status);
+      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Erro ao buscar pedidos`);
+        throw new Error(errorData.error || `Erro ao buscar pedidos (${response.status})`);
       }
 
       const data = await response.json();
+      console.log("✅ Pedidos recebidos:", data);
+      
       setPedidos(data || []);
       setBuscaRealizada(true);
     } catch (error: any) {
+      console.error("❌ Erro completo:", error);
       alert(`Erro ao buscar pedidos: ${error.message}`);
       setPedidos([]);
       setBuscaRealizada(true);

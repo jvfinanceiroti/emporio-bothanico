@@ -205,6 +205,44 @@ app.get("/produtos", async (req, res) => {
   }
 });
 
+// ==========================================
+// ENDPOINT SIMPLES DE BUSCA - SEM TOKEN!
+// ==========================================
+app.get("/api/buscar-pedido-simples", async (req, res) => {
+  console.log("\n🔥 ENDPOINT SUPER SIMPLES CHAMADO!");
+  console.log("📧 Query params:", req.query);
+  
+  const { email, cpf } = req.query;
+  
+  try {
+    let pedidos;
+    
+    if (email) {
+      console.log("🔍 Buscando por EMAIL:", email);
+      pedidos = await pool.query(
+        "SELECT * FROM pedidos WHERE cliente_email = $1 ORDER BY created_at DESC",
+        [email]
+      );
+    } else if (cpf) {
+      console.log("🔍 Buscando por CPF:", cpf);
+      const cpfLimpo = cpf.replace(/\D/g, "");
+      pedidos = await pool.query(
+        "SELECT * FROM pedidos WHERE cliente_cpf = $1 ORDER BY created_at DESC",
+        [cpfLimpo]
+      );
+    } else {
+      return res.status(400).json({ error: "Email ou CPF é obrigatório" });
+    }
+    
+    console.log("✅ Pedidos encontrados:", pedidos.rows.length);
+    res.json(pedidos.rows);
+    
+  } catch (error) {
+    console.error("❌ ERRO na busca:", error);
+    res.status(500).json({ error: "Erro ao buscar pedidos: " + error.message });
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
