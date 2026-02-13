@@ -274,7 +274,7 @@ function ProdutoContent() {
                   textTransform: "uppercase",
                   marginBottom: "16px"
                 }}>
-                  Empório Premium
+                  Empório Botânico
                 </div>
 
                 <h1 style={{

@@ -344,7 +344,7 @@ export default function Home() {
                       textTransform: "uppercase",
                       marginBottom: "12px"
                     }}>
-                      Empório Premium
+                      Empório Botânico
                     </div>
 
                     <h3 style={{
