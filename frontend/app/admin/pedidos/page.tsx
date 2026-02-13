@@ -751,6 +751,7 @@ export default function AdminPedidos() {
                               borderRadius: "8px",
                               fontSize: "14px",
                               fontWeight: "600",
+                              color: "#0a0a0a",
                               marginBottom: "12px"
                             }}
                           >
@@ -881,7 +882,8 @@ export default function AdminPedidos() {
                           border: "1px solid #d1d5db",
                           borderRadius: "8px",
                           fontSize: "14px",
-                          fontWeight: "600"
+                          fontWeight: "600",
+                          color: "#0a0a0a"
                         }}
                       />
                     ) : (

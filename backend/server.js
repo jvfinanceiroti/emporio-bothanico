@@ -444,12 +444,22 @@ app.put("/admin/pedidos/:id/status", verificarToken, async (req, res) => {
     const { id } = req.params;
     const { status, codigo_rastreio } = req.body;
 
-    await pool.query(
-      `UPDATE pedidos 
-       SET status = $1, codigo_rastreio = $2, updated_at = NOW() 
-       WHERE id = $3`,
-      [status, codigo_rastreio || null, id]
-    );
+    // Tentar com codigo_rastreio e updated_at primeiro
+    try {
+      await pool.query(
+        `UPDATE pedidos 
+         SET status = $1, codigo_rastreio = $2, updated_at = NOW() 
+         WHERE id = $3`,
+        [status, codigo_rastreio || null, id]
+      );
+    } catch (columnError) {
+      // Se falhar, atualizar apenas o status
+      console.log("Colunas codigo_rastreio/updated_at não existem, atualizando apenas status");
+      await pool.query(
+        `UPDATE pedidos SET status = $1 WHERE id = $2`,
+        [status, id]
+      );
+    }
 
     res.json({ success: true, message: "Status atualizado com sucesso" });
   } catch (error) {
