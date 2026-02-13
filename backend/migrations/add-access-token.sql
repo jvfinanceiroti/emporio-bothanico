@@ -1,11 +1,14 @@
--- Adicionar token de acesso único para cada pedido
-ALTER TABLE pedidos 
-ADD COLUMN IF NOT EXISTS access_token VARCHAR(64) UNIQUE;
+-- =============================================
+-- MIGRATION: Adicionar coluna access_token na tabela pedidos
+-- Data: 2026-02-13
+-- =============================================
 
--- Criar índice para busca rápida por token
+-- Adicionar coluna access_token (token único para acesso ao pedido sem login)
+ALTER TABLE pedidos 
+ADD COLUMN IF NOT EXISTS access_token VARCHAR(100) UNIQUE;
+
+-- Criar índice para melhorar performance nas buscas por token
 CREATE INDEX IF NOT EXISTS idx_pedidos_access_token ON pedidos(access_token);
 
--- Gerar tokens para pedidos existentes (se houver)
-UPDATE pedidos 
-SET access_token = encode(gen_random_bytes(32), 'hex')
-WHERE access_token IS NULL;
+-- Feedback
+SELECT 'Coluna access_token adicionada com sucesso!' as resultado;

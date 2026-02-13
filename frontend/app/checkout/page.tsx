@@ -296,7 +296,9 @@ export default function CheckoutPage() {
         const data = await response.json();
         router.push(`/pagamento?pedido=${data.id}&token=${data.access_token}`);
       } else {
-        setMensagemAlerta("Erro ao finalizar pedido. Tente novamente.");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ Erro do servidor:", errorData);
+        setMensagemAlerta(errorData.error || "Erro ao finalizar pedido. Tente novamente.");
         setMostrarPagamento(false);
         setMostrarAlerta(true);
       }

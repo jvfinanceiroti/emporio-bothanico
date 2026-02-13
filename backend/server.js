@@ -383,8 +383,16 @@ for (const item of itens) {
       access_token: accessToken
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro ao criar pedido");
+    console.error("❌ ERRO AO CRIAR PEDIDO:", error);
+    console.error("❌ STACK:", error.stack);
+    console.error("❌ MENSAGEM:", error.message);
+    
+    // Retornar erro detalhado
+    res.status(500).json({ 
+      error: "Erro ao criar pedido",
+      detalhes: error.message,
+      codigo: error.code
+    });
   }
 });
 
