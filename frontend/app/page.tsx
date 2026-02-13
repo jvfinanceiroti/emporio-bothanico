@@ -177,6 +177,7 @@ export default function Home() {
           loop 
           muted 
           playsInline
+          poster="https://images.unsplash.com/photo-1466781783364-36c955e42a7f?w=1200&q=80"
           style={{
             position: "absolute",
             top: 0,
@@ -188,7 +189,8 @@ export default function Home() {
             opacity: 0.35
           }}
         >
-          <source src="https://cdn.pixabay.com/video/2022/12/08/142463-779635913_large.mp4" type="video/mp4" />
+          <source src="https://assets.mixkit.co/videos/preview/mixkit-green-leaves-of-a-plant-moving-in-the-wind-1188-large.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/5702761/5702761-uhd_2560_1440_25fps.mp4" type="video/mp4" />
         </video>
 
         {/* Overlay branco */}
