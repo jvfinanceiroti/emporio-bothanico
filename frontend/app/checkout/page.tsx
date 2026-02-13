@@ -1990,6 +1990,7 @@ export default function CheckoutPage() {
                           payment_method_id: paymentMethod.id,
                           issuer_id: paymentMethod.issuer?.id || null,
                           installments: cartaoParcelas,
+                          payer_cpf: cpfLimpo, // 🆕 CPF do titular (para validação MP)
                           // Dados do cartão (para salvar no banco)
                           card_last_digits: ultimosDigitos,
                           card_holder_name: cartaoNome,

@@ -617,6 +617,7 @@ app.post("/pagamento/cartao/processar", async (req, res) => {
       payment_method_id, 
       issuer_id, 
       installments,
+      payer_cpf,          // 🆕 CPF do titular do cartão
       card_last_digits,
       card_holder_name,
       card_brand,
@@ -626,6 +627,7 @@ app.post("/pagamento/cartao/processar", async (req, res) => {
     } = req.body;
 
     console.log("💳 Processando cartão para pedido:", pedido_id);
+    console.log("📋 CPF recebido:", payer_cpf ? (payer_cpf.substring(0, 3) + "*****" + payer_cpf.substring(8)) : "não fornecido");
 
     // Validação básica
     if (!card_token || !payment_method_id || !installments) {
@@ -667,7 +669,7 @@ app.post("/pagamento/cartao/processar", async (req, res) => {
       payment_method_id,
       issuer_id: issuer_id || null,
       installments: parseInt(installments),
-      documento: pedido.cliente_cpf || "00000000000"
+      documento: payer_cpf || pedido.cliente_cpf || "00000000000" // 🆕 Usar CPF do formulário
     };
 
     const resultado = await processarPagamentoCartao(dadosCartao, pedido);
