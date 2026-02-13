@@ -5,12 +5,21 @@ const multer = require("multer");
 const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cloudinary = require("cloudinary").v2;
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || "emporio-bothanico-secret-key-2026";
 
+// Configurar Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "root",
+  api_key: process.env.CLOUDINARY_API_KEY || "629775744341559",
+  api_secret: process.env.CLOUDINARY_API_SECRET || "IACl75fZDlj66c44Us981JkWDi0"
+});
+
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const storage = multer.diskStorage({
@@ -42,6 +51,31 @@ const upload = multer({
 
 app.get("/", (req, res) => {
   res.send("API Loja rodando 🚀");
+});
+
+// 📸 UPLOAD DE IMAGEM PARA CLOUDINARY
+app.post("/upload", async (req, res) => {
+  try {
+    const { imagem } = req.body; // Base64 da imagem
+
+    if (!imagem) {
+      return res.status(400).json({ error: "Nenhuma imagem fornecida" });
+    }
+
+    // Upload para Cloudinary
+    const resultado = await cloudinary.uploader.upload(imagem, {
+      folder: "emporio-bothanico",
+      resource_type: "auto"
+    });
+
+    res.json({ 
+      url: resultado.secure_url,
+      public_id: resultado.public_id
+    });
+  } catch (error) {
+    console.error("Erro ao fazer upload:", error);
+    res.status(500).json({ error: "Erro ao fazer upload da imagem" });
+  }
 });
 
 // ========== AUTENTICAÇÃO ==========
