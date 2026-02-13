@@ -1,24 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-
-// Função para pegar a URL da API de forma dinâmica
-function getApiUrl() {
-  if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    
-    // Se está em produção (não é localhost)
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-      return 'https://emporio-bothanico.onrender.com';
-    }
-  }
-  
-  // Fallback para localhost em desenvolvimento
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-}
-
-const API_URL = getApiUrl();
 
 interface Pedido {
   id: number;
@@ -54,6 +37,7 @@ interface DetalhesPedido {
 }
 
 export default function MeusPedidos() {
+  const [apiUrl, setApiUrl] = useState("");
   const [busca, setBusca] = useState("");
   const [tipoBusca, setTipoBusca] = useState<"email" | "cpf">("email");
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -61,6 +45,17 @@ export default function MeusPedidos() {
   const [buscaRealizada, setBuscaRealizada] = useState(false);
   const [pedidoSelecionado, setPedidoSelecionado] = useState<DetalhesPedido | null>(null);
   const [carregandoDetalhes, setCarregandoDetalhes] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+        setApiUrl('https://emporio-bothanico.onrender.com');
+      } else {
+        setApiUrl('http://localhost:5000');
+      }
+    }
+  }, []);
 
   const formatarCPF = (valor: string) => {
     const numeros = valor.replace(/\D/g, "");
@@ -79,13 +74,18 @@ export default function MeusPedidos() {
       return;
     }
 
+    if (!apiUrl) {
+      alert("Aguarde, carregando configurações...");
+      return;
+    }
+
     setCarregando(true);
     setBuscaRealizada(false);
     setPedidos([]);
 
     try {
       const valor = tipoBusca === "cpf" ? busca.replace(/\D/g, "") : busca;
-      const url = `${API_URL}/pedidos/buscar?tipo=${tipoBusca}&valor=${encodeURIComponent(valor)}`;
+      const url = `${apiUrl}/pedidos/buscar?tipo=${tipoBusca}&valor=${encodeURIComponent(valor)}`;
       
       const response = await fetch(url);
       
@@ -107,9 +107,11 @@ export default function MeusPedidos() {
   };
 
   const carregarDetalhesPedido = async (id: number) => {
+    if (!apiUrl) return;
+    
     setCarregandoDetalhes(true);
     try {
-      const response = await fetch(`${API_URL}/pedidos/${id}/detalhes`);
+      const response = await fetch(`${apiUrl}/pedidos/${id}/detalhes`);
       const data = await response.json();
       setPedidoSelecionado(data);
     } catch (error) {
