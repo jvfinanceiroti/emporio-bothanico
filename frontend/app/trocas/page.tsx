@@ -1,123 +1,190 @@
-"use client";
-
-import Link from "next/link";
+import LayoutInstitucional from "@/components/LayoutInstitucional";
 
 export default function TrocasPage() {
   return (
-    <div style={{ minHeight: "100vh", background: "#fafafa" }}>
-      <header style={{
-        background: "white",
-        borderBottom: "1px solid rgba(0,0,0,0.08)",
-        padding: "24px 48px"
-      }}>
-        <div style={{
-          maxWidth: "1440px",
-          margin: "0 auto",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
+    <LayoutInstitucional titulo="Trocas e Devoluções">
+      <div style={{ display: "flex", flexDirection: "column", gap: "clamp(20px, 5vw, 32px)" }}>
+        <section style={{
+          background: "linear-gradient(135deg, #dbeafe, #bfdbfe)",
+          padding: "clamp(16px, 4vw, 24px)",
+          borderRadius: "clamp(12px, 3vw, 16px)",
+          border: "2px solid #3b82f6"
         }}>
-          <Link href="/"><img src="/logo.png" alt="Logo" style={{ height: "48px" }} /></Link>
-          <Link href="/" style={{ color: "#0a0a0a", textDecoration: "none", fontSize: "15px", fontWeight: "600" }}>
-            ← Voltar para loja
-          </Link>
-        </div>
-      </header>
-
-      <div style={{ maxWidth: "900px", margin: "80px auto", padding: "0 48px" }}>
-        <h1 style={{
-          fontSize: "48px",
-          fontWeight: "900",
-          color: "#0a0a0a",
-          marginBottom: "24px",
-          letterSpacing: "-1.5px"
-        }}>
-          Trocas e Devoluções
-        </h1>
-
-        <div style={{
-          background: "white",
-          borderRadius: "24px",
-          padding: "48px",
-          marginBottom: "32px",
-          border: "1px solid rgba(0,0,0,0.06)"
-        }}>
-          <h2 style={{ fontSize: "24px", fontWeight: "800", marginBottom: "20px" }}>
-            Direito de Arrependimento
-          </h2>
-          <p style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", marginBottom: "16px" }}>
-            De acordo com o Código de Defesa do Consumidor (Lei nº 8.078/90), você tem até <strong>7 dias corridos</strong> após o recebimento do produto para solicitar troca ou devolução, sem necessidade de justificativa.
-          </p>
-
-          <h3 style={{ fontSize: "20px", fontWeight: "700", marginTop: "32px", marginBottom: "16px" }}>
-            Como Solicitar
-          </h3>
-          <ol style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", paddingLeft: "24px" }}>
-            <li style={{ marginBottom: "12px" }}>Entre em contato conosco através do e-mail <strong>contato@emporiobothanico.com.br</strong> ou WhatsApp</li>
-            <li style={{ marginBottom: "12px" }}>Informe o número do pedido e o motivo da troca/devolução</li>
-            <li style={{ marginBottom: "12px" }}>Aguarde nossas instruções para envio</li>
-            <li style={{ marginBottom: "12px" }}>Embale o produto adequadamente com nota fiscal</li>
-            <li style={{ marginBottom: "12px" }}>Envie para o endereço indicado</li>
-          </ol>
-
-          <div style={{
-            background: "#fff9e6",
-            border: "1px solid #ffd966",
-            borderRadius: "16px",
-            padding: "24px",
-            marginTop: "32px"
+          <p style={{ 
+            fontSize: "clamp(14px, 3.5vw, 16px)",
+            color: "#1e40af",
+            fontWeight: "500",
+            lineHeight: 1.7
           }}>
-            <h4 style={{ fontSize: "16px", fontWeight: "700", marginBottom: "12px", color: "#0a0a0a" }}>
-              ⚠️ Condições Importantes
-            </h4>
-            <ul style={{ fontSize: "14px", color: "#666", lineHeight: "1.7", paddingLeft: "20px" }}>
-              <li>O produto deve estar em perfeitas condições, sem sinais de uso</li>
-              <li>Mantenha embalagem original, etiquetas e acessórios</li>
-              <li>Produtos violados, danificados ou personalizados não podem ser trocados</li>
-              <li>O frete de devolução é por conta do cliente, exceto em caso de defeito</li>
-            </ul>
-          </div>
-
-          <h3 style={{ fontSize: "20px", fontWeight: "700", marginTop: "40px", marginBottom: "16px" }}>
-            Prazos
-          </h3>
-          <ul style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", paddingLeft: "24px" }}>
-            <li style={{ marginBottom: "12px" }}><strong>Análise:</strong> até 5 dias úteis após recebermos o produto</li>
-            <li style={{ marginBottom: "12px" }}><strong>Reembolso:</strong> até 10 dias úteis após aprovação</li>
-            <li style={{ marginBottom: "12px" }}><strong>Troca:</strong> até 15 dias úteis para novo envio</li>
-          </ul>
-        </div>
-
-        <div style={{
-          background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
-          borderRadius: "24px",
-          padding: "48px",
-          color: "white",
-          textAlign: "center"
-        }}>
-          <h2 style={{ fontSize: "28px", fontWeight: "800", marginBottom: "16px" }}>
-            Precisa de Ajuda?
-          </h2>
-          <p style={{ fontSize: "16px", color: "#ccc", marginBottom: "32px" }}>
-            Nossa equipe está pronta para ajudar você com trocas e devoluções.
+            ♻️ Sua satisfação é nossa prioridade! Confira nossa política de trocas e devoluções.
           </p>
-          <Link
-            href="/contato"
-            style={{
-              display: "inline-block",
-              padding: "16px 40px",
-              background: "white",
-              color: "#0a0a0a",
-              borderRadius: "12px",
-              fontSize: "16px",
-              fontWeight: "700",
-              textDecoration: "none"
-            }}
-          >
-            Fale Conosco
-          </Link>
-        </div>
+        </section>
+
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            📅 Prazo para Troca ou Devolução
+          </h2>
+          <p style={{ marginBottom: "16px", lineHeight: 1.7 }}>
+            Você tem até <strong>7 dias corridos</strong> após o recebimento do produto para solicitar troca ou devolução, 
+            conforme o Código de Defesa do Consumidor (Art. 49).
+          </p>
+        </section>
+
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            ✅ Condições para Troca/Devolução
+          </h2>
+          <p style={{ marginBottom: "12px" }}>Para realizar troca ou devolução, o produto deve:</p>
+          <ul style={{ 
+            paddingLeft: "clamp(20px, 5vw, 32px)",
+            lineHeight: 1.8,
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px"
+          }}>
+            <li>Estar <strong>sem uso</strong> e na embalagem original</li>
+            <li>Conter todas as <strong>etiquetas e lacres</strong> intactos</li>
+            <li>Incluir a <strong>nota fiscal</strong> original</li>
+            <li>Não apresentar sinais de <strong>violação ou uso inadequado</strong></li>
+          </ul>
+        </section>
+
+        <section style={{
+          background: "#fef3c7",
+          padding: "clamp(16px, 4vw, 20px)",
+          borderRadius: "clamp(10px, 2.5vw, 12px)",
+          border: "2px solid #fbbf24"
+        }}>
+          <h2 style={{ 
+            fontSize: "clamp(16px, 4vw, 20px)", 
+            fontWeight: "700", 
+            color: "#92400e",
+            marginBottom: "12px" 
+          }}>
+            ⚠️ Importante
+          </h2>
+          <p style={{ 
+            fontSize: "clamp(13px, 3.2vw, 15px)",
+            color: "#78350f",
+            lineHeight: 1.7
+          }}>
+            Por questões de higiene e segurança, <strong>não aceitamos trocas ou devoluções</strong> de produtos que apresentem 
+            sinais de uso, embalagem violada ou sem lacre original. Perfumes abertos também não podem ser trocados.
+          </p>
+        </section>
+
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            📝 Como Solicitar Troca ou Devolução
+          </h2>
+          <ol style={{ 
+            paddingLeft: "clamp(20px, 5vw, 32px)",
+            lineHeight: 1.8,
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px"
+          }}>
+            <li>
+              <strong>Entre em contato conosco:</strong>
+              <ul style={{ paddingLeft: "20px", marginTop: "8px" }}>
+                <li>Telefone: <strong>31 - 3831-0866</strong></li>
+                <li>E-mail: <strong>contato@emporiobothanico.com.br</strong></li>
+                <li>WhatsApp: <strong>(31) 98765-4321</strong></li>
+              </ul>
+            </li>
+            <li><strong>Informe:</strong> Número do pedido, motivo da troca/devolução e fotos do produto (se aplicável)</li>
+            <li><strong>Aguarde:</strong> Nossa equipe analisará sua solicitação em até 24h úteis</li>
+            <li><strong>Envio:</strong> Após aprovação, você receberá instruções de envio (postagem via Correios)</li>
+            <li><strong>Processamento:</strong> Após recebermos o produto, faremos a análise em até 5 dias úteis</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            💰 Reembolso
+          </h2>
+          <p style={{ lineHeight: 1.7 }}>
+            Em caso de devolução aprovada, o reembolso será realizado em até <strong>10 dias úteis</strong> após a análise do produto, 
+            utilizando a mesma forma de pagamento original.
+          </p>
+          <ul style={{ 
+            paddingLeft: "clamp(20px, 5vw, 32px)",
+            marginTop: "12px",
+            lineHeight: 1.7
+          }}>
+            <li><strong>Cartão de Crédito:</strong> Estorno na próxima fatura</li>
+            <li><strong>PIX/Boleto:</strong> Depósito em conta bancária informada</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            📦 Produto com Defeito ou Avariado
+          </h2>
+          <p style={{ lineHeight: 1.7 }}>
+            Se você recebeu um produto com defeito, avaria no transporte ou divergente do pedido, entre em contato imediatamente:
+          </p>
+          <ul style={{ 
+            paddingLeft: "clamp(20px, 5vw, 32px)",
+            marginTop: "12px",
+            lineHeight: 1.7
+          }}>
+            <li>Tire fotos do produto e da embalagem</li>
+            <li>Entre em contato em até <strong>48 horas</strong> após o recebimento</li>
+            <li>Nestes casos, <strong>o frete de devolução é por nossa conta</strong></li>
+          </ul>
+        </section>
+
+        <section style={{
+          background: "linear-gradient(135deg, #dcfce7, #bbf7d0)",
+          padding: "clamp(20px, 5vw, 28px)",
+          borderRadius: "clamp(12px, 3vw, 16px)",
+          border: "2px solid #10b981",
+          marginTop: "clamp(20px, 5vw, 32px)"
+        }}>
+          <h2 style={{ 
+            fontSize: "clamp(16px, 4vw, 20px)", 
+            fontWeight: "700", 
+            color: "#065f46",
+            marginBottom: "12px"
+          }}>
+            💬 Dúvidas?
+          </h2>
+          <p style={{ 
+            fontSize: "clamp(14px, 3.5vw, 16px)",
+            color: "#047857",
+            lineHeight: 1.7
+          }}>
+            Nossa equipe está à disposição para esclarecer qualquer dúvida sobre trocas e devoluções. 
+            Entre em contato através da <a href="/contato" style={{ color: "#667eea", textDecoration: "underline", fontWeight: "600" }}>página de contato</a>.
+          </p>
+        </section>
       </div>
-    </div>
+    </LayoutInstitucional>
   );
 }

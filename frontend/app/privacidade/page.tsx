@@ -1,170 +1,266 @@
-"use client";
-
-import Link from "next/link";
+import LayoutInstitucional from "@/components/LayoutInstitucional";
 
 export default function PrivacidadePage() {
   return (
-    <div style={{ minHeight: "100vh", background: "#fafafa" }}>
-      <header style={{
-        background: "white",
-        borderBottom: "1px solid rgba(0,0,0,0.08)",
-        padding: "24px 48px"
-      }}>
-        <div style={{
-          maxWidth: "1440px",
-          margin: "0 auto",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
+    <LayoutInstitucional titulo="Política de Privacidade">
+      <div style={{ display: "flex", flexDirection: "column", gap: "clamp(20px, 5vw, 32px)" }}>
+        <section style={{
+          background: "linear-gradient(135deg, #dbeafe, #bfdbfe)",
+          padding: "clamp(16px, 4vw, 24px)",
+          borderRadius: "clamp(12px, 3vw, 16px)",
+          border: "2px solid #3b82f6"
         }}>
-          <Link href="/"><img src="/logo.png" alt="Logo" style={{ height: "48px" }} /></Link>
-          <Link href="/" style={{ color: "#0a0a0a", textDecoration: "none", fontSize: "15px", fontWeight: "600" }}>
-            ← Voltar para loja
-          </Link>
-        </div>
-      </header>
-
-      <div style={{ maxWidth: "900px", margin: "80px auto", padding: "0 48px 80px" }}>
-        <h1 style={{
-          fontSize: "48px",
-          fontWeight: "900",
-          color: "#0a0a0a",
-          marginBottom: "24px",
-          letterSpacing: "-1.5px"
-        }}>
-          Política de Privacidade
-        </h1>
-
-        <p style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", marginBottom: "48px" }}>
-          Última atualização: {new Date().toLocaleDateString('pt-BR')}
-        </p>
-
-        <div style={{
-          background: "white",
-          borderRadius: "24px",
-          padding: "48px",
-          marginBottom: "32px",
-          border: "1px solid rgba(0,0,0,0.06)"
-        }}>
-          <h2 style={{ fontSize: "24px", fontWeight: "800", marginBottom: "20px" }}>
-            1. Informações que Coletamos
-          </h2>
-          <p style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", marginBottom: "16px" }}>
-            Coletamos informações que você nos fornece diretamente ao:
+          <p style={{ 
+            fontSize: "clamp(14px, 3.5vw, 16px)",
+            color: "#1e40af",
+            fontWeight: "500",
+            lineHeight: 1.7
+          }}>
+            🔒 Sua privacidade e segurança são nossa prioridade. Veja como protegemos seus dados.
           </p>
-          <ul style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", paddingLeft: "24px", marginBottom: "32px" }}>
-            <li style={{ marginBottom: "8px" }}>Criar uma conta ou fazer um pedido</li>
-            <li style={{ marginBottom: "8px" }}>Entrar em contato com nosso suporte</li>
-            <li style={{ marginBottom: "8px" }}>Se inscrever na nossa newsletter</li>
-            <li style={{ marginBottom: "8px" }}>Participar de promoções ou pesquisas</li>
+        </section>
+
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            📋 Informações que Coletamos
+          </h2>
+          <p style={{ marginBottom: "12px", lineHeight: 1.7 }}>
+            Coletamos apenas as informações necessárias para processar seus pedidos e melhorar sua experiência:
+          </p>
+          <ul style={{ 
+            paddingLeft: "clamp(20px, 5vw, 32px)",
+            lineHeight: 1.8,
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px"
+          }}>
+            <li><strong>Dados Cadastrais:</strong> Nome, e-mail, CPF, telefone</li>
+            <li><strong>Endereço de Entrega:</strong> CEP, rua, número, complemento, bairro, cidade, estado</li>
+            <li><strong>Dados de Pagamento:</strong> Processados de forma segura por nossos parceiros (não armazenamos dados de cartão)</li>
+            <li><strong>Histórico de Compras:</strong> Pedidos realizados e preferências</li>
+            <li><strong>Navegação:</strong> Cookies para melhorar a experiência no site</li>
           </ul>
+        </section>
 
-          <h3 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "16px" }}>
-            Dados Pessoais
-          </h3>
-          <p style={{ fontSize: "16px", color: "#666", lineHeight: "1.8" }}>
-            Nome, e-mail, telefone, endereço de entrega, CPF e informações de pagamento.
-          </p>
-        </div>
-
-        <div style={{
-          background: "white",
-          borderRadius: "24px",
-          padding: "48px",
-          marginBottom: "32px",
-          border: "1px solid rgba(0,0,0,0.06)"
-        }}>
-          <h2 style={{ fontSize: "24px", fontWeight: "800", marginBottom: "20px" }}>
-            2. Como Usamos suas Informações
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            🎯 Como Usamos Suas Informações
           </h2>
-          <ul style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", paddingLeft: "24px" }}>
-            <li style={{ marginBottom: "12px" }}>Processar e entregar seus pedidos</li>
-            <li style={{ marginBottom: "12px" }}>Enviar confirmações e atualizações de pedidos</li>
-            <li style={{ marginBottom: "12px" }}>Responder suas dúvidas e solicitações</li>
-            <li style={{ marginBottom: "12px" }}>Melhorar nossos produtos e serviços</li>
-            <li style={{ marginBottom: "12px" }}>Enviar ofertas e novidades (com seu consentimento)</li>
-            <li style={{ marginBottom: "12px" }}>Prevenir fraudes e proteger a segurança</li>
+          <ul style={{ 
+            paddingLeft: "clamp(20px, 5vw, 32px)",
+            lineHeight: 1.8,
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px"
+          }}>
+            <li>Processar e entregar seus pedidos</li>
+            <li>Enviar atualizações sobre status do pedido</li>
+            <li>Prestar suporte e atendimento ao cliente</li>
+            <li>Melhorar nossos produtos e serviços</li>
+            <li>Enviar ofertas e novidades (com sua permissão)</li>
+            <li>Cumprir obrigações legais e regulatórias</li>
           </ul>
-        </div>
+        </section>
 
-        <div style={{
-          background: "white",
-          borderRadius: "24px",
-          padding: "48px",
-          marginBottom: "32px",
-          border: "1px solid rgba(0,0,0,0.06)"
+        <section style={{
+          background: "#dcfce7",
+          padding: "clamp(16px, 4vw, 20px)",
+          borderRadius: "clamp(10px, 2.5vw, 12px)",
+          border: "2px solid #10b981"
         }}>
-          <h2 style={{ fontSize: "24px", fontWeight: "800", marginBottom: "20px" }}>
-            3. Compartilhamento de Dados
+          <h2 style={{ 
+            fontSize: "clamp(16px, 4vw, 20px)", 
+            fontWeight: "700", 
+            color: "#065f46",
+            marginBottom: "12px" 
+          }}>
+            🔐 Segurança dos Dados
           </h2>
-          <p style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", marginBottom: "16px" }}>
-            Não vendemos suas informações pessoais. Compartilhamos apenas quando necessário:
+          <p style={{ 
+            fontSize: "clamp(14px, 3.5vw, 16px)",
+            color: "#047857",
+            lineHeight: 1.7
+          }}>
+            Utilizamos <strong>criptografia SSL</strong> para proteger suas informações durante a transmissão.
+            Todos os dados são armazenados em servidores seguros com acesso restrito.
           </p>
-          <ul style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", paddingLeft: "24px" }}>
-            <li style={{ marginBottom: "12px" }}><strong>Transportadoras:</strong> para entrega dos pedidos</li>
-            <li style={{ marginBottom: "12px" }}><strong>Processadores de pagamento:</strong> para transações seguras</li>
-            <li style={{ marginBottom: "12px" }}><strong>Serviços de marketing:</strong> com seu consentimento</li>
-            <li style={{ marginBottom: "12px" }}><strong>Autoridades legais:</strong> quando exigido por lei</li>
+        </section>
+
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            🤝 Compartilhamento de Informações
+          </h2>
+          <p style={{ marginBottom: "12px", lineHeight: 1.7 }}>
+            Seus dados pessoais <strong>não são vendidos</strong> para terceiros. Compartilhamos apenas quando necessário:
+          </p>
+          <ul style={{ 
+            paddingLeft: "clamp(20px, 5vw, 32px)",
+            lineHeight: 1.8,
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px"
+          }}>
+            <li><strong>Correios:</strong> Para entrega dos produtos</li>
+            <li><strong>Processadores de Pagamento:</strong> Para processar transações (dados criptografados)</li>
+            <li><strong>Autoridades Legais:</strong> Quando exigido por lei</li>
           </ul>
-        </div>
+        </section>
 
-        <div style={{
-          background: "white",
-          borderRadius: "24px",
-          padding: "48px",
-          marginBottom: "32px",
-          border: "1px solid rgba(0,0,0,0.06)"
-        }}>
-          <h2 style={{ fontSize: "24px", fontWeight: "800", marginBottom: "20px" }}>
-            4. Seus Direitos (LGPD)
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            🍪 Cookies
           </h2>
-          <p style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", marginBottom: "16px" }}>
-            De acordo com a Lei Geral de Proteção de Dados, você tem direito a:
+          <p style={{ lineHeight: 1.7 }}>
+            Utilizamos cookies para:
           </p>
-          <ul style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", paddingLeft: "24px" }}>
-            <li style={{ marginBottom: "12px" }}>Confirmar a existência de tratamento de dados</li>
-            <li style={{ marginBottom: "12px" }}>Acessar seus dados pessoais</li>
-            <li style={{ marginBottom: "12px" }}>Corrigir dados incompletos ou desatualizados</li>
-            <li style={{ marginBottom: "12px" }}>Solicitar a exclusão de seus dados</li>
-            <li style={{ marginBottom: "12px" }}>Revogar o consentimento</li>
-            <li style={{ marginBottom: "12px" }}>Portabilidade dos dados</li>
+          <ul style={{ 
+            paddingLeft: "clamp(20px, 5vw, 32px)",
+            marginTop: "12px",
+            lineHeight: 1.7
+          }}>
+            <li>Manter você logado durante a navegação</li>
+            <li>Lembrar itens no seu carrinho</li>
+            <li>Entender como você usa o site (análise anônima)</li>
+            <li>Melhorar sua experiência de navegação</li>
           </ul>
-        </div>
+          <p style={{ 
+            marginTop: "12px",
+            fontSize: "clamp(13px, 3.2vw, 14px)",
+            color: "#6b7280",
+            lineHeight: 1.7
+          }}>
+            Você pode desabilitar cookies nas configurações do seu navegador, mas isso pode afetar a funcionalidade do site.
+          </p>
+        </section>
 
-        <div style={{
-          background: "white",
-          borderRadius: "24px",
-          padding: "48px",
-          marginBottom: "32px",
-          border: "1px solid rgba(0,0,0,0.06)"
-        }}>
-          <h2 style={{ fontSize: "24px", fontWeight: "800", marginBottom: "20px" }}>
-            5. Segurança
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            ✋ Seus Direitos (LGPD)
           </h2>
-          <p style={{ fontSize: "16px", color: "#666", lineHeight: "1.8" }}>
-            Utilizamos medidas de segurança técnicas e organizacionais para proteger seus dados, incluindo:
-            criptografia SSL, servidores seguros, controle de acesso e monitoramento constante.
+          <p style={{ marginBottom: "12px", lineHeight: 1.7 }}>
+            Conforme a Lei Geral de Proteção de Dados (LGPD), você tem direito a:
           </p>
-        </div>
+          <ul style={{ 
+            paddingLeft: "clamp(20px, 5vw, 32px)",
+            lineHeight: 1.8,
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px"
+          }}>
+            <li><strong>Acessar</strong> seus dados pessoais</li>
+            <li><strong>Corrigir</strong> informações desatualizadas ou incorretas</li>
+            <li><strong>Solicitar exclusão</strong> de seus dados (exceto quando necessário por lei)</li>
+            <li><strong>Revogar consentimento</strong> para uso de dados (ex: newsletters)</li>
+            <li><strong>Portabilidade</strong> de dados para outro fornecedor</li>
+          </ul>
+          <p style={{ 
+            marginTop: "16px",
+            padding: "clamp(12px, 3vw, 16px)",
+            background: "#f9fafb",
+            borderRadius: "clamp(8px, 2vw, 10px)",
+            lineHeight: 1.7,
+            fontSize: "clamp(13px, 3.2vw, 15px)"
+          }}>
+            Para exercer seus direitos, entre em contato através do e-mail: 
+            <strong> contato@emporiobothanico.com.br</strong>
+          </p>
+        </section>
 
-        <div style={{
-          background: "white",
-          borderRadius: "24px",
-          padding: "48px",
-          border: "1px solid rgba(0,0,0,0.06)"
-        }}>
-          <h2 style={{ fontSize: "24px", fontWeight: "800", marginBottom: "20px" }}>
-            6. Contato
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            👶 Menores de Idade
           </h2>
-          <p style={{ fontSize: "16px", color: "#666", lineHeight: "1.8", marginBottom: "16px" }}>
-            Para exercer seus direitos ou tirar dúvidas sobre esta política:
+          <p style={{ lineHeight: 1.7 }}>
+            Nosso site e serviços são destinados a <strong>maiores de 18 anos</strong>. 
+            Não coletamos intencionalmente dados de menores sem consentimento dos responsáveis legais.
           </p>
-          <p style={{ fontSize: "16px", color: "#666", lineHeight: "1.8" }}>
-            📧 E-mail: <strong>contato@emporiobothanico.com.br</strong><br/>
-            📱 WhatsApp: <strong>(11) 99999-9999</strong>
+        </section>
+
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            🔄 Alterações nesta Política
+          </h2>
+          <p style={{ lineHeight: 1.7 }}>
+            Podemos atualizar esta Política de Privacidade periodicamente. Quando houver mudanças significativas, 
+            notificaremos você por e-mail ou através de um aviso destacado no site.
           </p>
-        </div>
+          <p style={{ 
+            marginTop: "12px",
+            fontSize: "clamp(13px, 3.2vw, 14px)",
+            color: "#6b7280"
+          }}>
+            <strong>Última atualização:</strong> Fevereiro de 2026
+          </p>
+        </section>
+
+        <section style={{
+          background: "linear-gradient(135deg, #fef3c7, #fde68a)",
+          padding: "clamp(20px, 5vw, 28px)",
+          borderRadius: "clamp(12px, 3vw, 16px)",
+          border: "2px solid #f59e0b",
+          marginTop: "clamp(20px, 5vw, 32px)"
+        }}>
+          <h2 style={{ 
+            fontSize: "clamp(16px, 4vw, 20px)", 
+            fontWeight: "700", 
+            color: "#92400e",
+            marginBottom: "12px"
+          }}>
+            💬 Dúvidas sobre Privacidade?
+          </h2>
+          <p style={{ 
+            fontSize: "clamp(14px, 3.5vw, 16px)",
+            color: "#78350f",
+            lineHeight: 1.7,
+            marginBottom: "12px"
+          }}>
+            Se você tiver qualquer dúvida sobre como tratamos seus dados, entre em contato:
+          </p>
+          <p style={{ 
+            fontSize: "clamp(14px, 3.5vw, 16px)",
+            color: "#78350f",
+            lineHeight: 1.7
+          }}>
+            📧 <strong>contato@emporiobothanico.com.br</strong><br />
+            📞 <strong>31 - 3831-0866</strong>
+          </p>
+        </section>
       </div>
-    </div>
+    </LayoutInstitucional>
   );
 }

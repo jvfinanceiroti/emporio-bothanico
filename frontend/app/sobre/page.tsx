@@ -1,200 +1,86 @@
-"use client";
-
-import Link from "next/link";
+import LayoutInstitucional from "@/components/LayoutInstitucional";
 
 export default function SobrePage() {
   return (
-    <div style={{ minHeight: "100vh", background: "#fafafa" }}>
-      {/* Header simples */}
-      <header style={{
-        background: "white",
-        borderBottom: "1px solid rgba(0,0,0,0.08)",
-        padding: "24px 48px"
-      }}>
-        <div style={{
-          maxWidth: "1440px",
-          margin: "0 auto",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center"
-        }}>
-          <Link href="/" style={{
-            display: "flex",
-            alignItems: "center",
-            textDecoration: "none"
+    <LayoutInstitucional titulo="Sobre Nós">
+      <div style={{ display: "flex", flexDirection: "column", gap: "clamp(16px, 4vw, 24px)" }}>
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
           }}>
-            <img 
-              src="/logo.png" 
-              alt="Logo" 
-              style={{ height: "48px" }}
-            />
-          </Link>
-          <Link href="/" style={{
-            color: "#0a0a0a",
-            textDecoration: "none",
-            fontSize: "15px",
-            fontWeight: "600"
-          }}>
-            ← Voltar para loja
-          </Link>
-        </div>
-      </header>
-
-      {/* Conteúdo */}
-      <div style={{
-        maxWidth: "900px",
-        margin: "80px auto",
-        padding: "0 48px"
-      }}>
-        <h1 style={{
-          fontSize: "48px",
-          fontWeight: "900",
-          color: "#0a0a0a",
-          marginBottom: "24px",
-          letterSpacing: "-1.5px"
-        }}>
-          Sobre Nós
-        </h1>
-
-        <p style={{
-          fontSize: "20px",
-          color: "#666",
-          lineHeight: "1.8",
-          marginBottom: "48px"
-        }}>
-          Bem-vindo ao <strong style={{ color: "#0a0a0a" }}>Empório Bothanico</strong>, onde a natureza e a sofisticação se encontram.
-        </p>
-
-        <div style={{
-          background: "white",
-          borderRadius: "24px",
-          padding: "48px",
-          marginBottom: "32px",
-          border: "1px solid rgba(0,0,0,0.06)"
-        }}>
-          <h2 style={{
-            fontSize: "28px",
-            fontWeight: "800",
-            color: "#0a0a0a",
-            marginBottom: "20px",
-            letterSpacing: "-0.8px"
-          }}>
-            Nossa História
+            Quem Somos
           </h2>
-          <p style={{
-            fontSize: "16px",
-            color: "#666",
-            lineHeight: "1.8",
-            marginBottom: "20px"
-          }}>
-            Fundado com a paixão por fragrâncias únicas e produtos naturais, o Empório Bothanico nasceu do desejo de proporcionar experiências sensoriais inesquecíveis. Cada produto é cuidadosamente selecionado para trazer o melhor da natureza até você.
+          <p style={{ marginBottom: "16px" }}>
+            O <strong>Empório Botânico</strong> é sua loja online especializada em perfumes, aromas e produtos para banho de alta qualidade.
           </p>
-          <p style={{
-            fontSize: "16px",
-            color: "#666",
-            lineHeight: "1.8"
-          }}>
-            Combinamos tradição artesanal com inovação moderna, criando uma linha de produtos que respeitam o meio ambiente e valorizam a qualidade acima de tudo.
+          <p>
+            Acreditamos que o bem-estar começa com pequenos momentos de autocuidado. Por isso, selecionamos cuidadosamente cada produto do nosso catálogo, 
+            oferecendo fragrâncias únicas e produtos naturais que transformam sua rotina em uma experiência sensorial especial.
           </p>
-        </div>
+        </section>
 
-        <div style={{
-          background: "white",
-          borderRadius: "24px",
-          padding: "48px",
-          marginBottom: "32px",
-          border: "1px solid rgba(0,0,0,0.06)"
-        }}>
-          <h2 style={{
-            fontSize: "28px",
-            fontWeight: "800",
-            color: "#0a0a0a",
-            marginBottom: "20px",
-            letterSpacing: "-0.8px"
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
+          }}>
+            Nossa Missão
+          </h2>
+          <p>
+            Proporcionar bem-estar e qualidade de vida através de produtos naturais, fragrâncias exclusivas e um atendimento personalizado que supera expectativas.
+          </p>
+        </section>
+
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
           }}>
             Nossos Valores
           </h2>
-          <div style={{
-            display: "grid",
-            gap: "24px"
+          <ul style={{ 
+            paddingLeft: "clamp(20px, 5vw, 32px)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px"
           }}>
-            {[
-              { icon: "🌿", title: "Sustentabilidade", desc: "Produtos naturais que respeitam o meio ambiente" },
-              { icon: "✨", title: "Qualidade Premium", desc: "Seleção rigorosa dos melhores ingredientes" },
-              { icon: "❤️", title: "Feito com Amor", desc: "Cada produto é preparado com cuidado e atenção" },
-              { icon: "🚚", title: "Entrega Rápida", desc: "Seu pedido chega com segurança e rapidez" }
-            ].map((item, i) => (
-              <div key={i} style={{
-                display: "flex",
-                gap: "20px",
-                padding: "24px",
-                background: "#fafafa",
-                borderRadius: "16px"
-              }}>
-                <div style={{ fontSize: "32px" }}>{item.icon}</div>
-                <div>
-                  <h3 style={{
-                    fontSize: "18px",
-                    fontWeight: "700",
-                    color: "#0a0a0a",
-                    marginBottom: "8px"
-                  }}>
-                    {item.title}
-                  </h3>
-                  <p style={{
-                    fontSize: "15px",
-                    color: "#666",
-                    lineHeight: "1.6"
-                  }}>
-                    {item.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+            <li><strong>Qualidade:</strong> Produtos cuidadosamente selecionados</li>
+            <li><strong>Transparência:</strong> Informações claras sobre cada produto</li>
+            <li><strong>Sustentabilidade:</strong> Compromisso com o meio ambiente</li>
+            <li><strong>Atendimento:</strong> Experiência personalizada para cada cliente</li>
+          </ul>
+        </section>
 
-        <div style={{
-          background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
-          borderRadius: "24px",
-          padding: "48px",
-          color: "white",
-          textAlign: "center"
-        }}>
-          <h2 style={{
-            fontSize: "28px",
-            fontWeight: "800",
-            marginBottom: "16px",
-            letterSpacing: "-0.8px"
+        <section>
+          <h2 style={{ 
+            fontSize: "clamp(18px, 4.5vw, 24px)", 
+            fontWeight: "700", 
+            color: "#1f2937",
+            marginBottom: "clamp(12px, 3vw, 16px)" 
           }}>
-            Entre em Contato
+            Por Que Escolher o Empório Botânico?
           </h2>
-          <p style={{
-            fontSize: "16px",
-            color: "#ccc",
-            marginBottom: "32px",
-            lineHeight: "1.6"
+          <ul style={{ 
+            paddingLeft: "clamp(20px, 5vw, 32px)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px"
           }}>
-            Tem alguma dúvida ou sugestão? Adoraríamos ouvir você!
-          </p>
-          <Link
-            href="/contato"
-            style={{
-              display: "inline-block",
-              padding: "16px 40px",
-              background: "white",
-              color: "#0a0a0a",
-              borderRadius: "12px",
-              fontSize: "16px",
-              fontWeight: "700",
-              textDecoration: "none",
-              transition: "all 0.3s"
-            }}
-          >
-            Fale Conosco
-          </Link>
-        </div>
+            <li>✨ <strong>Produtos Premium:</strong> Seleção exclusiva de perfumes e aromas</li>
+            <li>🌿 <strong>Ingredientes Naturais:</strong> Fórmulas com componentes de origem vegetal</li>
+            <li>🚚 <strong>Entrega Rápida:</strong> Envio para todo o Brasil</li>
+            <li>🔒 <strong>Compra Segura:</strong> Pagamento protegido e dados criptografados</li>
+            <li>💬 <strong>Suporte Dedicado:</strong> Atendimento humanizado em todos os canais</li>
+          </ul>
+        </section>
       </div>
-    </div>
+    </LayoutInstitucional>
   );
 }
