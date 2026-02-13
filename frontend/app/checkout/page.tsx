@@ -2089,47 +2089,50 @@ export default function CheckoutPage() {
               </button>
             </div>
 
-            <button
-              onClick={finalizarPedido}
-              disabled={carregando || !formaPagamento}
-              style={{
-                width: "100%",
-                padding: "clamp(16px, 4vw, 18px)",
-                background: !formaPagamento || carregando ? "#e5e5e5" : "#10b981",
-                color: !formaPagamento || carregando ? "#999" : "white",
-                border: "none",
-                borderRadius: "clamp(10px, 2.5vw, 12px)",
-                fontSize: "clamp(15px, 3.5vw, 16px)",
-                fontWeight: "700",
-                cursor: !formaPagamento || carregando ? "not-allowed" : "pointer",
-                transition: "all 0.3s ease",
-                minHeight: "50px",
-                whiteSpace: "normal",
-                wordBreak: "break-word"
-              }}
-              onMouseOver={(e) => {
-                if (formaPagamento && !carregando) {
-                  e.currentTarget.style.background = "#059669";
-                }
-              }}
-              onMouseOut={(e) => {
-                if (formaPagamento && !carregando) {
-                  e.currentTarget.style.background = "#10b981";
-                }
-              }}
-            >
-              {carregando ? (
-                <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "clamp(8px, 2vw, 12px)", flexWrap: "wrap" }}>
-                  <svg style={{ width: "clamp(18px, 4.5vw, 20px)", height: "clamp(18px, 4.5vw, 20px)", animation: "spin 1s linear infinite", flexShrink: 0 }} fill="none" viewBox="0 0 24 24">
-                    <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Processando...
-                </span>
-              ) : (
-                "✓ Confirmar Pedido"
-              )}
-            </button>
+            {/* Botão Confirmar - só aparece se não tiver pedido criado ainda */}
+            {!pedidoId && (
+              <button
+                onClick={finalizarPedido}
+                disabled={carregando || !formaPagamento}
+                style={{
+                  width: "100%",
+                  padding: "clamp(16px, 4vw, 18px)",
+                  background: !formaPagamento || carregando ? "#e5e7eb" : "#10b981",
+                  color: !formaPagamento || carregando ? "#999" : "white",
+                  border: "none",
+                  borderRadius: "clamp(10px, 2.5vw, 12px)",
+                  fontSize: "clamp(15px, 3.5vw, 16px)",
+                  fontWeight: "700",
+                  cursor: !formaPagamento || carregando ? "not-allowed" : "pointer",
+                  transition: "all 0.3s ease",
+                  minHeight: "50px",
+                  whiteSpace: "normal",
+                  wordBreak: "break-word"
+                }}
+                onMouseOver={(e) => {
+                  if (formaPagamento && !carregando) {
+                    e.currentTarget.style.background = "#059669";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (formaPagamento && !carregando) {
+                    e.currentTarget.style.background = "#10b981";
+                  }
+                }}
+              >
+                {carregando ? (
+                  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "clamp(8px, 2vw, 12px)", flexWrap: "wrap" }}>
+                    <svg style={{ width: "clamp(18px, 4.5vw, 20px)", height: "clamp(18px, 4.5vw, 20px)", animation: "spin 1s linear infinite", flexShrink: 0 }} fill="none" viewBox="0 0 24 24">
+                      <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processando...
+                  </span>
+                ) : (
+                  "✓ Confirmar Pedido"
+                )}
+              </button>
+            )}
             </>
             )}
           </div>
