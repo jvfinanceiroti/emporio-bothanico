@@ -120,41 +120,64 @@ export default function CarrinhoPage() {
         <div style={{
           maxWidth: "1440px",
           margin: "0 auto",
-          padding: "20px 48px",
+          padding: "16px 20px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between"
+          justifyContent: "space-between",
+          gap: "12px"
         }}>
           <Link 
             href="/"
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "8px",
+              gap: "6px",
               color: "#666",
               textDecoration: "none",
-              fontSize: "15px",
+              fontSize: "14px",
               fontWeight: "600",
-              transition: "color 0.2s"
+              transition: "color 0.2s",
+              flexShrink: 0,
+              whiteSpace: "nowrap"
             }}
             onMouseOver={(e) => e.currentTarget.style.color = "#0a0a0a"}
             onMouseOut={(e) => e.currentTarget.style.color = "#666"}
           >
-            <svg style={{ width: "20px", height: "20px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg style={{ width: "18px", height: "18px" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Continuar Comprando
+            <span style={{ display: "none" }}>Continuar Comprando</span>
           </Link>
 
-          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "20px" }}>
-            <img src="/logo.png" alt="Logo" style={{ height: "56px", objectFit: "contain" }} />
-            <div>
+          <Link href="/" style={{ 
+            textDecoration: "none", 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "12px",
+            flex: 1,
+            minWidth: 0,
+            justifyContent: "center"
+          }}>
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              style={{ 
+                height: "40px", 
+                width: "40px",
+                objectFit: "contain",
+                flexShrink: 0
+              }} 
+            />
+            <div style={{ minWidth: 0, overflow: "hidden" }}>
               <h1 style={{
-                fontSize: "20px",
+                fontSize: "clamp(14px, 3.5vw, 20px)",
                 fontWeight: "800",
                 color: "#0a0a0a",
                 margin: 0,
-                letterSpacing: "-0.5px"
+                letterSpacing: "-0.5px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis"
               }}>
                 Empório Bothanico
               </h1>
@@ -162,17 +185,19 @@ export default function CarrinhoPage() {
           </Link>
 
           <div style={{
-            fontSize: "20px",
+            fontSize: "clamp(14px, 3.5vw, 20px)",
             fontWeight: "800",
             color: "#0a0a0a",
-            letterSpacing: "-0.5px"
+            letterSpacing: "-0.5px",
+            flexShrink: 0,
+            whiteSpace: "nowrap"
           }}>
             Meu Carrinho
           </div>
         </div>
       </header>
 
-      <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "80px 48px" }}>
+      <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "40px 20px" }}>
         {carrinho.length === 0 ? (
           <div style={{
             textAlign: "center",
