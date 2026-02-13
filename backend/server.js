@@ -718,7 +718,27 @@ app.get("/admin/dashboard", verificarToken, async (req, res) => {
   try {
     const totalPedidos = await pool.query("SELECT COUNT(*) FROM pedidos");
     const totalProdutos = await pool.query("SELECT COUNT(*) FROM produtos");
-    const totalUsuarios = await pool.query("SELECT COUNT(*) FROM usuarios WHERE role != 'admin'");
+    
+    // Total de vendas
+    const totalVendas = await pool.query(`
+      SELECT COALESCE(SUM(total), 0) as total 
+      FROM pedidos 
+      WHERE status NOT IN ('cancelado', 'Cancelado')
+    `);
+    
+    // Ticket médio
+    const ticketMedio = await pool.query(`
+      SELECT COALESCE(AVG(total), 0) as media 
+      FROM pedidos 
+      WHERE status NOT IN ('cancelado', 'Cancelado')
+    `);
+    
+    // Pedidos de hoje
+    const pedidosHoje = await pool.query(`
+      SELECT COUNT(*) as count 
+      FROM pedidos 
+      WHERE DATE(created_at) = CURRENT_DATE
+    `);
     
     // Pedidos recentes
     const pedidosRecentes = await pool.query(`
@@ -729,13 +749,15 @@ app.get("/admin/dashboard", verificarToken, async (req, res) => {
     `);
 
     res.json({
-      totalPedidos: totalPedidos.rows[0].count,
-      totalProdutos: totalProdutos.rows[0].count,
-      totalUsuarios: totalUsuarios.rows[0].count,
+      totalPedidos: parseInt(totalPedidos.rows[0].count) || 0,
+      totalProdutos: parseInt(totalProdutos.rows[0].count) || 0,
+      totalVendas: parseFloat(totalVendas.rows[0].total) || 0,
+      ticketMedio: parseFloat(ticketMedio.rows[0].media) || 0,
+      pedidosHoje: parseInt(pedidosHoje.rows[0].count) || 0,
       pedidosRecentes: pedidosRecentes.rows
     });
   } catch (error) {
-    console.error(error);
+    console.error("Erro no dashboard:", error);
     res.status(500).json({ error: "Erro ao buscar dados do dashboard" });
   }
 });
