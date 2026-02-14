@@ -22,6 +22,7 @@ const {
   processarWebhookMercadoPago 
 } = require("./mercadopago");
 const { encrypt, decrypt, maskCardNumber } = require("./crypto-helper");
+const { enviarEmailPedidoAprovado, enviarEmailPedidoRecusado } = require("./email/sender");
 
 // Handlers globais de erro para prevenir crash
 process.on('unhandledRejection', (reason, promise) => {
@@ -834,11 +835,36 @@ app.post("/pagamento/cartao/processar", async (req, res) => {
         [pedido.id]
       );
       console.log("✅ Pedido marcado como PAGO!");
+      
+      // 📧 Enviar email de aprovação
+      try {
+        const itensResult = await pool.query(
+          `SELECT nome, tamanho, quantidade, preco 
+           FROM pedido_itens 
+           WHERE pedido_id = $1`,
+          [pedido.id]
+        );
+        
+        await enviarEmailPedidoAprovado(pedido, itensResult.rows, pedido.cliente_email);
+        console.log("📧 Email de aprovação enviado!");
+      } catch (emailError) {
+        console.error("⚠️ Erro ao enviar email (não crítico):", emailError.message);
+      }
+      
     } else {
       // Status pendente ou rejeitado
       let novoStatus = "aguardando_pagamento";
       if (resultado.status === "rejected") {
         novoStatus = "recusado";
+        
+        // 📧 Enviar email de recusa
+        try {
+          const motivoRecusa = resultado.error || "Cartão recusado pela operadora";
+          await enviarEmailPedidoRecusado(pedido, pedido.cliente_email, motivoRecusa);
+          console.log("📧 Email de recusa enviado!");
+        } catch (emailError) {
+          console.error("⚠️ Erro ao enviar email (não crítico):", emailError.message);
+        }
       }
       
       await pool.query(
