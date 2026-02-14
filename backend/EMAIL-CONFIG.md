@@ -1,4 +1,4 @@
-# 📧 Configuração de Email - Empório Botânico
+# 📧 Configuração de Email - Empório Bothânico
 
 ## ✅ Sistema Implementado
 
@@ -31,7 +31,7 @@ SMTP_PASS=sua-senha-de-app-do-gmail
 
 1. Acesse: https://myaccount.google.com/apppasswords
 2. Selecione "Email" e "Outro (nome personalizado)"
-3. Digite "Empório Botânico"
+3. Digite "Empório Bothânico"
 4. Copie a senha gerada (16 caracteres)
 5. Cole em `SMTP_PASS`
 

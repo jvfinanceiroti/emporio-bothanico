@@ -107,7 +107,7 @@ app.post("/pagamento/pix/gerar", async (req, res) => {
     // Criar pagamento PIX no Mercado Pago
     const payment = await mercadopago.payment.create({
       transaction_amount: valorTotal,
-      description: `Pedido #${pedido.id} - Empório Botânico`,
+      description: `Pedido #${pedido.id} - Empório Bothânico`,
       payment_method_id: 'pix',
       payer: {
         email: pedido.cliente_email,

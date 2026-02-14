@@ -202,7 +202,7 @@ function PagamentoPixContent() {
             color: "#0a0a0a",
             textDecoration: "none"
           }}>
-            Empório Botânico
+            Empório Bothânico
           </Link>
           <div style={{
             fontSize: "14px",

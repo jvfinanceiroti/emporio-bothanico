@@ -1,4 +1,4 @@
-# 🛍️ Empório Bothanico - E-commerce Premium
+# 🛍️ Empório Bothânico - E-commerce Premium
 
 Loja online moderna de perfumaria e produtos de banho, desenvolvida com Next.js, Node.js e PostgreSQL.
 

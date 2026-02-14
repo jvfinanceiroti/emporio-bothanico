@@ -52,7 +52,7 @@ async function gerarPixMercadoPago(pedido) {
     const payment = await paymentClient.create({
       body: {
         transaction_amount: valorTotal,
-        description: `Pedido #${pedido.id} - Empório Botânico`,
+        description: `Pedido #${pedido.id} - Empório Bothânico`,
         payment_method_id: 'pix',
         payer: {
           email: pedido.cliente_email || "cliente@email.com",
@@ -195,7 +195,7 @@ async function processarPagamentoCartao(dadosCartao, pedido) {
       body: {
         transaction_amount: valorTotal,
         token: dadosCartao.token,
-        description: `Pedido #${pedido.id} - Empório Botânico`,
+        description: `Pedido #${pedido.id} - Empório Bothânico`,
         installments: dadosCartao.installments,
         payment_method_id: dadosCartao.payment_method_id,
         issuer_id: dadosCartao.issuer_id,

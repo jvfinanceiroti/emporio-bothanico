@@ -1,6 +1,6 @@
 -- ==========================================
 -- SCRIPT SQL COMPLETO PARA SUPABASE
--- Empório Bothanico - Banco de Dados
+-- Empório Bothânico - Banco de Dados
 -- ==========================================
 
 -- 1. TABELA DE PRODUTOS

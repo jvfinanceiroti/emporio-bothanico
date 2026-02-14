@@ -227,7 +227,7 @@ export default function MeusPedidos() {
           <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px" }}>
             <img 
               src="/logo.png" 
-              alt="Empório Botânico" 
+              alt="Empório Bothânico" 
               style={{ height: "clamp(40px, 10vw, 50px)", objectFit: "contain" }}
             />
             <div>
@@ -238,7 +238,7 @@ export default function MeusPedidos() {
                 margin: 0,
                 lineHeight: 1
               }}>
-                Empório Botânico
+                Empório Bothânico
               </h1>
               <p style={{ fontSize: "clamp(10px, 2.5vw, 12px)", color: "#666", margin: "4px 0 0 0", letterSpacing: "1px" }}>
                 DELICADEZAS & BANHO

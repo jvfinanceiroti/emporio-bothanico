@@ -9,7 +9,7 @@ export default function SobrePage() {
             Quem Somos
           </h2>
           <p style={{ marginBottom: "16px" }}>
-            O <strong>Empório Botânico</strong> é sua loja online especializada em perfumes, aromas e produtos para banho de alta qualidade.
+            O <strong>Empório Bothânico</strong> é sua loja online especializada em perfumes, aromas e produtos para banho de alta qualidade.
           </p>
           <p>
             Acreditamos que o bem-estar começa com pequenos momentos de autocuidado. Por isso, selecionamos cuidadosamente cada produto do nosso catálogo, 
@@ -40,7 +40,7 @@ export default function SobrePage() {
 
         <section>
           <h2 className="text-lg md:text-2xl font-bold text-[var(--foreground)] mb-4">
-            Por Que Escolher o Empório Botânico?
+            Por Que Escolher o Empório Bothânico?
           </h2>
           <ul className="list-disc pl-6 space-y-2">
             <li>✨ <strong>Produtos Premium:</strong> Seleção exclusiva de perfumes e aromas</li>

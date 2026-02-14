@@ -552,7 +552,7 @@ export default function CheckoutPage() {
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap"
               }}>
-                Empório Bothanico
+                Empório Bothânico
               </h1>
             </div>
           </Link>

@@ -9,9 +9,9 @@ async function enviarEmailPedidoAprovado(pedido, itens, emailCliente) {
     const html = templatePedidoAprovado(pedido, itens);
 
     const mailOptions = {
-      from: `"Empório Botânico" <${process.env.SMTP_USER}>`,
+      from: `"Empório Bothânico" <${process.env.SMTP_USER}>`,
       to: emailCliente,
-      subject: `✅ Pedido #${pedido.id} Aprovado - Empório Botânico`,
+      subject: `✅ Pedido #${pedido.id} Aprovado - Empório Bothânico`,
       html: html,
     };
 
@@ -32,7 +32,7 @@ async function enviarEmailPedidoRecusado(pedido, emailCliente, motivoRecusa) {
     const html = templatePedidoRecusado(pedido, motivoRecusa);
 
     const mailOptions = {
-      from: `"Empório Botânico" <${process.env.SMTP_USER}>`,
+      from: `"Empório Bothânico" <${process.env.SMTP_USER}>`,
       to: emailCliente,
       subject: `⚠️ Pagamento Recusado - Pedido #${pedido.id}`,
       html: html,

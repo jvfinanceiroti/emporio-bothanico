@@ -1,4 +1,4 @@
--- Schema para Empório Bothanico
+-- Schema para Empório Bothânico
 -- PostgreSQL Database
 
 -- Tabela de Produtos

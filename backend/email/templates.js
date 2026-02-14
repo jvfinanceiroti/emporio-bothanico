@@ -45,7 +45,7 @@ function templatePedidoAprovado(pedido, itens) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pedido Aprovado - Empório Botânico</title>
+  <title>Pedido Aprovado - Empório Bothânico</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 20px 0;">
@@ -143,7 +143,7 @@ function templatePedidoAprovado(pedido, itens) {
                 Obrigado por comprar com a gente! 💚
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                Empório Botânico - CNPJ 04.280.033/0001-93<br>
+                Empório Bothânico - CNPJ 04.280.033/0001-93<br>
                 Telefone: 31 - 3831-0866
               </p>
             </td>
@@ -173,7 +173,7 @@ function templatePedidoRecusado(pedido, motivoRecusa) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pagamento Recusado - Empório Botânico</title>
+  <title>Pagamento Recusado - Empório Bothânico</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 20px 0;">
@@ -261,7 +261,7 @@ function templatePedidoRecusado(pedido, motivoRecusa) {
                 Estamos aqui para ajudar! 💚
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px;">
-                Empório Botânico - CNPJ 04.280.033/0001-93<br>
+                Empório Bothânico - CNPJ 04.280.033/0001-93<br>
                 Telefone: 31 - 3831-0866
               </p>
             </td>

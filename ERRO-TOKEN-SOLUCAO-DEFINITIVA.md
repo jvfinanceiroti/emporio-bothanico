@@ -101,7 +101,7 @@ No Render, mesma página do serviço:
 
 ```
 ============================================================
-🚀 BACKEND EMPÓRIO BOTÂNICO - INICIANDO...
+🚀 BACKEND EMPÓRIO BOTHÂNICO - INICIANDO...
 ============================================================
 📦 Versão: 467d423-cpf-nos-pedidos
 📅 Data: 2026-02-13

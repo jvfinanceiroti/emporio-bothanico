@@ -607,7 +607,7 @@ app.post("/pagamento/pix/gerar", sensivelRateLimiter, async (req, res) => {
     
     const pixData = {
       chave: process.env.PIX_CHAVE || "emporiobothanico@gmail.com",
-      nome: "Emporio Bothanico LTDA",
+      nome: "Empório Bothânico LTDA",
       cidade: "Belo Horizonte",
       valor: valorTotal.toFixed(2),
       identificador: `PED${pedido.id}`,

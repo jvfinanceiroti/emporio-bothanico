@@ -1,6 +1,6 @@
 @echo off
 echo ================================
-echo   EMPORIO BOTHANICO - NGROK
+echo   EMPORIO BOTHÂNICO - NGROK
 echo ================================
 echo.
 echo Iniciando tuneis ngrok...

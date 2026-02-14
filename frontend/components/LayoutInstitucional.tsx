@@ -15,9 +15,9 @@ export default function LayoutInstitucional({ titulo, children }: LayoutInstituc
         <div className="store-container py-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-3 no-underline">
-              <img src="/logo.png" alt="Empório Bothanico" className="h-12 w-12 object-contain" />
+              <img src="/logo.png" alt="Empório Bothânico" className="h-12 w-12 object-contain" />
               <span className="text-xl font-extrabold text-[var(--accent)] tracking-tight">
-                Empório Bothanico
+                Empório Bothânico
               </span>
             </Link>
             <Link
@@ -52,7 +52,7 @@ export default function LayoutInstitucional({ titulo, children }: LayoutInstituc
         <div className="text-center text-sm text-[var(--muted)] space-y-1">
           <p>CNPJ 04.280.033/0001-93 | LAMBARI PERFUMARIA LTDA - ME</p>
           <p>Tel: 31 - 3831-0866</p>
-          <p>© 2026 Empório Botânico. Todos os direitos reservados.</p>
+          <p>© 2026 Empório Bothânico. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>

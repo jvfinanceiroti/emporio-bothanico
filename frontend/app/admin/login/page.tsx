@@ -49,8 +49,8 @@ export default function LoginPage() {
     <div className="admin-theme min-h-screen flex items-center justify-center p-4" style={{ background: "var(--background)" }}>
       <div className="w-full max-w-md p-8 rounded-2xl border border-[var(--border)] shadow-[var(--shadow-xl)]" style={{ background: "var(--surface)" }}>
         <div className="flex flex-col items-center mb-8">
-          <img src="/logo.png" alt="Empório Bothanico" className="h-16 w-16 mb-4" />
-          <h1 className="text-2xl font-extrabold" style={{ color: "var(--accent)" }}>Empório Bothanico</h1>
+          <img src="/logo.png" alt="Empório Bothânico" className="h-16 w-16 mb-4" />
+          <h1 className="text-2xl font-extrabold" style={{ color: "var(--accent)" }}>Empório Bothânico</h1>
           <p className="text-sm font-medium mt-1" style={{ color: "var(--muted)" }}>Área Administrativa</p>
         </div>
 

@@ -162,7 +162,7 @@ function ProdutoContent() {
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap"
               }}>
-                Empório Bothanico
+                Empório Bothânico
               </h1>
             </div>
           </Link>
@@ -297,7 +297,7 @@ function ProdutoContent() {
                   textTransform: "uppercase",
                   marginBottom: "16px"
                 }}>
-                  Empório Botânico
+                  Empório Bothânico
                 </div>
 
                 <h1 style={{

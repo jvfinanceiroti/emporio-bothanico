@@ -179,7 +179,7 @@ export default function CarrinhoPage() {
                 overflow: "hidden",
                 textOverflow: "ellipsis"
               }}>
-                Empório Bothanico
+                Empório Bothânico
               </h1>
             </div>
           </Link>

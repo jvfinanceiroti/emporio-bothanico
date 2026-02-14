@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Empório Bothanico - Delicadezas e Banho",
+  title: "Empório Bothânico - Delicadezas e Banho",
   description: "Produtos naturais e artesanais para seu bem-estar",
 };
 

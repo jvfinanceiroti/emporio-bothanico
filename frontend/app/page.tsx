@@ -59,9 +59,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             <Link href="/" className="flex items-center gap-3 no-underline group">
-              <img src="/logo.png" alt="Empório Bothanico" className="h-10 w-10 lg:h-12 lg:w-12 object-contain" />
+              <img src="/logo.png" alt="Empório Bothânico" className="h-10 w-10 lg:h-12 lg:w-12 object-contain" />
               <div>
-                <h1 className="text-lg lg:text-xl font-extrabold text-[var(--foreground)] tracking-tight group-hover:text-[var(--accent)] transition-colors">Empório Bothanico</h1>
+                <h1 className="text-lg lg:text-xl font-extrabold text-[var(--foreground)] tracking-tight group-hover:text-[var(--accent)] transition-colors">Empório Bothânico</h1>
                 <p className="text-[10px] lg:text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Delicadezas & Banho</p>
               </div>
             </Link>
@@ -305,7 +305,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             <div>
               <img src="/logo.png" alt="Logo" className="h-12 w-12 mb-4 invert opacity-90" />
-              <h3 className="text-lg font-bold mb-2">Empório Bothanico</h3>
+              <h3 className="text-lg font-bold mb-2">Empório Bothânico</h3>
               <p className="text-white/70 text-sm leading-relaxed">Fragrâncias e produtos de banho selecionados para você.</p>
             </div>
             <div>
@@ -330,7 +330,7 @@ export default function Home() {
             </div>
           </div>
           <div className="pt-8 border-t border-white/20 text-center text-white/60 text-sm">
-            <p>© 2026 Empório Bothanico. CNPJ: 04.280.033/0001-93</p>
+            <p>© 2026 Empório Bothânico. CNPJ: 04.280.033/0001-93</p>
           </div>
         </div>
       </footer>

@@ -1,4 +1,4 @@
-# Melhorias Aplicadas - Empório Bothanico
+# Melhorias Aplicadas - Empório Bothânico
 
 ## Segurança
 

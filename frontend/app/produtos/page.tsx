@@ -86,9 +86,9 @@ export default function ProdutosPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             <Link href="/" className="flex items-center gap-3 no-underline group">
-              <img src="/logo.png" alt="Empório Bothanico" className="h-10 w-10 lg:h-12 lg:w-12 object-contain" />
+              <img src="/logo.png" alt="Empório Bothânico" className="h-10 w-10 lg:h-12 lg:w-12 object-contain" />
               <div>
-                <h1 className="text-lg lg:text-xl font-extrabold text-[var(--foreground)] tracking-tight group-hover:text-[var(--accent)] transition-colors">Empório Bothanico</h1>
+                <h1 className="text-lg lg:text-xl font-extrabold text-[var(--foreground)] tracking-tight group-hover:text-[var(--accent)] transition-colors">Empório Bothânico</h1>
                 <p className="text-[10px] lg:text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Delicadezas & Banho</p>
               </div>
             </Link>
@@ -259,7 +259,7 @@ export default function ProdutosPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 no-underline text-white hover:opacity-90">
             <img src="/logo.png" alt="Logo" className="h-10 w-10 invert opacity-90" />
-            <span className="font-bold">Empório Bothanico</span>
+            <span className="font-bold">Empório Bothânico</span>
           </Link>
           <div className="flex gap-6 text-sm">
             <Link href="/" className="text-white/70 hover:text-white transition-colors">Início</Link>
@@ -268,7 +268,7 @@ export default function ProdutosPage() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-6 pt-6 border-t border-white/20 text-center text-white/60 text-sm">
-          © 2026 Empório Bothanico. CNPJ: 04.280.033/0001-93
+          © 2026 Empório Bothânico. CNPJ: 04.280.033/0001-93
         </div>
       </footer>
     </div>

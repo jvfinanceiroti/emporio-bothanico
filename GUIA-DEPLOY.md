@@ -1,4 +1,4 @@
-# 📚 GUIA COMPLETO DE DEPLOY - EMPÓRIO BOTHANICO
+# 📚 GUIA COMPLETO DE DEPLOY - EMPÓRIO BOTHÂNICO
 
 Siga este guia passo a passo para colocar sua loja online!
 
@@ -67,7 +67,7 @@ Siga este guia passo a passo para colocar sua loja online!
 cd C:\Users\joaov\loja
 git init
 git add .
-git commit -m "Initial commit - Emporio Bothanico"
+git commit -m "Initial commit - Empório Bothânico"
 ```
 
 ### 2.2 - Criar Repositório no GitHub
