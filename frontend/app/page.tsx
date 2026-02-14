@@ -6,861 +6,331 @@ import { API_URL } from "@/lib/api";
 
 export default function Home() {
   const [produtos, setProdutos] = useState<any[]>([]);
+  const [categorias, setCategorias] = useState<any[]>([]);
   const [carrinho, setCarrinho] = useState<any[]>([]);
 
-  const carregarProdutos = () => {
-    fetch(`${API_URL}/produtos`)
-      .then(res => res.json())
-      .then(data => {
-        const produtosAtivos = data.filter((p: any) => p.ativo === true && p.estoque > 0);
-        setProdutos(produtosAtivos);
-      });
-  };
-
   useEffect(() => {
-    carregarProdutos();
-    
-    const interval = setInterval(() => {
-      carregarProdutos();
-    }, 3000);
-
-    const carrinhoLocal = localStorage.getItem("carrinho");
-    if (carrinhoLocal) {
-      setCarrinho(JSON.parse(carrinhoLocal));
-    }
-
-    return () => clearInterval(interval);
+    fetch(`${API_URL}/produtos`).then(res => res.json()).then(data => {
+      setProdutos(data.filter((p: any) => p.ativo !== false && p.estoque > 0));
+    });
+    fetch(`${API_URL}/categorias`).then(res => res.json()).then(setCategorias).catch(() => {});
+    const salvo = localStorage.getItem("carrinho");
+    if (salvo) setCarrinho(JSON.parse(salvo));
   }, []);
 
   const adicionarAoCarrinho = (produto: any, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    const novoCarrinho = [...carrinho];
-    const itemExistente = novoCarrinho.find(item => item.id === produto.id);
-
-    if (itemExistente) {
-      itemExistente.quantidade += 1;
-    } else {
-      novoCarrinho.push({ ...produto, quantidade: 1 });
-    }
-
-    setCarrinho(novoCarrinho);
-    localStorage.setItem("carrinho", JSON.stringify(novoCarrinho));
-
+    const novo = [...carrinho];
+    const idx = novo.findIndex((i: any) => i.id === produto.id);
+    if (idx >= 0) novo[idx].quantidade += 1;
+    else novo.push({ ...produto, quantidade: 1 });
+    setCarrinho(novo);
+    localStorage.setItem("carrinho", JSON.stringify(novo));
     const btn = e.currentTarget as HTMLButtonElement;
     btn.textContent = "✓ Adicionado!";
-    btn.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+    btn.classList.add("!bg-[var(--success)]", "!border-[var(--success)]");
     setTimeout(() => {
-      btn.innerHTML = '<svg style="width:20px;height:20px;display:inline" fill="currentColor" viewBox="0 0 20 20"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path></svg> Adicionar ao Carrinho';
-      btn.style.background = "";
+      btn.textContent = "Adicionar ao Carrinho";
+      btn.classList.remove("!bg-[var(--success)]", "!border-[var(--success)]");
     }, 1500);
   };
 
-  const totalItensCarrinho = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
+  const totalItens = carrinho.reduce((acc: number, i: any) => acc + (i.quantidade || 1), 0);
+
+  const categoriasDestaque = categorias.slice(0, 3).length > 0 ? categorias.slice(0, 3) : [
+    { id: 1, nome: "Perfumes", slug: "perfume", descricao: "Fragrâncias exclusivas" },
+    { id: 2, nome: "Aromas", slug: "aromas", descricao: "Ambientes perfumados" },
+    { id: 3, nome: "Banho", slug: "banho", descricao: "Cuidados especiais" },
+  ];
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--background)" }}>
-      <style jsx global>{`
-        @media (min-width: 768px) {
-          .desktop-only {
-            display: flex !important;
-          }
-        }
-      `}</style>
-      
-      {/* HEADER MODERNO */}
-      <header className="store-header">
-        <div style={{
-          maxWidth: "1440px",
-          margin: "0 auto",
-          padding: "16px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "12px"
-        }}>
-          <Link href="/" style={{ 
-            textDecoration: "none", 
-            display: "flex", 
-            alignItems: "center", 
-            gap: "12px",
-            flex: "1",
-            minWidth: 0
-          }}>
-            <img 
-              src="/logo.png" 
-              alt="Logo" 
-              style={{ 
-                height: "48px", 
-                width: "48px",
-                objectFit: "contain",
-                flexShrink: 0
-              }} 
-            />
-            <div style={{ minWidth: 0, overflow: "hidden" }}>
-              <h1 style={{
-                fontSize: "clamp(16px, 4vw, 28px)",
-                fontWeight: "800",
-                color: "#0a0a0a",
-                margin: 0,
-                letterSpacing: "-0.5px",
-                fontFamily: "system-ui, -apple-system, sans-serif",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis"
-              }}>
-                Empório Bothanico
-              </h1>
-              <p style={{ 
-                fontSize: "9px", 
-                color: "#888", 
-                margin: 0, 
-                fontWeight: 500,
-                letterSpacing: "0.5px",
-                textTransform: "uppercase"
-              }}>
-                Delicadezas & Banho
-              </p>
-            </div>
-          </Link>
+    <div className="min-h-screen bg-[var(--background)]">
+      {/* TOP BAR PROMOCIONAL */}
+      <div className="bg-[var(--accent)] text-white py-2.5 text-center text-sm font-semibold">
+        <span className="hidden sm:inline">✨ Frete grátis em compras acima de R$ 199 </span>
+        <span className="sm:hidden">✨ Frete grátis acima de R$ 199</span>
+        <span className="mx-2 opacity-75">|</span>
+        <span>Entrega para todo o Brasil</span>
+      </div>
 
-          <nav style={{ display: "flex", gap: "12px", alignItems: "center", flexShrink: 0 }}>
-            <Link 
-              href="/produtos"
-              style={{
-                padding: "10px 20px",
-                background: "transparent",
-                color: "#0a0a0a",
-                textDecoration: "none",
-                borderRadius: "12px",
-                fontSize: "14px",
-                fontWeight: "600",
-                transition: "all 0.3s",
-                display: "none"
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = "#f8f9fa";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = "transparent";
-              }}
-              className="desktop-only"
-            >
-              Produtos
+      {/* HEADER PREMIUM */}
+      <header className="store-header sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 lg:h-20">
+            <Link href="/" className="flex items-center gap-3 no-underline group">
+              <img src="/logo.png" alt="Empório Bothanico" className="h-10 w-10 lg:h-12 lg:w-12 object-contain" />
+              <div>
+                <h1 className="text-lg lg:text-xl font-extrabold text-[var(--foreground)] tracking-tight group-hover:text-[var(--accent)] transition-colors">Empório Bothanico</h1>
+                <p className="text-[10px] lg:text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Delicadezas & Banho</p>
+              </div>
             </Link>
-            
-            <Link 
-              href="/meus-pedidos"
-              style={{
-                padding: "10px 20px",
-                background: "transparent",
-                color: "#0a0a0a",
-                textDecoration: "none",
-                borderRadius: "12px",
-                fontSize: "14px",
-                fontWeight: "600",
-                transition: "all 0.3s",
-                display: "none"
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = "#f8f9fa";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = "transparent";
-              }}
-              className="desktop-only"
-            >
-              Meus Pedidos
-            </Link>
-            
-            <Link 
-              href="/carrinho"
-              style={{
-                position: "relative",
-                padding: "10px 16px",
-                background: "#0a0a0a",
-                color: "white",
-                borderRadius: "10px",
-                textDecoration: "none",
-                fontWeight: "600",
-                fontSize: "13px",
-                transition: "all 0.3s ease",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                border: "2px solid #0a0a0a",
-                whiteSpace: "nowrap"
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = "white";
-                e.currentTarget.style.color = "#0a0a0a";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = "#0a0a0a";
-                e.currentTarget.style.color = "white";
-              }}
-            >
-              <svg style={{ width: "16px", height: "16px" }} fill="currentColor" viewBox="0 0 20 20">
-                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
-              </svg>
+
+            <nav className="hidden md:flex items-center gap-1">
+              <Link href="/produtos" className="px-4 py-2 rounded-lg text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)] transition-colors">Produtos</Link>
+              <Link href="/meus-pedidos" className="px-4 py-2 rounded-lg text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)] transition-colors">Meus Pedidos</Link>
+              <Link href="/sobre" className="px-4 py-2 rounded-lg text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)] transition-colors">Sobre</Link>
+            </nav>
+
+            <Link href="/carrinho" className="relative flex items-center gap-2 px-4 py-2.5 bg-[var(--foreground)] text-white rounded-xl font-bold text-sm hover:bg-[var(--accent)] transition-all hover:scale-105 active:scale-95">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M3 1a1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>
               Carrinho
-              {totalItensCarrinho > 0 && (
-                <span style={{
-                  position: "absolute",
-                  top: "-6px",
-                  right: "-6px",
-                  background: "#ef4444",
-                  color: "white",
-                  borderRadius: "50%",
-                  width: "22px",
-                  height: "22px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "11px",
-                  fontWeight: "700",
-                  border: "2px solid white"
-                }}>
-                  {totalItensCarrinho}
+              {totalItens > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full border-2 border-white">
+                  {totalItens}
                 </span>
               )}
             </Link>
-          </nav>
+          </div>
         </div>
       </header>
 
-      {/* HERO BANNER */}
-      <section style={{
-        position: "relative",
-        padding: "60px 24px",
-        overflow: "hidden",
-        minHeight: "600px"
-      }}>
-        {/* Vídeo de fundo */}
-        <video 
-          autoPlay 
-          loop 
-          muted 
-          playsInline
-          poster="https://images.unsplash.com/photo-1466781783364-36c955e42a7f?w=1200&q=80"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            zIndex: 0,
-            objectFit: "cover",
-            opacity: 0.6
-          }}
-        >
-          <source src="https://assets.mixkit.co/videos/preview/mixkit-green-leaves-of-a-plant-moving-in-the-wind-1188-large.mp4" type="video/mp4" />
-          <source src="https://videos.pexels.com/video-files/5702761/5702761-uhd_2560_1440_25fps.mp4" type="video/mp4" />
-        </video>
-
-        {/* Overlay branco */}
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(245,245,245,0.65) 100%)",
-          zIndex: 1
-        }}></div>
-
-        <div style={{ 
-          maxWidth: "900px", 
-          margin: "0 auto", 
-          textAlign: "center",
-          position: "relative",
-          zIndex: 2,
-          padding: "0 20px"
-        }}>
-
-          
-          <h2 style={{
-            fontSize: "clamp(32px, 8vw, 64px)",
-            fontWeight: "900",
-            color: "#0a0a0a",
-            marginBottom: "24px",
-            letterSpacing: "-2px",
-            lineHeight: "1.1",
-            fontFamily: "system-ui, -apple-system, sans-serif"
-          }}>
-            Fragrâncias que<br/>Contam Histórias
+      {/* HERO FULL-SCREEN */}
+      <section className="relative min-h-[85vh] lg:min-h-[90vh] flex items-center overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url(https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=1920&q=80)" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70" />
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-20 text-center">
+          <p className="text-white/90 text-sm font-semibold uppercase tracking-[0.3em] mb-4">Perfumaria Premium</p>
+          <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight mb-6">
+            Fragrâncias que<br /><span className="text-[var(--accent-light)]">Contam Histórias</span>
           </h2>
-          
-          <p style={{
-            fontSize: "clamp(16px, 3vw, 20px)",
-            color: "#666",
-            lineHeight: "1.7",
-            maxWidth: "700px",
-            margin: "0 auto 40px",
-            fontWeight: 400
-          }}>
-            Cada essência é cuidadosamente selecionada para proporcionar uma experiência única e memorável
+          <p className="text-white/90 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
+            Cada essência é selecionada para uma experiência única. Descubra produtos que transformam momentos comuns em memórias especiais.
           </p>
-
-          <div style={{
-            display: "flex",
-            gap: "48px",
-            justifyContent: "center",
-            marginTop: "48px"
-          }}>
-            <StatBadge number="1000+" label="Produtos Vendidos" />
-            <StatBadge number="5★" label="Avaliação Clientes" />
-            <StatBadge number="24h" label="Envio Rápido" />
-          </div>
-        </div>
-      </section>
-
-      {/* PRODUTOS GRID */}
-      <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "80px 48px" }}>
-        <div style={{ marginBottom: "48px" }}>
-          <h3 style={{
-            fontSize: "14px",
-            fontWeight: "600",
-            color: "#888",
-            letterSpacing: "2px",
-            textTransform: "uppercase",
-            marginBottom: "12px"
-          }}>
-            Nossa Seleção
-          </h3>
-          <h2 style={{
-            fontSize: "42px",
-            fontWeight: "800",
-            color: "#0a0a0a",
-            letterSpacing: "-1px"
-          }}>
-            Produtos em Destaque
-          </h2>
-        </div>
-
-        {produtos.length === 0 ? (
-          <div style={{
-            textAlign: "center",
-            padding: "120px 48px",
-            background: "#fafafa",
-            borderRadius: "24px"
-          }}>
-            <div style={{ fontSize: "72px", marginBottom: "24px" }}>🌿</div>
-            <p style={{ fontSize: "18px", color: "#999", fontWeight: 500 }}>
-              Novos produtos chegando em breve...
-            </p>
-          </div>
-        ) : (
-          <>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-              gap: "32px"
-            }}>
-              {produtos.map((produto) => (
-              <Link 
-                key={produto.id} 
-                href={`/produto/${produto.id}`}
-                style={{ textDecoration: "none" }}
-              >
-                <div style={{
-                  background: "white",
-                  borderRadius: "20px",
-                  overflow: "hidden",
-                  border: "1px solid rgba(0,0,0,0.08)",
-                  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                  cursor: "pointer",
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column"
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "translateY(-8px)";
-                  e.currentTarget.style.boxShadow = "0 24px 48px rgba(0,0,0,0.12)";
-                  e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                  e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)";
-                }}
-                >
-                  {/* IMAGEM */}
-                  <div style={{
-                    position: "relative",
-                    height: "360px",
-                    background: "#fafafa",
-                    overflow: "hidden"
-                  }}>
-                    {produto.imagem_url ? (
-                      <img 
-                        src={produto.imagem_url} 
-                        alt={produto.nome}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          transition: "transform 0.6s ease"
-                        }}
-                        onMouseOver={(e) => e.currentTarget.style.transform = "scale(1.08)"}
-                        onMouseOut={(e) => e.currentTarget.style.transform = "scale(1)"}
-                        onError={(e) => {
-                          e.currentTarget.src = 'https://via.placeholder.com/400x400/fafafa/ccc?text=Sem+Imagem';
-                        }}
-                      />
-                    ) : (
-                      <div style={{
-                        width: "100%",
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "64px"
-                      }}>
-                        🌸
-                      </div>
-                    )}
-                    
-                    {/* BADGE ESTOQUE */}
-                    {produto.estoque <= 5 && produto.estoque > 0 && (
-                      <div style={{
-                        position: "absolute",
-                        top: "16px",
-                        left: "16px",
-                        background: "#0a0a0a",
-                        color: "white",
-                        padding: "8px 16px",
-                        borderRadius: "8px",
-                        fontSize: "11px",
-                        fontWeight: "700",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px"
-                      }}>
-                        Últimas Unidades
-                      </div>
-                    )}
-                  </div>
-
-                  {/* CONTEÚDO */}
-                  <div style={{ padding: "32px", flex: 1, display: "flex", flexDirection: "column" }}>
-                    <div style={{
-                      fontSize: "11px",
-                      fontWeight: "600",
-                      color: "#999",
-                      letterSpacing: "1px",
-                      textTransform: "uppercase",
-                      marginBottom: "12px"
-                    }}>
-                      Empório Botânico
-                    </div>
-
-                    <h3 style={{
-                      fontSize: "22px",
-                      fontWeight: "700",
-                      color: "#0a0a0a",
-                      marginBottom: "12px",
-                      lineHeight: "1.3",
-                      letterSpacing: "-0.5px",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical"
-                    }}>
-                      {produto.nome}
-                    </h3>
-
-                    {produto.descricao && (
-                      <p style={{
-                        fontSize: "14px",
-                        color: "#666",
-                        lineHeight: "1.6",
-                        marginBottom: "24px",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: "vertical"
-                      }}>
-                        {produto.descricao}
-                      </p>
-                    )}
-
-                    <div style={{ marginTop: "auto" }}>
-                      <div style={{
-                        display: "flex",
-                        alignItems: "baseline",
-                        gap: "8px",
-                        marginBottom: "8px"
-                      }}>
-                        <span style={{
-                          fontSize: "36px",
-                          fontWeight: "900",
-                          color: "#0a0a0a",
-                          letterSpacing: "-1px"
-                        }}>
-                          R$ {Number(produto.preco).toFixed(2)}
-                        </span>
-                      </div>
-
-                      <p style={{
-                        fontSize: "12px",
-                        color: produto.estoque > 5 ? "#10b981" : "#f59e0b",
-                        fontWeight: "600",
-                        marginBottom: "20px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px"
-                      }}>
-                        <span style={{
-                          width: "8px",
-                          height: "8px",
-                          borderRadius: "50%",
-                          background: produto.estoque > 5 ? "#10b981" : "#f59e0b"
-                        }}></span>
-                        {produto.estoque} em estoque
-                      </p>
-
-                      <button
-                        onClick={(e) => adicionarAoCarrinho(produto, e)}
-                        style={{
-                          width: "100%",
-                          padding: "16px",
-                          background: "#0a0a0a",
-                          color: "white",
-                          border: "2px solid #0a0a0a",
-                          borderRadius: "12px",
-                          fontSize: "15px",
-                          fontWeight: "600",
-                          cursor: "pointer",
-                          transition: "all 0.3s ease",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "10px"
-                        }}
-                        onMouseOver={(e) => {
-                          e.currentTarget.style.background = "white";
-                          e.currentTarget.style.color = "#0a0a0a";
-                        }}
-                        onMouseOut={(e) => {
-                          e.currentTarget.style.background = "#0a0a0a";
-                          e.currentTarget.style.color = "white";
-                        }}
-                      >
-                        <svg style={{ width: "20px", height: "20px" }} fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
-                        </svg>
-                        Adicionar ao Carrinho
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-              ))}
-            </div>
-
-            {/* Botão Ver Todos os Produtos */}
-            <div style={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "clamp(48px, 12vw, 64px)"
-            }}>
-            <Link
-              href="/produtos"
-              style={{
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "12px",
-                padding: "clamp(16px, 4vw, 20px) clamp(40px, 10vw, 56px)",
-                background: "#0a0a0a",
-                color: "white",
-                borderRadius: "16px",
-                fontSize: "clamp(15px, 3.8vw, 18px)",
-                fontWeight: "700",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                border: "2px solid #0a0a0a"
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.background = "white";
-                e.currentTarget.style.color = "#0a0a0a";
-                e.currentTarget.style.transform = "translateY(-4px)";
-                e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,0.25)";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.background = "#0a0a0a";
-                e.currentTarget.style.color = "white";
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.2)";
-              }}
-            >
-              <span style={{ fontSize: "clamp(20px, 5vw, 24px)" }}>🛍️</span>
-              Ver Todos os Produtos
-              <span style={{ fontSize: "clamp(16px, 4vw, 18px)" }}>→</span>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/produtos" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-[var(--foreground)] font-bold text-lg rounded-xl hover:bg-[var(--accent-light)] hover:text-[var(--accent)] transition-all hover:scale-105 shadow-xl">
+              Explorar Coleção
+            </Link>
+            <Link href="/produtos" className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white text-white font-bold text-lg rounded-xl hover:bg-white hover:text-[var(--foreground)] transition-all">
+              Ver Produtos
             </Link>
           </div>
-          </>
-        )}
-      </main>
-
-      {/* SEÇÃO DE BENEFÍCIOS */}
-      <section style={{
-        background: "#fafafa",
-        padding: "80px 48px",
-        borderTop: "1px solid rgba(0,0,0,0.06)",
-        borderBottom: "1px solid rgba(0,0,0,0.06)"
-      }}>
-        <div style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: "48px"
-        }}>
-          <FeatureCard
-            icon={
-              <svg style={{ width: "32px", height: "32px" }} fill="currentColor" viewBox="0 0 20 20">
-                <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"></path>
-                <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"></path>
-              </svg>
-            }
-            title="Entrega Nacional"
-            description="Enviamos para todo Brasil com rastreamento em tempo real"
-          />
-          <FeatureCard
-            icon={
-              <svg style={{ width: "32px", height: "32px" }} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-              </svg>
-            }
-            title="Qualidade Garantida"
-            description="Produtos 100% originais com garantia de autenticidade"
-          />
-          <FeatureCard
-            icon={
-              <svg style={{ width: "32px", height: "32px" }} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"></path>
-              </svg>
-            }
-            title="Pagamento Seguro"
-            description="Ambiente 100% seguro e criptografado para suas compras"
-          />
-          <FeatureCard
-            icon={
-              <svg style={{ width: "32px", height: "32px" }} fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd"></path>
-              </svg>
-            }
-            title="Embalagem Premium"
-            description="Cada pedido é cuidadosamente embalado para presentear"
-          />
+          <div className="flex flex-wrap justify-center gap-8 lg:gap-16 mt-16 text-white/90">
+            <div className="text-center">
+              <div className="text-2xl lg:text-3xl font-black">1000+</div>
+              <div className="text-sm font-medium">Produtos Vendidos</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl lg:text-3xl font-black">5★</div>
+              <div className="text-sm font-medium">Avaliação</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl lg:text-3xl font-black">24h</div>
+              <div className="text-sm font-medium">Envio Rápido</div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* FOOTER PREMIUM */}
-      <footer style={{
-        background: "#0a0a0a",
-        color: "white",
-        padding: "clamp(40px, 10vw, 80px) clamp(20px, 5vw, 48px) 40px"
-      }}>
-        <div style={{
-          maxWidth: "1440px",
-          margin: "0 auto"
-        }}>
-          {/* Footer Content */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-            gap: "clamp(32px, 8vw, 64px)",
-            marginBottom: "clamp(32px, 8vw, 64px)"
-          }}>
-            {/* Coluna 1 - Logo e Descrição */}
-            <div>
-              <img 
-                src="/logo.png" 
-                alt="Logo" 
-                style={{ 
-                  height: "clamp(48px, 10vw, 64px)", 
-                  marginBottom: "20px",
-                  filter: "brightness(0) invert(1)"
-                }} 
-              />
-              <h3 style={{
-                fontSize: "clamp(18px, 4vw, 24px)",
-                fontWeight: "800",
-                marginBottom: "12px",
-                letterSpacing: "-0.5px"
-              }}>
-                Empório Bothanico
-              </h3>
-              <p style={{
-                fontSize: "clamp(13px, 2.5vw, 14px)",
-                color: "#999",
-                lineHeight: "1.7",
-                marginBottom: "20px"
-              }}>
-                Oferecemos uma experiência única em fragrâncias e produtos de banho, cuidadosamente selecionados para você.
-              </p>
+      {/* CATEGORIAS - Explore */}
+      {categoriasDestaque.length > 0 && (
+        <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-8 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <p className="text-[var(--accent)] font-semibold text-sm uppercase tracking-widest mb-2">Navegue</p>
+            <h2 className="text-3xl lg:text-4xl font-extrabold text-[var(--foreground)] mb-12">Explore por Categoria</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+              {categoriasDestaque.map((cat: any) => (
+                <Link 
+                  key={cat.id} 
+                  href={cat.slug ? `/produtos?categoria=${cat.slug}` : "/produtos"}
+                  className="group relative overflow-hidden rounded-2xl aspect-[4/3] bg-gradient-to-br from-[var(--accent-light)] to-white border-2 border-[var(--border)] hover:border-[var(--accent)] transition-all hover:shadow-xl"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute inset-0 flex flex-col justify-end p-6 text-[var(--foreground)]">
+                    <h3 className="text-xl font-bold mb-1">{cat.nome}</h3>
+                    <p className="text-sm text-[var(--muted)]">{cat.descricao || "Ver produtos"}</p>
+                    <span className="text-[var(--accent)] font-semibold mt-2 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                      Explorar
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                    </span>
+                  </div>
+                </Link>
+              ))}
             </div>
+          </div>
+        </section>
+      )}
 
-            {/* Coluna 2 - Links */}
+      {/* PRODUTOS EM DESTAQUE */}
+      <section className="py-16 lg:py-24 px-4 sm:px-6 lg:px-8 bg-[var(--background)]">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
             <div>
-              <h4 style={{
-                fontSize: "clamp(11px, 2.2vw, 13px)",
-                fontWeight: "700",
-                letterSpacing: "1px",
-                textTransform: "uppercase",
-                marginBottom: "16px",
-                color: "#fff"
-              }}>
-                Navegação
-              </h4>
+              <p className="text-[var(--accent)] font-semibold text-sm uppercase tracking-widest mb-2">Nossa Seleção</p>
+              <h2 className="text-3xl lg:text-4xl font-extrabold text-[var(--foreground)]">Produtos em Destaque</h2>
+            </div>
+            <Link href="/produtos" className="btn-primary shrink-0">
+              Ver Todos os Produtos
+            </Link>
+          </div>
+
+          {produtos.length === 0 ? (
+            <div className="text-center py-24 bg-white rounded-2xl border border-[var(--border)]">
+              <div className="text-6xl mb-4">🌿</div>
+              <p className="text-[var(--muted)] text-lg font-medium">Novos produtos em breve...</p>
+              <Link href="/produtos" className="btn-primary mt-6 inline-flex">Ver Catálogo</Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+              {produtos.slice(0, 8).map((produto) => (
+                <Link key={produto.id} href={`/produto/${produto.id}`} className="group no-underline">
+                  <div className="store-card overflow-hidden h-full flex flex-col hover:-translate-y-1">
+                    <div className="relative aspect-square bg-[var(--accent-light)] overflow-hidden">
+                      {produto.imagem_url ? (
+                        <img 
+                          src={produto.imagem_url} 
+                          alt={produto.nome}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => { (e.target as HTMLImageElement).src = "https://via.placeholder.com/400/fafafa/ccc?text=Produto"; }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-5xl">🌸</div>
+                      )}
+                      {produto.estoque <= 5 && produto.estoque > 0 && (
+                        <span className="absolute top-3 left-3 px-3 py-1 bg-[var(--foreground)] text-white text-xs font-bold uppercase rounded-lg">Últimas unidades</span>
+                      )}
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col">
+                      {produto.categoria_nome && (
+                        <span className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">{produto.categoria_nome}</span>
+                      )}
+                      <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 line-clamp-2 group-hover:text-[var(--accent)] transition-colors">{produto.nome}</h3>
+                      {produto.descricao && <p className="text-sm text-[var(--muted)] line-clamp-2 mb-4 flex-1">{produto.descricao}</p>}
+                      <div className="mt-auto">
+                        <div className="text-2xl font-black text-[var(--foreground)] mb-3">R$ {Number(produto.preco).toFixed(2)}</div>
+                        <p className={`text-xs font-semibold flex items-center gap-2 mb-4 ${produto.estoque > 5 ? "text-[var(--success)]" : "text-[var(--warning)]"}`}>
+                          <span className={`w-2 h-2 rounded-full ${produto.estoque > 5 ? "bg-[var(--success)]" : "bg-[var(--warning)]"}`} />
+                          {produto.estoque} em estoque
+                        </p>
+                        <button
+                          onClick={(e) => adicionarAoCarrinho(produto, e)}
+                          disabled={produto.estoque === 0}
+                          className="w-full py-3.5 bg-[var(--foreground)] text-white font-bold rounded-xl border-2 border-[var(--foreground)] hover:bg-white hover:text-[var(--foreground)] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--foreground)] disabled:hover:text-white"
+                        >
+                          Adicionar ao Carrinho
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* BANNER BENEFÍCIOS */}
+      <section className="py-16 lg:py-20 px-4 sm:px-6 bg-[var(--accent)] text-white">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl lg:text-3xl font-extrabold text-center mb-12">Por que comprar conosco?</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white/20 flex items-center justify-center">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+              </div>
+              <h3 className="font-bold text-lg mb-2">Entrega Nacional</h3>
+              <p className="text-white/90 text-sm">Enviamos para todo o Brasil com rastreamento</p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white/20 flex items-center justify-center">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+              <h3 className="font-bold text-lg mb-2">Qualidade Garantida</h3>
+              <p className="text-white/90 text-sm">Produtos 100% originais</p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white/20 flex items-center justify-center">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              </div>
+              <h3 className="font-bold text-lg mb-2">Pagamento Seguro</h3>
+              <p className="text-white/90 text-sm">Ambiente criptografado</p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-white/20 flex items-center justify-center">
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+              </div>
+              <h3 className="font-bold text-lg mb-2">Embalagem Premium</h3>
+              <p className="text-white/90 text-sm">Cuidadosamente embalado para presentear</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* NEWSLETTER */}
+      <section className="py-16 px-4 sm:px-6 bg-white border-y border-[var(--border)]">
+        <div className="max-w-xl mx-auto text-center">
+          <h2 className="text-xl font-bold text-[var(--foreground)] mb-2">Receba novidades e ofertas</h2>
+          <p className="text-[var(--muted)] text-sm mb-6">Cadastre seu e-mail e seja o primeiro a saber das novidades.</p>
+          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
+            <input type="email" placeholder="seu@email.com" className="input-store flex-1" />
+            <button type="submit" className="btn-primary shrink-0">Cadastrar</button>
+          </form>
+        </div>
+      </section>
+
+      {/* DEPOIMENTO / SOCIAL PROOF */}
+      <section className="py-16 lg:py-24 px-4 sm:px-6 bg-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-[var(--accent)] font-semibold text-sm uppercase tracking-widest mb-4">O que dizem nossos clientes</p>
+          <blockquote className="text-2xl lg:text-3xl font-medium text-[var(--foreground)] leading-relaxed mb-6">
+            &ldquo;Produtos de qualidade excepcional e entrega super rápida. Já compro há anos e nunca me decepcionei.&rdquo;
+          </blockquote>
+          <div className="flex items-center justify-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-[var(--accent-light)] flex items-center justify-center text-xl">M</div>
+            <div className="text-left">
+              <div className="font-bold text-[var(--foreground)]">Maria S.</div>
+              <div className="text-sm text-[var(--muted)]">Cliente desde 2024</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
+      <section className="py-16 lg:py-24 px-4 sm:px-6 bg-[var(--accent-light)]">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl lg:text-3xl font-extrabold text-[var(--foreground)] mb-4">Pronto para descobrir?</h2>
+          <p className="text-[var(--muted)] mb-8">Explore nossa coleção completa de fragrâncias e produtos para banho.</p>
+          <Link href="/produtos" className="btn-primary text-lg px-10 py-4">
+            Ver Todos os Produtos
+          </Link>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="bg-[var(--foreground)] text-white py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            <div>
+              <img src="/logo.png" alt="Logo" className="h-12 w-12 mb-4 invert opacity-90" />
+              <h3 className="text-lg font-bold mb-2">Empório Bothanico</h3>
+              <p className="text-white/70 text-sm leading-relaxed">Fragrâncias e produtos de banho selecionados para você.</p>
+            </div>
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-white/90 mb-4">Navegação</h4>
               <FooterLink href="/">Início</FooterLink>
               <FooterLink href="/produtos">Produtos</FooterLink>
               <FooterLink href="/sobre">Sobre Nós</FooterLink>
               <FooterLink href="/contato">Contato</FooterLink>
             </div>
-
-            {/* Coluna 3 - Atendimento */}
             <div>
-              <h4 style={{
-                fontSize: "clamp(11px, 2.2vw, 13px)",
-                fontWeight: "700",
-                letterSpacing: "1px",
-                textTransform: "uppercase",
-                marginBottom: "16px",
-                color: "#fff"
-              }}>
-                Atendimento
-              </h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-white/90 mb-4">Atendimento</h4>
               <FooterLink href="/ajuda">Central de Ajuda</FooterLink>
               <FooterLink href="/trocas">Trocas e Devoluções</FooterLink>
               <FooterLink href="/entregas">Política de Entrega</FooterLink>
               <FooterLink href="/privacidade">Privacidade</FooterLink>
             </div>
-
-            {/* Coluna 4 - Contato */}
             <div>
-              <h4 style={{
-                fontSize: "clamp(11px, 2.2vw, 13px)",
-                fontWeight: "700",
-                letterSpacing: "1px",
-                textTransform: "uppercase",
-                marginBottom: "16px",
-                color: "#fff"
-              }}>
-                Fale Conosco
-              </h4>
-              <p style={{ fontSize: "clamp(12px, 2.5vw, 14px)", color: "#999", marginBottom: "12px", wordBreak: "break-word" }}>
-                📧 contato@emporiobothanico.com.br
-              </p>
-              <p style={{ fontSize: "clamp(12px, 2.5vw, 14px)", color: "#999", marginBottom: "12px", wordBreak: "break-word" }}>
-                📱 (31) 3831-0866
-              </p>
-              <p style={{ fontSize: "14px", color: "#999" }}>
-                🕐 Seg-Sex: 9h às 18h
-              </p>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-white/90 mb-4">Fale Conosco</h4>
+              <p className="text-white/70 text-sm">📧 contato@emporiobothanico.com.br</p>
+              <p className="text-white/70 text-sm mt-2">📱 (31) 3831-0866</p>
+              <p className="text-white/70 text-sm mt-2">Seg-Sex: 9h às 18h</p>
             </div>
           </div>
-
-          {/* Payment Methods */}
-          <div style={{
-            paddingTop: "40px",
-            paddingBottom: "40px",
-            borderTop: "1px solid rgba(255,255,255,0.1)",
-            borderBottom: "1px solid rgba(255,255,255,0.1)"
-          }}>
-            <h4 style={{
-              fontSize: "13px",
-              fontWeight: "700",
-              letterSpacing: "1px",
-              textTransform: "uppercase",
-              marginBottom: "24px",
-              color: "#fff",
-              textAlign: "center"
-            }}>
-              Formas de Pagamento
-            </h4>
-            <div style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "20px",
-              flexWrap: "wrap"
-            }}>
-              {/* Cartões de Crédito */}
-              <PaymentIcon>
-                <svg style={{ width: "48px", height: "32px" }} viewBox="0 0 48 32" fill="none">
-                  <rect width="48" height="32" rx="4" fill="white"/>
-                  <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="#1434CB" fontSize="10" fontWeight="bold">VISA</text>
-                </svg>
-              </PaymentIcon>
-
-              <PaymentIcon>
-                <svg style={{ width: "48px", height: "32px" }} viewBox="0 0 48 32" fill="none">
-                  <rect width="48" height="32" rx="4" fill="white"/>
-                  <circle cx="18" cy="16" r="8" fill="#EB001B"/>
-                  <circle cx="30" cy="16" r="8" fill="#F79E1B"/>
-                </svg>
-              </PaymentIcon>
-
-              <PaymentIcon>
-                <svg style={{ width: "48px", height: "32px" }} viewBox="0 0 48 32" fill="none">
-                  <rect width="48" height="32" rx="4" fill="white"/>
-                  <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="#016FD0" fontSize="9" fontWeight="bold">ELO</text>
-                </svg>
-              </PaymentIcon>
-
-              <PaymentIcon>
-                <svg style={{ width: "48px", height: "32px" }} viewBox="0 0 48 32" fill="none">
-                  <rect width="48" height="32" rx="4" fill="white"/>
-                  <text x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" fill="#0066B2" fontSize="7" fontWeight="bold">AMEX</text>
-                </svg>
-              </PaymentIcon>
-
-              {/* PIX */}
-              <PaymentIcon>
-                <svg style={{ width: "48px", height: "32px" }} viewBox="0 0 48 32" fill="none">
-                  <rect width="48" height="32" rx="4" fill="#32BCAD"/>
-                  <path d="M24 8L28 12L24 16L20 12L24 8Z" fill="white"/>
-                  <path d="M24 16L28 20L24 24L20 20L24 16Z" fill="white"/>
-                  <path d="M16 12L20 16L16 20L12 16L16 12Z" fill="white"/>
-                  <path d="M32 12L36 16L32 20L28 16L32 12Z" fill="white"/>
-                </svg>
-              </PaymentIcon>
-
-              {/* Boleto */}
-              <PaymentIcon>
-                <svg style={{ width: "48px", height: "32px" }} viewBox="0 0 48 32" fill="none">
-                  <rect width="48" height="32" rx="4" fill="white"/>
-                  <rect x="8" y="8" width="2" height="16" fill="#FF6B00"/>
-                  <rect x="12" y="8" width="1" height="16" fill="#FF6B00"/>
-                  <rect x="15" y="8" width="2" height="16" fill="#FF6B00"/>
-                  <rect x="19" y="8" width="1" height="16" fill="#FF6B00"/>
-                  <rect x="22" y="8" width="2" height="16" fill="#FF6B00"/>
-                  <rect x="26" y="8" width="3" height="16" fill="#FF6B00"/>
-                  <rect x="31" y="8" width="1" height="16" fill="#FF6B00"/>
-                  <rect x="34" y="8" width="2" height="16" fill="#FF6B00"/>
-                  <rect x="38" y="8" width="2" height="16" fill="#FF6B00"/>
-                </svg>
-              </PaymentIcon>
-            </div>
-          </div>
-
-          {/* Copyright */}
-          <div style={{
-            paddingTop: "32px",
-            textAlign: "center"
-          }}>
-            <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>
-              © 2026 Empório Bothanico - Delicadezas e Banho. Todos os direitos reservados.
-            </p>
-            <p style={{ fontSize: "12px", color: "#555", marginTop: "8px" }}>
-              CNPJ: 04.280.033/0001-93 | Razão Social: LAMBARI PERFUMARIA LTDA - ME
-            </p>
+          <div className="pt-8 border-t border-white/20 text-center text-white/60 text-sm">
+            <p>© 2026 Empório Bothanico. CNPJ: 04.280.033/0001-93</p>
           </div>
         </div>
       </footer>
@@ -868,96 +338,10 @@ export default function Home() {
   );
 }
 
-function StatBadge({ number, label }: any) {
+function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <div style={{ textAlign: "center" }}>
-      <div style={{
-        fontSize: "36px",
-        fontWeight: "900",
-        color: "#0a0a0a",
-        marginBottom: "8px",
-        letterSpacing: "-1px"
-      }}>
-        {number}
-      </div>
-      <div style={{
-        fontSize: "13px",
-        color: "#666",
-        fontWeight: "600",
-        letterSpacing: "0.5px"
-      }}>
-        {label}
-      </div>
-    </div>
-  );
-}
-
-function FeatureCard({ icon, title, description }: any) {
-  return (
-    <div style={{ textAlign: "center" }}>
-      <div style={{
-        width: "64px",
-        height: "64px",
-        background: "white",
-        borderRadius: "16px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        margin: "0 auto 20px",
-        color: "#0a0a0a"
-      }}>
-        {icon}
-      </div>
-      <h3 style={{
-        fontSize: "18px",
-        fontWeight: "700",
-        color: "#0a0a0a",
-        marginBottom: "12px",
-        letterSpacing: "-0.3px"
-      }}>
-        {title}
-      </h3>
-      <p style={{
-        fontSize: "14px",
-        color: "#666",
-        lineHeight: "1.6"
-      }}>
-        {description}
-      </p>
-    </div>
-  );
-}
-
-function FooterLink({ href, children }: any) {
-  return (
-    <Link 
-      href={href}
-      className="block text-sm text-[#999] no-underline mb-3 transition-colors hover:text-white"
-    >
+    <Link href={href} className="block text-white/70 text-sm mb-3 hover:text-white transition-colors">
       {children}
     </Link>
-  );
-}
-
-function PaymentIcon({ children }: any) {
-  return (
-    <div style={{
-      padding: "8px",
-      background: "rgba(255,255,255,0.05)",
-      borderRadius: "8px",
-      border: "1px solid rgba(255,255,255,0.1)",
-      transition: "all 0.3s"
-    }}
-    onMouseOver={(e) => {
-      e.currentTarget.style.background = "rgba(255,255,255,0.1)";
-      e.currentTarget.style.transform = "translateY(-2px)";
-    }}
-    onMouseOut={(e) => {
-      e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-      e.currentTarget.style.transform = "translateY(0)";
-    }}
-    >
-      {children}
-    </div>
   );
 }
