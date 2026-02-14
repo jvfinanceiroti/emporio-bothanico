@@ -31,7 +31,6 @@ export function usePermissoes() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.log('⚠️ usePermissoes: Sem token, pulando busca de permissões');
         setCarregando(false);
         return;
       }

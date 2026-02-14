@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET || "chave-secreta-padrao";
-const JWT_EXPIRES_IN = "24h"; // Token expira em 24 horas
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === "production" ? null : "dev-secret-change-in-prod");
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "8h";
 
 // Mapa para rastrear tentativas de login falhadas
 const loginAttempts = new Map();
@@ -58,6 +58,9 @@ function limparTentativas(email) {
 }
 
 function gerarToken(usuario) {
+  if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET não configurado. Defina a variável de ambiente.");
+  }
   return jwt.sign(
     {
       id: usuario.id,
@@ -70,6 +73,9 @@ function gerarToken(usuario) {
 }
 
 function verificarToken(req, res, next) {
+  if (!JWT_SECRET) {
+    return res.status(500).json({ error: "Serviço temporariamente indisponível" });
+  }
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -105,6 +111,5 @@ module.exports = {
   verificarTentativasLogin,
   registrarTentativaFalha,
   limparTentativas,
-  gerarToken,
-  JWT_SECRET
+  gerarToken
 };

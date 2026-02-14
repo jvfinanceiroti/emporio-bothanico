@@ -46,16 +46,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+    <div className="admin-theme min-h-screen flex items-center justify-center p-4" style={{ background: "var(--background)" }}>
+      <div className="w-full max-w-md p-8 rounded-2xl border border-[var(--border)] shadow-[var(--shadow-xl)]" style={{ background: "var(--surface)" }}>
         <div className="flex flex-col items-center mb-8">
-          <img src="/logo.png" alt="Empório Bothanico" className="h-20 w-20 mb-4" />
-          <h1 className="text-3xl font-bold text-gray-800">Empório Bothanico</h1>
-          <p className="text-gray-600 mt-2">Área Administrativa</p>
+          <img src="/logo.png" alt="Empório Bothanico" className="h-16 w-16 mb-4" />
+          <h1 className="text-2xl font-extrabold" style={{ color: "var(--accent)" }}>Empório Bothanico</h1>
+          <p className="text-sm font-medium mt-1" style={{ color: "var(--muted)" }}>Área Administrativa</p>
         </div>
 
         {erro && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+          <div className="mb-6 px-4 py-3 rounded-lg flex items-center gap-2 border" style={{ background: "var(--error-bg)", borderColor: "var(--error)", color: "var(--error)" }}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -70,8 +70,9 @@ export default function LoginPage() {
             </label>
             <input
               type="email"
-              placeholder="admin@emporio.com.br"
+              placeholder="seu@email.com"
               value={email}
+              autoComplete="email"
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -86,6 +87,7 @@ export default function LoginPage() {
               type="password"
               placeholder="••••••••"
               value={senha}
+              autoComplete="current-password"
               onChange={(e) => setSenha(e.target.value)}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -95,7 +97,8 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={carregando}
-            className="w-full py-4 bg-blue-600 text-white rounded-lg font-bold text-lg hover:bg-blue-700 transition-all transform hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none"
+            className="btn-primary w-full py-4 font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            style={{ background: carregando ? "var(--muted)" : "var(--accent)", borderColor: carregando ? "var(--muted)" : "var(--accent)" }}
           >
             {carregando ? (
               <span className="flex items-center justify-center gap-2">
@@ -112,19 +115,11 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <Link href="/" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+          <Link href="/" className="store-link text-sm">
             ← Voltar para a loja
           </Link>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <p className="text-xs text-gray-500 text-center">
-            Credenciais padrão:<br />
-            <span className="font-mono bg-gray-100 px-2 py-1 rounded">admin@emporio.com.br</span>
-            {" / "}
-            <span className="font-mono bg-gray-100 px-2 py-1 rounded">admin123</span>
-          </p>
-        </div>
       </div>
     </div>
   );

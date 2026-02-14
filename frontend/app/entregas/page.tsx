@@ -1,4 +1,5 @@
 import LayoutInstitucional from "@/components/LayoutInstitucional";
+import Link from "next/link";
 
 export default function EntregasPage() {
   return (
@@ -193,7 +194,7 @@ export default function EntregasPage() {
             color: "#6b7280",
             lineHeight: 1.7
           }}>
-            Você também pode acompanhar seu pedido pela página <a href="/meus-pedidos" style={{ color: "#667eea", textDecoration: "underline", fontWeight: "600" }}>Meus Pedidos</a>.
+            Você também pode acompanhar seu pedido pela página <Link href="/meus-pedidos" className="store-link">Meus Pedidos</Link>.
           </p>
         </section>
 
@@ -253,7 +254,7 @@ export default function EntregasPage() {
             lineHeight: 1.7
           }}>
             Nossa equipe está pronta para ajudar! Entre em contato através da 
-            <a href="/contato" style={{ color: "#667eea", textDecoration: "underline", fontWeight: "600" }}> página de contato</a>.
+            <Link href="/contato" className="store-link">página de contato</Link>.
           </p>
         </section>
       </div>

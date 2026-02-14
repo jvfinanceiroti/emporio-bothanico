@@ -1,4 +1,5 @@
 import LayoutInstitucional from "@/components/LayoutInstitucional";
+import Link from "next/link";
 
 export default function TrocasPage() {
   return (
@@ -181,7 +182,7 @@ export default function TrocasPage() {
             lineHeight: 1.7
           }}>
             Nossa equipe está à disposição para esclarecer qualquer dúvida sobre trocas e devoluções. 
-            Entre em contato através da <a href="/contato" style={{ color: "#667eea", textDecoration: "underline", fontWeight: "600" }}>página de contato</a>.
+            Entre em contato através da <Link href="/contato" className="store-link">página de contato</Link>.
           </p>
         </section>
       </div>

@@ -60,10 +60,7 @@ export default function Home() {
   const totalItensCarrinho = carrinho.reduce((acc, item) => acc + item.quantidade, 0);
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#ffffff"
-    }}>
+    <div className="min-h-screen" style={{ background: "var(--background)" }}>
       <style jsx global>{`
         @media (min-width: 768px) {
           .desktop-only {
@@ -73,15 +70,7 @@ export default function Home() {
       `}</style>
       
       {/* HEADER MODERNO */}
-      <header style={{
-        background: "rgba(255, 255, 255, 0.98)",
-        backdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(0,0,0,0.08)",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-        position: "sticky",
-        top: 0,
-        zIndex: 100
-      }}>
+      <header className="store-header">
         <div style={{
           maxWidth: "1440px",
           margin: "0 auto",
@@ -941,21 +930,12 @@ function FeatureCard({ icon, title, description }: any) {
 
 function FooterLink({ href, children }: any) {
   return (
-    <a 
+    <Link 
       href={href}
-      style={{
-        display: "block",
-        fontSize: "14px",
-        color: "#999",
-        textDecoration: "none",
-        marginBottom: "12px",
-        transition: "color 0.2s"
-      }}
-      onMouseOver={(e) => e.currentTarget.style.color = "#fff"}
-      onMouseOut={(e) => e.currentTarget.style.color = "#999"}
+      className="block text-sm text-[#999] no-underline mb-3 transition-colors hover:text-white"
     >
       {children}
-    </a>
+    </Link>
   );
 }
 

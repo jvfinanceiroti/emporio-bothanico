@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const pool = require("./db");
@@ -11,9 +12,9 @@ const {
   verificarTentativasLogin,
   registrarTentativaFalha,
   limparTentativas,
-  gerarToken,
-  JWT_SECRET
+  gerarToken
 } = require("./middleware/auth");
+const { configurarSeguranca, loginRateLimiter, sensivelRateLimiter } = require("./middleware/security");
 const cloudinary = require("cloudinary").v2;
 const { 
   configurarMercadoPago, 
@@ -35,18 +36,39 @@ process.on('uncaughtException', (error) => {
 
 const app = express();
 
-// Configurar Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "root",
-  api_key: process.env.CLOUDINARY_API_KEY || "629775744341559",
-  api_secret: process.env.CLOUDINARY_API_SECRET || "IACl75fZDlj66c44Us981JkWDi0"
-});
+// Configurar Cloudinary (apenas via variáveis de ambiente - sem credenciais hardcoded)
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+  });
+}
 
 // Configurar Mercado Pago
 const mercadoPagoAtivo = configurarMercadoPago();
-console.log("💳 Mercado Pago:", mercadoPagoAtivo ? "ATIVO" : "DESATIVADO (modo simulação)");
 
-app.use(cors());
+// Segurança: Helmet + Rate Limit
+configurarSeguranca(app);
+
+// CORS restrito às origens permitidas (Vercel + localhost)
+const allowList = ["http://localhost:3000", "http://127.0.0.1:3000"];
+if (process.env.FRONTEND_URL) allowList.push(process.env.FRONTEND_URL.trim());
+if (process.env.CORS_ORIGIN) allowList.push(process.env.CORS_ORIGIN.trim());
+const corsOptions = {
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    if (allowList.includes(origin) || origin.endsWith(".vercel.app")) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -82,8 +104,8 @@ app.get("/", (req, res) => {
   res.send("API Loja rodando 🚀");
 });
 
-// 📸 UPLOAD DE IMAGEM PARA CLOUDINARY
-app.post("/upload", async (req, res) => {
+// 📸 UPLOAD DE IMAGEM PARA CLOUDINARY (rate limited)
+app.post("/upload", sensivelRateLimiter, async (req, res) => {
   try {
     const { imagem } = req.body; // Base64 da imagem
 
@@ -109,17 +131,30 @@ app.post("/upload", async (req, res) => {
 
 // ========== AUTENTICAÇÃO ==========
 
-// Login
-app.post("/auth/login", async (req, res) => {
+// Login (com rate limit e proteção contra brute force)
+app.post("/auth/login", loginRateLimiter, async (req, res) => {
   try {
     const { email, senha } = req.body;
 
+    if (!email || !senha || typeof email !== "string" || typeof senha !== "string") {
+      return res.status(400).json({ error: "Email e senha são obrigatórios" });
+    }
+
+    const emailLimpo = email.toLowerCase().trim().slice(0, 255);
+
+    // Verificar bloqueio por tentativas falhadas
+    const checagem = verificarTentativasLogin(emailLimpo);
+    if (checagem.blocked) {
+      return res.status(429).json({ error: checagem.message });
+    }
+
     const result = await pool.query(
-      "SELECT * FROM usuarios WHERE email = $1",
-      [email]
+      "SELECT id, nome, email, senha, tipo, role FROM usuarios WHERE email = $1",
+      [emailLimpo]
     );
 
     if (result.rows.length === 0) {
+      registrarTentativaFalha(emailLimpo);
       return res.status(401).json({ error: "Email ou senha incorretos" });
     }
 
@@ -127,13 +162,17 @@ app.post("/auth/login", async (req, res) => {
     const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
 
     if (!senhaCorreta) {
+      registrarTentativaFalha(emailLimpo);
       return res.status(401).json({ error: "Email ou senha incorretos" });
     }
+
+    limparTentativas(emailLimpo);
 
     const token = gerarToken({
       id: usuario.id,
       email: usuario.email,
-      nome: usuario.nome
+      nome: usuario.nome,
+      role: usuario.role || usuario.tipo || "admin"
     });
 
     res.json({
@@ -142,7 +181,7 @@ app.post("/auth/login", async (req, res) => {
         id: usuario.id,
         email: usuario.email,
         nome: usuario.nome,
-        tipo: usuario.tipo
+        tipo: usuario.tipo || usuario.role
       }
     });
   } catch (error) {
@@ -154,20 +193,15 @@ app.post("/auth/login", async (req, res) => {
 // Verificar token (para validar sessão)
 app.get("/auth/verificar", verificarToken, async (req, res) => {
   try {
-    console.log("Verificando usuário ID:", req.userId);
     const result = await pool.query(
       "SELECT id, email, nome, tipo FROM usuarios WHERE id = $1",
       [req.userId]
     );
 
-    console.log("Resultado query:", result.rows);
-
     if (result.rows.length === 0) {
-      console.log("Usuário não encontrado no banco");
       return res.status(401).json({ error: "Usuário não encontrado" });
     }
 
-    console.log("Usuário autenticado:", result.rows[0].email);
     res.json({ usuario: result.rows[0] });
   } catch (error) {
     console.error("Erro ao verificar token:", error);
@@ -221,38 +255,42 @@ app.get("/produtos", async (req, res) => {
 // ==========================================
 // ENDPOINT SIMPLES DE BUSCA - SEM TOKEN!
 // ==========================================
-app.get("/api/buscar-pedido-simples", async (req, res) => {
-  console.log("\n🔥 ENDPOINT SUPER SIMPLES CHAMADO!");
-  console.log("📧 Query params:", req.query);
-  
+app.get("/api/buscar-pedido-simples", sensivelRateLimiter, async (req, res) => {
   const { email, cpf } = req.query;
   
+  if (!email && !cpf) {
+    return res.status(400).json({ error: "Email ou CPF é obrigatório" });
+  }
+
   try {
     let pedidos;
     
-    if (email) {
-      console.log("🔍 Buscando por EMAIL:", email);
+    if (email && typeof email === "string") {
+      const emailLimpo = email.trim().toLowerCase().slice(0, 255);
+      if (!emailLimpo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLimpo)) {
+        return res.status(400).json({ error: "Email inválido" });
+      }
       pedidos = await pool.query(
-        "SELECT * FROM pedidos WHERE cliente_email = $1 ORDER BY created_at DESC",
-        [email]
+        "SELECT * FROM pedidos WHERE cliente_email = $1 ORDER BY created_at DESC LIMIT 50",
+        [emailLimpo]
       );
-    } else if (cpf) {
-      console.log("🔍 Buscando por CPF:", cpf);
-      const cpfLimpo = cpf.replace(/\D/g, "");
+    } else if (cpf && typeof cpf === "string") {
+      const cpfLimpo = cpf.replace(/\D/g, "").slice(0, 14);
+      if (cpfLimpo.length < 11) {
+        return res.status(400).json({ error: "CPF inválido" });
+      }
       pedidos = await pool.query(
-        "SELECT * FROM pedidos WHERE cliente_cpf = $1 ORDER BY created_at DESC",
+        "SELECT * FROM pedidos WHERE cliente_cpf = $1 ORDER BY created_at DESC LIMIT 50",
         [cpfLimpo]
       );
     } else {
       return res.status(400).json({ error: "Email ou CPF é obrigatório" });
     }
     
-    console.log("✅ Pedidos encontrados:", pedidos.rows.length);
     res.json(pedidos.rows);
-    
   } catch (error) {
-    console.error("❌ ERRO na busca:", error);
-    res.status(500).json({ error: "Erro ao buscar pedidos: " + error.message });
+    console.error("Erro na busca de pedidos:", error);
+    res.status(500).json({ error: "Erro ao buscar pedidos" });
   }
 });
 
@@ -405,7 +443,7 @@ app.get("/produtos/:id", async (req, res) => {
 
 /// ROTA DE CRIAR PEDIDO
 
-app.post("/pedidos", async (req, res) => {
+app.post("/pedidos", sensivelRateLimiter, async (req, res) => {
   try {
   	console.log("BODY RECEBIDO:", req.body);
     console.log("ITENS DO PEDIDO:", JSON.stringify(req.body.itens, null, 2));
@@ -495,7 +533,7 @@ for (const item of itens) {
 
 // ROTA PAGAMENTO FAKE
 
-app.post("/pagamento-fake", async (req, res) => {
+app.post("/pagamento-fake", sensivelRateLimiter, async (req, res) => {
   try {
     const { pedido_id, aprovado } = req.body;
 
@@ -516,7 +554,7 @@ app.post("/pagamento-fake", async (req, res) => {
 // ============================================
 
 // Gerar QR Code PIX para o pedido
-app.post("/pagamento/pix/gerar", async (req, res) => {
+app.post("/pagamento/pix/gerar", sensivelRateLimiter, async (req, res) => {
   try {
     const { pedido_id, token } = req.body;
 
@@ -644,7 +682,7 @@ app.get("/pagamento/pix/status/:pedido_id", async (req, res) => {
 });
 
 // Webhook para simular pagamento PIX (em produção, seria chamado pela API de pagamento)
-app.post("/pagamento/pix/confirmar", async (req, res) => {
+app.post("/pagamento/pix/confirmar", sensivelRateLimiter, async (req, res) => {
   try {
     const { pedido_id, token } = req.body;
 
@@ -692,7 +730,7 @@ app.post("/pagamento/pix/confirmar", async (req, res) => {
 // ============================================
 // PAGAMENTO COM CARTÃO DE CRÉDITO
 // ============================================
-app.post("/pagamento/cartao/processar", async (req, res) => {
+app.post("/pagamento/cartao/processar", sensivelRateLimiter, async (req, res) => {
   try {
     const { 
       pedido_id, 
