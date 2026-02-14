@@ -2,7 +2,7 @@ const nodemailer = require("nodemailer");
 const nm = nodemailer.default || nodemailer;
 
 // Configuração do email (use suas credenciais SMTP)
-const transporter = nm.createTransporter({
+const transporter = nm.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: process.env.SMTP_PORT || 587,
   secure: false, // true para 465, false para outras portas
