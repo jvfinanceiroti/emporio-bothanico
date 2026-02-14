@@ -12,6 +12,7 @@ interface Produto {
   estoque: number;
   categoria_nome?: string;
   categoria_slug?: string;
+  descricao?: string;
 }
 
 interface Categoria {
@@ -27,581 +28,249 @@ export default function ProdutosPage() {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [termoBusca, setTermoBusca] = useState("");
+  const [carrinho, setCarrinho] = useState<any[]>([]);
 
   useEffect(() => {
-    carregarCategorias();
-    carregarProdutos();
+    const salvo = localStorage.getItem("carrinho");
+    if (salvo) setCarrinho(JSON.parse(salvo));
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_URL}/categorias`).then(res => res.json()).then(setCategorias).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    setCarregando(true);
+    const url = categoriaSelecionada 
+      ? `${API_URL}/produtos?categoria=${categoriaSelecionada}` 
+      : `${API_URL}/produtos`;
+    fetch(url).then(res => res.json()).then(data => setProdutos(data || [])).catch(() => setProdutos([])).finally(() => setCarregando(false));
   }, [categoriaSelecionada]);
 
-  const carregarCategorias = async () => {
-    try {
-      const response = await fetch(`${API_URL}/categorias`);
-      const data = await response.json();
-      setCategorias(data);
-    } catch (error) {
-      console.error("Erro ao carregar categorias:", error);
-    }
-  };
-
-  const carregarProdutos = async () => {
-    setCarregando(true);
-    try {
-      const url = categoriaSelecionada 
-        ? `${API_URL}/produtos?categoria=${categoriaSelecionada}`
-        : `${API_URL}/produtos`;
-      
-      const response = await fetch(url);
-      const data = await response.json();
-      setProdutos(data);
-    } catch (error) {
-      console.error("Erro ao carregar produtos:", error);
-    } finally {
-      setCarregando(false);
-    }
-  };
-
   const adicionarAoCarrinho = (produto: Produto) => {
-    const carrinho = JSON.parse(localStorage.getItem("carrinho") || "[]");
-    const itemExistente = carrinho.find((item: any) => item.id === produto.id);
+    const novo = [...carrinho];
+    const idx = novo.findIndex((i: any) => i.id === produto.id);
+    if (idx >= 0) novo[idx].quantidade = (novo[idx].quantidade || 1) + 1;
+    else novo.push({ ...produto, quantidade: 1 });
+    setCarrinho(novo);
+    localStorage.setItem("carrinho", JSON.stringify(novo));
 
-    if (itemExistente) {
-      itemExistente.quantidade += 1;
-    } else {
-      carrinho.push({
-        id: produto.id,
-        nome: produto.nome,
-        preco: produto.preco,
-        imagem_url: produto.imagem_url,
-        quantidade: 1
-      });
-    }
-
-    localStorage.setItem("carrinho", JSON.stringify(carrinho));
-
-    // Notificação
-    const notification = document.createElement("div");
-    notification.innerHTML = `✓ ${produto.nome} adicionado ao carrinho!`;
-    notification.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #10b981;
-      color: white;
-      padding: 16px 24px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      z-index: 10000;
-      animation: slideIn 0.3s ease-out;
-    `;
-    document.body.appendChild(notification);
-    setTimeout(() => notification.remove(), 3000);
+    const notif = document.createElement("div");
+    notif.className = "fixed top-5 right-5 z-[10000] px-6 py-4 rounded-xl font-bold text-sm text-white shadow-xl";
+    notif.style.background = "var(--success)";
+    notif.textContent = `✓ ${produto.nome} adicionado ao carrinho!`;
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 3000);
   };
 
-  const produtosFiltrados = produtos.filter(produto => 
-    produto.nome.toLowerCase().includes(termoBusca.toLowerCase())
+  const produtosFiltrados = produtos.filter(p => 
+    p.nome.toLowerCase().includes(termoBusca.toLowerCase())
   );
 
+  const totalItens = carrinho.reduce((acc: number, i: any) => acc + (i.quantidade || 1), 0);
+
+  const iconesCategoria: Record<string, string> = { perfume: "🌸", aromas: "🕯️", banho: "🛁" };
+
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#f8f9fa"
-    }}>
-      {/* Header */}
-      <header style={{
-        background: "rgba(255, 255, 255, 0.95)",
-        backdropFilter: "blur(10px)",
-        boxShadow: "0 2px 20px rgba(0,0,0,0.08)",
-        position: "sticky",
-        top: 0,
-        zIndex: 100
-      }}>
-        <div style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          padding: "clamp(16px, 4vw, 20px) clamp(20px, 5vw, 40px)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "clamp(16px, 4vw, 20px)",
-          flexWrap: "wrap"
-        }}>
-          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px" }}>
-            <img 
-              src="/logo.png" 
-              alt="Empório Botânico" 
-              style={{ height: "clamp(40px, 10vw, 50px)", objectFit: "contain" }}
-            />
-            <h1 style={{
-              fontSize: "clamp(18px, 4.5vw, 24px)",
-              fontWeight: "800",
-              color: "#0a0a0a",
-              margin: 0
-            }}>
-              Empório Botânico
-            </h1>
-          </Link>
+    <div className="min-h-screen bg-[var(--background)]">
+      {/* TOP BAR */}
+      <div className="bg-[var(--accent)] text-white py-2.5 text-center text-sm font-semibold">
+        <span className="hidden sm:inline">✨ Frete grátis em compras acima de R$ 199 </span>
+        <span className="sm:hidden">✨ Frete grátis acima de R$ 199</span>
+        <span className="mx-2 opacity-75">|</span>
+        <span>Entrega para todo o Brasil</span>
+      </div>
 
-          <nav style={{
-            display: "flex",
-            gap: "clamp(16px, 4vw, 24px)",
-            alignItems: "center",
-            flexWrap: "wrap"
-          }}>
-            <Link href="/" style={{ textDecoration: "none", color: "#0a0a0a", fontSize: "clamp(13px, 3vw, 14px)", fontWeight: "600" }}>Início</Link>
-            <Link href="/produtos" style={{ textDecoration: "none", color: "#0a0a0a", fontSize: "clamp(13px, 3vw, 14px)", fontWeight: "600" }}>Produtos</Link>
-            <Link href="/meus-pedidos" style={{ textDecoration: "none", color: "#0a0a0a", fontSize: "clamp(13px, 3vw, 14px)", fontWeight: "600" }}>Meus Pedidos</Link>
-          </nav>
+      {/* HEADER */}
+      <header className="store-header sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 lg:h-20">
+            <Link href="/" className="flex items-center gap-3 no-underline group">
+              <img src="/logo.png" alt="Empório Bothanico" className="h-10 w-10 lg:h-12 lg:w-12 object-contain" />
+              <div>
+                <h1 className="text-lg lg:text-xl font-extrabold text-[var(--foreground)] tracking-tight group-hover:text-[var(--accent)] transition-colors">Empório Bothanico</h1>
+                <p className="text-[10px] lg:text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Delicadezas & Banho</p>
+              </div>
+            </Link>
 
-          <div style={{ display: "flex", gap: "clamp(12px, 3vw, 16px)", alignItems: "center" }}>
-            <Link
-              href="/carrinho"
-              style={{
-                textDecoration: "none",
-                padding: "clamp(10px, 2.5vw, 12px) clamp(20px, 5vw, 24px)",
-                background: "#0a0a0a",
-                color: "white",
-                borderRadius: "clamp(8px, 2vw, 12px)",
-                fontSize: "clamp(13px, 3vw, 14px)",
-                fontWeight: "700",
-                boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
-                transition: "all 0.3s",
-                minHeight: "44px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px"
-              }}
-            >
-              🛒 Carrinho
+            <nav className="hidden md:flex items-center gap-1">
+              <Link href="/produtos" className="px-4 py-2 rounded-lg text-sm font-semibold text-[var(--accent)] bg-[var(--accent-light)]">Produtos</Link>
+              <Link href="/meus-pedidos" className="px-4 py-2 rounded-lg text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)] transition-colors">Meus Pedidos</Link>
+              <Link href="/sobre" className="px-4 py-2 rounded-lg text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)] transition-colors">Sobre</Link>
+            </nav>
+
+            <Link href="/carrinho" className="relative flex items-center gap-2 px-4 py-2.5 bg-[var(--foreground)] text-white rounded-xl font-bold text-sm hover:bg-[var(--accent)] transition-all hover:scale-105 active:scale-95">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M3 1a1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>
+              Carrinho
+              {totalItens > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full border-2 border-white">{totalItens}</span>
+              )}
             </Link>
           </div>
         </div>
       </header>
 
-      {/* Container Principal */}
-      <div style={{
-        maxWidth: "1400px",
-        margin: "0 auto",
-        padding: "clamp(24px, 6vw, 40px) clamp(20px, 5vw, 40px)"
-      }}>
-        {/* Título e Barra de Pesquisa */}
-        <div style={{
-          textAlign: "center",
-          marginBottom: "clamp(32px, 8vw, 48px)"
-        }}>
-          <h1 style={{
-            fontSize: "clamp(28px, 7vw, 42px)",
-            fontWeight: "800",
-            color: "#0a0a0a",
-            marginBottom: "clamp(12px, 3vw, 16px)",
-            lineHeight: "1.2"
-          }}>
+      {/* HERO PRODUTOS */}
+      <section className="relative py-20 lg:py-28 overflow-hidden bg-[var(--foreground)]">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1594035910387-fea47794261f?w=1920&q=80')] bg-cover bg-center opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-black/50" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-[var(--accent-light)] font-semibold text-sm uppercase tracking-[0.3em] mb-3">Catálogo Completo</p>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-4">
             Nossos Produtos
           </h1>
-          <p style={{
-            fontSize: "clamp(14px, 3.5vw, 18px)",
-            color: "#666",
-            maxWidth: "600px",
-            margin: "0 auto 24px"
-          }}>
-            Descubra fragrâncias exclusivas para todos os momentos
+          <p className="text-white/90 text-lg sm:text-xl max-w-2xl">
+            Descubra fragrâncias exclusivas e produtos de banho selecionados para transformar seu dia a dia.
           </p>
+        </div>
+      </section>
 
-          {/* Barra de Pesquisa Grande */}
-          <div style={{
-            maxWidth: "700px",
-            margin: "0 auto",
-            position: "relative"
-          }}>
+      {/* CONTEÚDO */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        {/* Pesquisa e Categorias */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-12">
+          <div className="relative flex-1 max-w-xl">
             <input
               type="text"
-              placeholder="🔍 Pesquisar produtos..."
+              placeholder="Pesquisar produtos..."
               value={termoBusca}
               onChange={(e) => setTermoBusca(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "clamp(16px, 4vw, 20px) clamp(20px, 5vw, 24px)",
-                fontSize: "clamp(15px, 3.8vw, 18px)",
-                border: "2px solid #e5e7eb",
-                borderRadius: "clamp(12px, 3vw, 16px)",
-                outline: "none",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                transition: "all 0.3s",
-                fontWeight: "500",
-                color: "#0a0a0a"
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#0a0a0a";
-                e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.15)";
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = "#e5e7eb";
-                e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)";
-              }}
+              className="input-store pl-12"
             />
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
             {termoBusca && (
-              <button
-                onClick={() => setTermoBusca("")}
-                style={{
-                  position: "absolute",
-                  right: "16px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "#ef4444",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "50%",
-                  width: "32px",
-                  height: "32px",
-                  cursor: "pointer",
-                  fontSize: "18px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: "700",
-                  transition: "all 0.3s"
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.background = "#dc2626";
-                  e.currentTarget.style.transform = "translateY(-50%) scale(1.1)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.background = "#ef4444";
-                  e.currentTarget.style.transform = "translateY(-50%) scale(1)";
-                }}
-              >
+              <button onClick={() => setTermoBusca("")} className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center text-lg font-bold hover:bg-red-600 transition-colors">
                 ×
               </button>
             )}
           </div>
-        </div>
 
-        {/* Menu de Categorias */}
-        <div style={{
-          background: "white",
-          borderRadius: "20px",
-          padding: "32px",
-          marginBottom: "32px",
-          boxShadow: "0 10px 40px rgba(0,0,0,0.06)",
-          border: "1px solid #e5e7eb"
-        }}>
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            marginBottom: "24px",
-            gap: "12px"
-          }}>
-            <div style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "12px",
-              background: "#0a0a0a",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "24px"
-            }}>
-              🏷️
-            </div>
-            <h3 style={{
-              fontSize: "clamp(18px, 4.5vw, 22px)",
-              fontWeight: "800",
-              color: "#0a0a0a",
-              margin: 0
-            }}>
-              Navegue por Categoria
-            </h3>
-          </div>
-
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "16px"
-          }}>
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setCategoriaSelecionada(null)}
-              style={{
-                padding: "16px 24px",
-                background: categoriaSelecionada === null 
-                  ? "#0a0a0a" 
-                  : "#f8f9fa",
-                color: categoriaSelecionada === null ? "white" : "#495057",
-                border: categoriaSelecionada === null ? "2px solid #0a0a0a" : "2px solid #e5e7eb",
-                borderRadius: "16px",
-                fontSize: "15px",
-                fontWeight: "700",
-                cursor: "pointer",
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                minHeight: "60px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                boxShadow: categoriaSelecionada === null 
-                  ? "0 8px 24px rgba(0,0,0,0.2)" 
-                  : "0 2px 8px rgba(0,0,0,0.04)",
-                transform: categoriaSelecionada === null ? "translateY(-2px)" : "none"
-              }}
-              onMouseOver={(e) => {
-                if (categoriaSelecionada !== null) {
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)";
-                  e.currentTarget.style.borderColor = "#0a0a0a";
-                }
-              }}
-              onMouseOut={(e) => {
-                if (categoriaSelecionada !== null) {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
-                  e.currentTarget.style.borderColor = "#e5e7eb";
-                }
-              }}
+              className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                categoriaSelecionada === null 
+                  ? "bg-[var(--foreground)] text-white shadow-lg" 
+                  : "bg-white text-[var(--muted)] border-2 border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              }`}
             >
-              <span style={{ fontSize: "20px" }}>✨</span>
-              Todos os Produtos
+              ✨ Todos
             </button>
-
-            {categorias.map((categoria) => {
-              const icones: { [key: string]: string } = {
-                'perfume': '🌸',
-                'aromas': '🕯️',
-                'banho': '🛁'
-              };
-              
-              return (
-                <button
-                  key={categoria.id}
-                  onClick={() => setCategoriaSelecionada(categoria.slug)}
-                  style={{
-                    padding: "16px 24px",
-                    background: categoriaSelecionada === categoria.slug
-                      ? "#0a0a0a"
-                      : "#f8f9fa",
-                    color: categoriaSelecionada === categoria.slug ? "white" : "#495057",
-                    border: categoriaSelecionada === categoria.slug ? "2px solid #0a0a0a" : "2px solid #e5e7eb",
-                    borderRadius: "16px",
-                    fontSize: "15px",
-                    fontWeight: "700",
-                    cursor: "pointer",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    minHeight: "60px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    boxShadow: categoriaSelecionada === categoria.slug
-                      ? "0 8px 24px rgba(0,0,0,0.2)"
-                      : "0 2px 8px rgba(0,0,0,0.04)",
-                    transform: categoriaSelecionada === categoria.slug ? "translateY(-2px)" : "none"
-                  }}
-                  onMouseOver={(e) => {
-                    if (categoriaSelecionada !== categoria.slug) {
-                      e.currentTarget.style.transform = "translateY(-4px)";
-                      e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.15)";
-                      e.currentTarget.style.borderColor = "#0a0a0a";
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (categoriaSelecionada !== categoria.slug) {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)";
-                      e.currentTarget.style.borderColor = "#e5e7eb";
-                    }
-                  }}
-                >
-                  <span style={{ fontSize: "20px" }}>{icones[categoria.slug] || '📦'}</span>
-                  {categoria.nome}
-                </button>
-              );
-            })}
+            {categorias.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setCategoriaSelecionada(cat.slug)}
+                className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${
+                  categoriaSelecionada === cat.slug 
+                    ? "bg-[var(--foreground)] text-white shadow-lg" 
+                    : "bg-white text-[var(--muted)] border-2 border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                }`}
+              >
+                <span>{iconesCategoria[cat.slug] || "📦"}</span>
+                {cat.nome}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Grid de Produtos */}
         {carregando ? (
-          <div style={{
-            textAlign: "center",
-            padding: "clamp(40px, 10vw, 60px)",
-            color: "#666"
-          }}>
-            Carregando produtos...
+          <div className="flex flex-col items-center justify-center py-24">
+            <div className="w-12 h-12 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin mb-4" />
+            <p className="text-[var(--muted)] font-medium">Carregando produtos...</p>
           </div>
         ) : produtosFiltrados.length === 0 ? (
-          <div style={{
-            textAlign: "center",
-            padding: "clamp(40px, 10vw, 60px)",
-            background: "white",
-            borderRadius: "clamp(16px, 4vw, 20px)",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
-          }}>
-            <div style={{ fontSize: "clamp(48px, 12vw, 64px)", marginBottom: "16px" }}>📦</div>
-            <h3 style={{
-              fontSize: "clamp(18px, 4.5vw, 22px)",
-              fontWeight: "700",
-              color: "#0a0a0a",
-              marginBottom: "8px"
-            }}>
-              Nenhum produto encontrado
-            </h3>
-            <p style={{ fontSize: "clamp(13px, 3vw, 14px)", color: "#666" }}>
-              Tente selecionar outra categoria
-            </p>
+          <div className="text-center py-24 bg-white rounded-2xl border border-[var(--border)]">
+            <div className="text-6xl mb-4">📦</div>
+            <h3 className="text-xl font-bold text-[var(--foreground)] mb-2">Nenhum produto encontrado</h3>
+            <p className="text-[var(--muted)] mb-6">Tente outra categoria ou termo de busca.</p>
+            <button onClick={() => { setCategoriaSelecionada(null); setTermoBusca(""); }} className="btn-primary">
+              Limpar Filtros
+            </button>
           </div>
         ) : (
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(min(280px, 100%), 1fr))",
-            gap: "clamp(20px, 5vw, 32px)"
-          }}>
-            {produtosFiltrados.map((produto) => (
-              <div
-                key={produto.id}
-                style={{
-                  background: "white",
-                  borderRadius: "clamp(16px, 4vw, 20px)",
-                  overflow: "hidden",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                  transition: "all 0.3s",
-                  display: "flex",
-                  flexDirection: "column"
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "translateY(-8px)";
-                  e.currentTarget.style.boxShadow = "0 12px 40px rgba(102, 126, 234, 0.3)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)";
-                }}
-              >
-                <Link
-                  href={`/produto/${produto.id}`}
-                  style={{
-                    textDecoration: "none",
-                    color: "inherit",
-                    display: "flex",
-                    flexDirection: "column",
-                    flex: 1
-                  }}
-                >
-                  {produto.imagem_url ? (
-                    <img
-                      src={produto.imagem_url}
-                      alt={produto.nome}
-                      style={{
-                        width: "100%",
-                        height: "clamp(250px, 60vw, 320px)",
-                        objectFit: "cover"
-                      }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: "100%",
-                      height: "clamp(250px, 60vw, 320px)",
-                      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "clamp(48px, 12vw, 64px)"
-                    }}>
-                      🌿
+          <>
+            <p className="text-[var(--muted)] text-sm mb-6">
+              {produtosFiltrados.length} produto{produtosFiltrados.length !== 1 ? "s" : ""} encontrado{produtosFiltrados.length !== 1 ? "s" : ""}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+              {produtosFiltrados.map((produto) => (
+                <Link key={produto.id} href={`/produto/${produto.id}`} className="group no-underline">
+                  <div className="store-card overflow-hidden h-full flex flex-col hover:-translate-y-1">
+                    <div className="relative aspect-square bg-[var(--accent-light)] overflow-hidden">
+                      {produto.imagem_url ? (
+                        <img 
+                          src={produto.imagem_url} 
+                          alt={produto.nome}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => { (e.target as HTMLImageElement).src = "https://via.placeholder.com/400/fafafa/ccc?text=Produto"; }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-5xl">🌸</div>
+                      )}
+                      {produto.estoque <= 5 && produto.estoque > 0 && (
+                        <span className="absolute top-3 left-3 px-3 py-1 bg-[var(--foreground)] text-white text-xs font-bold uppercase rounded-lg">Últimas unidades</span>
+                      )}
                     </div>
-                  )}
-
-                  <div style={{
-                    padding: "clamp(16px, 4vw, 20px)",
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column"
-                  }}>
-                    {produto.categoria_nome && (
-                      <span style={{
-                        fontSize: "clamp(11px, 2.8vw, 12px)",
-                        color: "#666",
-                        fontWeight: "700",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.5px",
-                        marginBottom: "8px"
-                      }}>
-                        {produto.categoria_nome}
-                      </span>
-                    )}
-
-                    <h3 style={{
-                      fontSize: "clamp(16px, 4vw, 18px)",
-                      fontWeight: "700",
-                      color: "#0a0a0a",
-                      marginBottom: "clamp(8px, 2vw, 12px)",
-                      lineHeight: "1.3"
-                    }}>
-                      {produto.nome}
-                    </h3>
-
-                    <div style={{
-                      fontSize: "clamp(22px, 5.5vw, 28px)",
-                      fontWeight: "800",
-                      color: "#0a0a0a",
-                      marginTop: "auto"
-                    }}>
-                      R$ {Number(produto.preco).toFixed(2)}
+                    <div className="p-5 flex-1 flex flex-col">
+                      {produto.categoria_nome && (
+                        <span className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">{produto.categoria_nome}</span>
+                      )}
+                      <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 line-clamp-2 group-hover:text-[var(--accent)] transition-colors">{produto.nome}</h3>
+                      {produto.descricao && <p className="text-sm text-[var(--muted)] line-clamp-2 mb-4 flex-1">{produto.descricao}</p>}
+                      <div className="mt-auto">
+                        <div className="text-2xl font-black text-[var(--foreground)] mb-3">R$ {Number(produto.preco).toFixed(2)}</div>
+                        <p className={`text-xs font-semibold flex items-center gap-2 mb-4 ${produto.estoque > 5 ? "text-[var(--success)]" : "text-[var(--warning)]"}`}>
+                          <span className={`w-2 h-2 rounded-full ${produto.estoque > 5 ? "bg-[var(--success)]" : "bg-[var(--warning)]"}`} />
+                          {produto.estoque} em estoque
+                        </p>
+                        <button
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); adicionarAoCarrinho(produto); }}
+                          disabled={produto.estoque === 0}
+                          className="w-full py-3.5 bg-[var(--foreground)] text-white font-bold rounded-xl border-2 border-[var(--foreground)] hover:bg-white hover:text-[var(--foreground)] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--foreground)] disabled:hover:text-white"
+                        >
+                          {produto.estoque === 0 ? "Indisponível" : "Adicionar ao Carrinho"}
+                        </button>
+                      </div>
                     </div>
-
-                    {produto.estoque === 0 && (
-                      <span style={{
-                        marginTop: "8px",
-                        fontSize: "clamp(11px, 2.8vw, 12px)",
-                        color: "#ef4444",
-                        fontWeight: "700"
-                      }}>
-                        Sem estoque
-                      </span>
-                    )}
                   </div>
                 </Link>
-
-                <div style={{ padding: "0 clamp(16px, 4vw, 20px) clamp(16px, 4vw, 20px)" }}>
-                  <button
-                    onClick={() => adicionarAoCarrinho(produto)}
-                    disabled={produto.estoque === 0}
-                    style={{
-                      width: "100%",
-                      padding: "clamp(12px, 3vw, 14px)",
-                      background: produto.estoque === 0
-                        ? "#e5e7eb"
-                        : "#0a0a0a",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "clamp(10px, 2.5vw, 12px)",
-                      fontSize: "clamp(13px, 3vw, 14px)",
-                      fontWeight: "700",
-                      cursor: produto.estoque === 0 ? "not-allowed" : "pointer",
-                      transition: "all 0.3s",
-                      minHeight: "44px"
-                    }}
-                    onMouseOver={(e) => {
-                      if (produto.estoque !== 0) {
-                        e.currentTarget.style.background = "#1a1a1a";
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                        e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.3)";
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (produto.estoque !== 0) {
-                        e.currentTarget.style.background = "#0a0a0a";
-                        e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "none";
-                      }
-                    }}
-                  >
-                    {produto.estoque === 0 ? "Indisponível" : "🛒 Adicionar ao Carrinho"}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
-      </div>
+      </main>
+
+      {/* CTA BOTTOM */}
+      <section className="py-16 px-4 sm:px-6 bg-[var(--accent-light)]">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl font-extrabold text-[var(--foreground)] mb-4">Não encontrou o que procura?</h2>
+          <p className="text-[var(--muted)] mb-6">Entre em contato conosco. Estamos à disposição para ajudar.</p>
+          <Link href="/contato" className="btn-primary text-lg px-10 py-4">
+            Fale Conosco
+          </Link>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="bg-[var(--foreground)] text-white py-12 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <Link href="/" className="flex items-center gap-2 no-underline text-white hover:opacity-90">
+            <img src="/logo.png" alt="Logo" className="h-10 w-10 invert opacity-90" />
+            <span className="font-bold">Empório Bothanico</span>
+          </Link>
+          <div className="flex gap-6 text-sm">
+            <Link href="/" className="text-white/70 hover:text-white transition-colors">Início</Link>
+            <Link href="/produtos" className="text-white/70 hover:text-white transition-colors">Produtos</Link>
+            <Link href="/contato" className="text-white/70 hover:text-white transition-colors">Contato</Link>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto mt-6 pt-6 border-t border-white/20 text-center text-white/60 text-sm">
+          © 2026 Empório Bothanico. CNPJ: 04.280.033/0001-93
+        </div>
+      </footer>
     </div>
   );
 }
