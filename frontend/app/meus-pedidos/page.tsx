@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { API_URL } from "@/lib/api";
 
 interface Pedido {
   id: number;
@@ -37,7 +38,6 @@ interface DetalhesPedido {
 }
 
 export default function MeusPedidos() {
-  const [apiUrl, setApiUrl] = useState("");
   const [busca, setBusca] = useState("");
   const [tipoBusca, setTipoBusca] = useState<"email" | "cpf">("email");
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -45,17 +45,6 @@ export default function MeusPedidos() {
   const [buscaRealizada, setBuscaRealizada] = useState(false);
   const [pedidoSelecionado, setPedidoSelecionado] = useState<DetalhesPedido | null>(null);
   const [carregandoDetalhes, setCarregandoDetalhes] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-        setApiUrl('https://emporio-bothanico.onrender.com');
-      } else {
-        setApiUrl('http://localhost:5000');
-      }
-    }
-  }, []);
 
   const formatarCPF = (valor: string) => {
     const numeros = valor.replace(/\D/g, "");
@@ -74,7 +63,7 @@ export default function MeusPedidos() {
       return;
     }
 
-    if (!apiUrl) {
+    if (!API_URL) {
       alert("Aguarde, carregando configurações...");
       return;
     }
@@ -88,7 +77,7 @@ export default function MeusPedidos() {
       
       // NOVO ENDPOINT SIMPLES!
       const parametro = tipoBusca === "cpf" ? "cpf" : "email";
-      const url = `${apiUrl}/api/buscar-pedido-simples?${parametro}=${encodeURIComponent(valor)}`;
+      const url = `${API_URL}/api/buscar-pedido-simples?${parametro}=${encodeURIComponent(valor)}`;
       
       console.log("🔥 Chamando endpoint SIMPLES:", url);
       
@@ -118,9 +107,9 @@ export default function MeusPedidos() {
 
   const carregarDetalhesPedido = async (id: number) => {
     console.log("🔍 Carregando detalhes do pedido ID:", id);
-    console.log("🌐 API URL:", apiUrl);
+    console.log("🌐 API URL:", API_URL);
     
-    if (!apiUrl) {
+    if (!API_URL) {
       console.error("❌ API URL não está definida!");
       alert("Erro: API URL não configurada. Aguarde um momento e tente novamente.");
       return;
@@ -128,7 +117,7 @@ export default function MeusPedidos() {
     
     setCarregandoDetalhes(true);
     try {
-      const url = `${apiUrl}/pedidos/${id}/detalhes`;
+      const url = `${API_URL}/pedidos/${id}/detalhes`;
       console.log("📡 Fazendo requisição para:", url);
       
       const response = await fetch(url);

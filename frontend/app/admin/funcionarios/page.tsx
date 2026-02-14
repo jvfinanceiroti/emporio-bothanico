@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProtegerRota, usePodeExecutar } from "@/lib/ProtegerRota";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+import { API_URL } from "@/lib/api";
 
 interface Permissoes {
   pode_criar_produtos: boolean;
