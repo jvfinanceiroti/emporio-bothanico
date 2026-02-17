@@ -5,7 +5,7 @@ const ADMIN_SUBDOMAIN = "painel.emporiobothanico.com.br";
 
 export function middleware(request: NextRequest) {
   const host = request.headers.get("host") || "";
-   const url = request.nextUrl.clone();
+  const url = request.nextUrl.clone();
 
   // SEGURANÇA: /admin no domínio principal NÃO existe - redireciona para subdomínio (quem sabe) ou para a loja
   if (host === "emporiobothanico.com.br" || host === "www.emporiobothanico.com.br") {
@@ -21,6 +21,11 @@ export function middleware(request: NextRequest) {
   // Se acessar pelo subdomínio do painel, reescreve para /admin
   if (host.startsWith("painel.") || host === ADMIN_SUBDOMAIN) {
     const pathname = url.pathname;
+
+    // NUNCA reescrever /api, /_next, etc - passa direto
+    if (pathname.startsWith("/api") || pathname.startsWith("/_next") || pathname.startsWith("/favicon")) {
+      return NextResponse.next();
+    }
 
     // / ou vazio -> /admin/login
     if (pathname === "/" || pathname === "") {
