@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { API_URL } from "@/lib/api";
@@ -24,7 +24,7 @@ interface Categoria {
   descricao?: string;
 }
 
-export default function ProdutosPage() {
+function ProdutosContent() {
   const searchParams = useSearchParams();
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -258,5 +258,20 @@ export default function ProdutosPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function ProdutosPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[var(--background)] flex flex-col">
+        <StoreHeader />
+        <div className="flex-1 flex items-center justify-center py-32">
+          <div className="w-14 h-14 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin" />
+        </div>
+      </div>
+    }>
+      <ProdutosContent />
+    </Suspense>
   );
 }

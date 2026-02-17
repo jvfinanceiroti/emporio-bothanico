@@ -392,7 +392,7 @@ function AvaliacoesCarousel() {
 
   useEffect(() => {
     if (isPaused || totalSlides <= 1) return;
-    const t = setInterval(() => goTo((index + 1) % totalSlides), 6000);
+    const t = setInterval(() => goTo((index + 1) % totalSlides), 4500);
     return () => clearInterval(t);
   }, [index, isPaused, totalSlides]);
 
@@ -421,7 +421,7 @@ function AvaliacoesCarousel() {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 min-h-[200px]">
             {visible.map((av, i) => (
-              <div key={`${index}-${i}`} className="bg-white rounded-2xl p-5 sm:p-6 border border-[var(--border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all">
+              <div key={`${index}-${i}`} className="bg-white rounded-2xl p-5 sm:p-6 border border-[var(--border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all duration-300">
                 <div className="flex gap-1 mb-2 sm:mb-3 text-base sm:text-lg stars-google">{"★".repeat(5)}</div>
                 <blockquote className="text-[var(--foreground)] leading-relaxed mb-3 sm:mb-4 text-sm sm:text-base line-clamp-4 sm:line-clamp-none">
                   &ldquo;{av.texto}&rdquo;
@@ -436,19 +436,35 @@ function AvaliacoesCarousel() {
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-center gap-3 mt-6 sm:mt-8">
-            <button onClick={() => goTo(index - 1)} className="w-10 h-10 rounded-full bg-white border-2 border-[var(--border)] text-[var(--foreground)] flex items-center justify-center hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors disabled:opacity-40" disabled={index <= 0} aria-label="Anterior">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+          <div className="flex items-center justify-center gap-4 sm:gap-6 mt-8 sm:mt-10">
+            <button
+              onClick={() => goTo(index - 1)}
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white border-2 border-[var(--accent)] text-[var(--accent)] flex items-center justify-center shadow-lg hover:bg-[var(--accent)] hover:text-white hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[var(--accent)] disabled:hover:scale-100"
+              disabled={index <= 0}
+              aria-label="Avaliação anterior"
+            >
+              <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
             </button>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-3">
               {Array.from({ length: totalSlides }).map((_, i) => (
-                <button key={i} onClick={() => goTo(i)} className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all ${i === index ? "bg-[var(--accent)] scale-110" : "bg-[var(--muted-light)] hover:bg-[var(--muted)]"}`} aria-label={`Avaliação ${i + 1}`} />
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  className={`rounded-full transition-all duration-200 ${i === index ? "w-5 h-5 sm:w-6 sm:h-6 bg-[var(--accent)] shadow-md scale-110" : "w-4 h-4 sm:w-5 sm:h-5 bg-[var(--muted-light)] hover:bg-[var(--muted)] hover:scale-110"}`}
+                  aria-label={`Ir para avaliação ${i + 1}`}
+                />
               ))}
             </div>
-            <button onClick={() => goTo(index + 1)} className="w-10 h-10 rounded-full bg-white border-2 border-[var(--border)] text-[var(--foreground)] flex items-center justify-center hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors disabled:opacity-40" disabled={index >= totalSlides - 1} aria-label="Próximo">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+            <button
+              onClick={() => goTo(index + 1)}
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white border-2 border-[var(--accent)] text-[var(--accent)] flex items-center justify-center shadow-lg hover:bg-[var(--accent)] hover:text-white hover:scale-105 active:scale-95 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[var(--accent)] disabled:hover:scale-100"
+              disabled={index >= totalSlides - 1}
+              aria-label="Próxima avaliação"
+            >
+              <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
             </button>
           </div>
+          <p className="text-center text-[var(--muted)] text-xs mt-3">Troca automática a cada 4,5s • Pause ao passar o mouse</p>
         </div>
       </div>
     </section>
