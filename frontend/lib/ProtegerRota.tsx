@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePermissoes } from './usePermissoes';
+import { getAdminPath } from './admin-paths';
 
 interface ProtegerRotaProps {
   permissoesRequeridas: string[];
@@ -18,7 +19,7 @@ export function ProtegerRota({ permissoesRequeridas, children, modoOr = false }:
     // Verificar token primeiro
     const token = localStorage.getItem('token');
     if (!token) {
-      router.push('/admin/login');
+      router.push(getAdminPath('/login'));
       return;
     }
 
@@ -27,7 +28,7 @@ export function ProtegerRota({ permissoesRequeridas, children, modoOr = false }:
 
     // Se não tem permissões (não é admin nem funcionário), redirecionar
     if (!permissoes) {
-      router.push('/admin/login');
+      router.push(getAdminPath('/login'));
       return;
     }
 
@@ -108,7 +109,7 @@ export function ProtegerRota({ permissoesRequeridas, children, modoOr = false }:
           </p>
 
           <button
-            onClick={() => router.push('/admin/dashboard')}
+            onClick={() => router.push(getAdminPath('/dashboard'))}
             style={{
               width: '100%',
               padding: 'clamp(14px, 3.5vw, 18px)',

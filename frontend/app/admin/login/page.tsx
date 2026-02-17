@@ -1,6 +1,7 @@
 "use client";
 
 import { API_URL } from "@/lib/api";
+import { getAdminPath } from "@/lib/admin-paths";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -37,7 +38,7 @@ export default function LoginPage() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("usuario", JSON.stringify(data.usuario));
 
-      router.push("/admin/dashboard");
+      router.push(getAdminPath("/dashboard"));
     } catch (error) {
       console.error("Erro no login:", error);
       setErro("Erro ao conectar ao servidor");

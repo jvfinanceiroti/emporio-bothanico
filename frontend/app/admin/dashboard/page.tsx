@@ -1,6 +1,7 @@
 "use client";
 
 import { API_URL } from "@/lib/api";
+import { getAdminLoginPath } from "@/lib/admin-paths";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -24,7 +25,7 @@ function DashboardConteudo() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/admin/login");
+      router.push(getAdminLoginPath());
       return;
     }
 

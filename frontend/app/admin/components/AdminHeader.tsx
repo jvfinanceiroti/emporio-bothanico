@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { usePermissoes } from "@/lib/usePermissoes";
+import { getAdminPath } from "@/lib/admin-paths";
 import { useEffect, useState } from "react";
 
 export default function AdminHeader() {
@@ -24,14 +25,14 @@ export default function AdminHeader() {
           console.warn("Formato de usuário desatualizado, fazendo logout...");
           localStorage.removeItem("token");
           localStorage.removeItem("usuario");
-          router.push("/admin/login");
+          router.push(getAdminPath("/login"));
         }
       } catch (error) {
         // Falha no parse = formato antigo, força logout
         console.warn("Formato de usuário inválido, fazendo logout...");
         localStorage.removeItem("token");
         localStorage.removeItem("usuario");
-        router.push("/admin/login");
+        router.push(getAdminPath("/login"));
       }
     }
   }, [router]);
@@ -39,7 +40,7 @@ export default function AdminHeader() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
-    router.push("/admin/login");
+    router.push(getAdminPath("/login"));
   };
 
   const getMenuAtivo = () => {
@@ -160,7 +161,7 @@ export default function AdminHeader() {
         }}>
           {temPermissao('pode_acessar_dashboard') && (
             <MenuLink
-              href="/admin/dashboard"
+              href={getAdminPath("/dashboard")}
               label="📊 Dashboard"
               ativo={menuAtivo === "dashboard"}
             />
@@ -168,7 +169,7 @@ export default function AdminHeader() {
 
           {(temPermissao('pode_editar_produtos') || temPermissao('pode_criar_produtos')) && (
             <MenuLink
-              href="/admin/produtos"
+              href={getAdminPath("/produtos")}
               label="📦 Produtos"
               ativo={menuAtivo === "produtos"}
             />
@@ -176,7 +177,7 @@ export default function AdminHeader() {
 
           {temPermissao('pode_visualizar_pedidos') && (
             <MenuLink
-              href="/admin/pedidos"
+              href={getAdminPath("/pedidos")}
               label="🛒 Pedidos"
               ativo={menuAtivo === "pedidos"}
             />
@@ -184,7 +185,7 @@ export default function AdminHeader() {
 
           {temPermissao('pode_visualizar_usuarios') && (
             <MenuLink
-              href="/admin/usuarios"
+              href={getAdminPath("/usuarios")}
               label="👥 Usuários"
               ativo={menuAtivo === "usuarios"}
             />
@@ -192,7 +193,7 @@ export default function AdminHeader() {
 
           {temPermissao('pode_gerenciar_funcionarios') && (
             <MenuLink
-              href="/admin/funcionarios"
+              href={getAdminPath("/funcionarios")}
               label="👔 Funcionários"
               ativo={menuAtivo === "funcionarios"}
             />

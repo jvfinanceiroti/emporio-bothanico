@@ -4,16 +4,24 @@
 
 ---
 
-## Caminho de acesso
+## Caminho de acesso (recomendado)
 
 ```
-https://seudominio.com.br/admin
+https://painel.emporiobothanico.com.br
 ```
 
 ou diretamente na página de login:
 
 ```
-https://seudominio.com.br/admin/login
+https://painel.emporiobothanico.com.br/login
+```
+
+---
+
+## Acesso alternativo (domínio principal)
+
+```
+https://emporiobothanico.com.br/admin
 ```
 
 ---
@@ -33,6 +41,20 @@ Para dificultar ainda mais o acesso por terceiros, você pode:
 1. **Manter este arquivo apenas local** — remova do repositório antes de fazer push
 2. **Usar um subdomínio** — ex.: `painel.seudominio.com.br` (configuração no DNS)
 3. **Adicionar autenticação no servidor** — proteção extra via .htaccess ou nginx
+
+---
+
+## Configuração DNS (painel subdomínio)
+
+Para o subdomínio **painel.emporiobothanico.com.br** funcionar:
+
+1. **Vercel**: Em Project Settings → Domains, adicione `painel.emporiobothanico.com.br`
+2. **DNS**: Na sua provedora de domínio (Registro.br, Hostinger, etc.), adicione:
+   - **Tipo:** CNAME
+   - **Nome:** painel (ou painel.emporiobothanico)
+   - **Valor:** cname.vercel-dns.com (ou o que a Vercel indicar)
+
+A Vercel mostra o valor exato ao adicionar o domínio. Pode levar alguns minutos para propagar.
 
 ---
 

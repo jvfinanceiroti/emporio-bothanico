@@ -1,3 +1,5 @@
+import { getAdminLoginPath } from "./admin-paths";
+
 // Configuração central da API
 // Usa variável de ambiente em produção, localhost em desenvolvimento
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -42,7 +44,7 @@ export async function apiRequestAuth(endpoint: string, options?: RequestInit) {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
       localStorage.removeItem('usuario');
-      window.location.href = '/admin/login';
+      window.location.href = getAdminLoginPath();
     }
     throw new Error('Sessão expirada');
   }

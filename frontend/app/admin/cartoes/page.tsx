@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AdminHeader from "../components/AdminHeader";
 import { API_URL } from "@/lib/api";
+import { getAdminLoginPath } from "@/lib/admin-paths";
 
 interface Cartao {
   pedido_id: number;
@@ -31,7 +32,7 @@ export default function CartoesPage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/admin/login");
+      router.push(getAdminLoginPath());
       return;
     }
     carregarCartoes();

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ProtegerRota, usePodeExecutar } from "@/lib/ProtegerRota";
 
 import { API_URL } from "@/lib/api";
+import { getAdminLoginPath } from "@/lib/admin-paths";
 
 interface Permissoes {
   pode_criar_produtos: boolean;
@@ -89,7 +90,7 @@ function FuncionariosConteudo() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        router.push("/admin/login");
+        router.push(getAdminLoginPath());
         return;
       }
 
