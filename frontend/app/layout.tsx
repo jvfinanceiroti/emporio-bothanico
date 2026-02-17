@@ -1,5 +1,5 @@
 import "./globals.css";
-import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { WhatsAppButtonExceptAdmin } from "@/components/WhatsAppButtonExceptAdmin";
 import { JsonLdHome } from "@/components/JsonLd";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://emporiobothanico.com.br";
@@ -57,7 +57,7 @@ export default function RootLayout({
       <body>
         <JsonLdHome />
         <main>{children}</main>
-        <WhatsAppButton />
+        <WhatsAppButtonExceptAdmin />
       </body>
     </html>
   );
