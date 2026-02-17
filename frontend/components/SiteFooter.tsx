@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PaymentIcons } from "./PaymentIcons";
 
 function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
@@ -45,14 +46,7 @@ export function SiteFooter() {
         </div>
         <div className="pt-8 pb-8 border-t border-white/20">
           <p className="text-xs font-bold uppercase tracking-wider text-white/70 mb-4 text-center">Formas de pagamento</p>
-          <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6">
-            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">VISA</span>
-            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Mastercard</span>
-            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Elo</span>
-            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Hipercard</span>
-            <span className="text-[#6ee7de] font-bold text-xs px-2 py-1 rounded bg-[#32bcad]/30 border border-[#32bcad]/50">PIX</span>
-            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Boleto</span>
-          </div>
+          <PaymentIcons />
         </div>
         <div className="pt-8 border-t border-white/20 text-center text-white/60 text-sm">
           <p>© 2026 Empório Bothânico. CNPJ: 04.280.033/0001-93</p>

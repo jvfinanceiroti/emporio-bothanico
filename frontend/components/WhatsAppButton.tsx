@@ -12,7 +12,7 @@ export function WhatsAppButton() {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-[9999] flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all hover:scale-110 hover:shadow-xl active:scale-95"
+      className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all hover:scale-110 hover:shadow-xl active:scale-95"
       aria-label="Fale conosco no WhatsApp"
     >
       <svg className="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">

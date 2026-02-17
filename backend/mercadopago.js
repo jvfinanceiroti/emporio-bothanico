@@ -48,12 +48,18 @@ async function gerarPixMercadoPago(pedido) {
     const primeiroNome = partesNome[0];
     const sobrenome = partesNome.slice(1).join(" ") || "-";
 
+    // Expiração em 30 minutos
+    const expiraEm = new Date();
+    expiraEm.setMinutes(expiraEm.getMinutes() + 30);
+    const dateOfExpiration = expiraEm.toISOString().replace('Z', '-03:00');
+
     // Criar pagamento PIX
     const payment = await paymentClient.create({
       body: {
         transaction_amount: valorTotal,
         description: `Pedido #${pedido.id} - Empório Bothânico`,
         payment_method_id: 'pix',
+        date_of_expiration: dateOfExpiration,
         payer: {
           email: pedido.cliente_email || "cliente@email.com",
           first_name: primeiroNome,

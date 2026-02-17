@@ -75,12 +75,12 @@ export default function Home() {
 
       {/* BANNER LIVE / PROMOCIONAL - Com foto da loja */}
       <section className="relative min-h-[50vh] sm:min-h-[55vh] lg:min-h-[60vh] flex overflow-hidden">
-        {/* Imagem de fundo - foto da mulher/loja - object-position para enquadrar a pessoa */}
+        {/* Imagem de fundo - foto da mulher/loja. Mobile: enquadramento ok | Desktop: object-position para não cortar a pessoa */}
         <div className="absolute inset-0">
           <img
             src="/banner-loja.png"
             alt="Empório Bothânico - Nossa loja em Itabira"
-            className="w-full h-full object-cover object-[65%_30%]"
+            className="w-full h-full object-cover object-[65%_30%] lg:object-[75%_50%]"
             onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1920&q=80"; }}
           />
         </div>

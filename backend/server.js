@@ -637,7 +637,7 @@ app.post("/pagamento/pix/gerar", sensivelRateLimiter, async (req, res) => {
     const qrCodeBase64 = await QRCode.toDataURL(pixString);
     
     const expiraEm = new Date();
-    expiraEm.setHours(expiraEm.getHours() + 1);
+    expiraEm.setMinutes(expiraEm.getMinutes() + 30);
 
     await pool.query(
       `UPDATE pedidos 

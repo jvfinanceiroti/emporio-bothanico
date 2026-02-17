@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { API_URL } from "@/lib/api";
 import { StoreHeader } from "@/components/StoreHeader";
+import { PaymentIcons } from "@/components/PaymentIcons";
 
 interface Produto {
   id: number;
@@ -71,6 +72,7 @@ function ProdutosContent() {
   };
 
   const [ordem, setOrdem] = useState<"recente" | "nome" | "preco">("recente");
+  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
   const produtosFiltrados = produtos
     .filter(p => p.nome.toLowerCase().includes(termoBusca.toLowerCase()))
     .sort((a, b) => {
@@ -97,30 +99,13 @@ function ProdutosContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f4]">
+    <div className="min-h-screen bg-[#f5f5f4] overflow-x-hidden">
       <header className="sticky top-0 z-50">
         <StoreHeader />
       </header>
 
-      {/* HERO - Estilo referência: leve, clean */}
-      <section className="relative py-12 sm:py-16 lg:py-20 overflow-hidden bg-gradient-to-b from-[#f5f5f4] to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#374151] mb-2" style={{ fontFamily: "var(--font-logo)" }}>
-                {categoriaAtual?.nome || "Produtos"}
-              </h1>
-              <p className="text-[var(--muted)] text-base sm:text-lg">{categoriaAtual?.descricao || "Fragrâncias exclusivas e produtos de banho que transformam seu dia a dia."}</p>
-            </div>
-            <p className="text-[#374151] text-lg sm:text-xl font-medium max-w-xs" style={{ fontFamily: "var(--font-logo)" }}>
-              fragrâncias que contam histórias
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* BREADCRUMBS */}
-      <div className="bg-white border-b border-[var(--border)] py-3">
+      {/* Breadcrumb compacto */}
+      <div className="bg-white border-b border-[var(--border)] py-2 sm:py-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="text-sm">
             <Link href="/" className="text-[var(--muted)] hover:text-[var(--accent)]">Home</Link>
@@ -130,12 +115,127 @@ function ProdutosContent() {
         </div>
       </div>
 
-      {/* CONTEÚDO - Sidebar + Grid */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar - Filtros */}
-          <aside className="lg:w-64 shrink-0">
-            <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden lg:sticky lg:top-36">
+      {/* CONTEÚDO - Mobile: barra filtrar minimal + produtos | Desktop: sidebar + grid */}
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-10 overflow-x-hidden">
+        {/* Mobile: barra Filtrar minimal acima dos produtos */}
+        <div className="lg:hidden mb-4">
+          <button
+            onClick={() => setFiltrosAbertos(!filtrosAbertos)}
+            className="w-full flex items-center justify-between px-4 py-2.5 bg-white rounded-lg border border-[var(--border)] font-semibold text-sm text-[var(--foreground)]"
+          >
+            <span>Filtrar por</span>
+            <svg className={`w-4 h-4 transition-transform ${filtrosAbertos ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          {filtrosAbertos && (
+            <div className="mt-2 p-3 bg-white rounded-lg border border-[var(--border)] space-y-1">
+              <button onClick={() => { setCategoriaSelecionada(null); setFiltrosAbertos(false); }} className={`w-full text-left px-3 py-2 rounded text-sm ${categoriaSelecionada === null ? "bg-[var(--accent-light)] text-[var(--accent)] font-medium" : "text-[var(--foreground)]"}`}>Todos</button>
+              {categorias.map((cat) => (
+                <button key={cat.id} onClick={() => { setCategoriaSelecionada(cat.slug); setFiltrosAbertos(false); }} className={`w-full text-left px-3 py-2 rounded text-sm ${categoriaSelecionada === cat.slug ? "bg-[var(--accent-light)] text-[var(--accent)] font-medium" : "text-[var(--foreground)]"}`}>{cat.nome}</button>
+              ))}
+              <div className="pt-2 mt-2 border-t border-[var(--border)]">
+                <input type="text" placeholder="Buscar..." value={termoBusca} onChange={(e) => setTermoBusca(e.target.value)} className="w-full px-3 py-2 rounded border border-[var(--border)] text-sm" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 min-w-0">
+          {/* Grid de Produtos - primeiro no mobile (ordem visual) */}
+          <div className="flex-1 min-w-0 order-1 lg:order-2">
+            {carregando ? (
+              <div className="flex flex-col items-center justify-center py-32">
+                <div className="w-14 h-14 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin mb-6" />
+                <p className="text-[var(--muted)] font-medium">Carregando produtos...</p>
+              </div>
+            ) : produtosFiltrados.length === 0 ? (
+              <div className="text-center py-24 bg-white rounded-2xl border border-[var(--border)]">
+                <div className="text-6xl mb-6">🌿</div>
+                <h3 className="text-xl font-bold text-[var(--foreground)] mb-2">Nenhum produto encontrado</h3>
+                <p className="text-[var(--muted)] mb-8">Tente outra categoria ou termo de busca.</p>
+                <button onClick={() => { setCategoriaSelecionada(null); setTermoBusca(""); }} className="btn-primary rounded-xl px-8 py-4">
+                  Limpar Filtros
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* Header: Total + Ordenar */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                  <p className="text-[var(--muted)] text-sm">
+                    Total de <span className="font-semibold text-[var(--foreground)]">{produtosFiltrados.length}</span> produto{produtosFiltrados.length !== 1 ? "s" : ""}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-[var(--muted)]">Ordenar por:</span>
+                    <select
+                      value={ordem}
+                      onChange={(e) => setOrdem(e.target.value as any)}
+                      className="px-4 py-2.5 rounded-lg border border-[var(--border)] bg-white text-sm font-medium text-[var(--foreground)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] outline-none"
+                    >
+                      <option value="recente">Mais recentes</option>
+                      <option value="nome">Nome (A–Z)</option>
+                      <option value="preco">Menor preço</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Cards - Estilo referência */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+                  {produtosFiltrados.map((produto, idx) => (
+                    <div key={produto.id} className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden flex flex-col min-w-0 hover:shadow-lg hover:border-[var(--border-strong)] transition-all">
+                      <Link href={`/produto/${produto.id}`} className="block flex-1 min-w-0">
+                        <div className="relative aspect-square bg-[#fafafa] flex items-center justify-center p-4 sm:p-6">
+                          <img
+                            src={getProdutoImagem(produto)}
+                            alt={produto.nome}
+                            className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform"
+                            onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=85"; }}
+                          />
+                          {idx < 2 && (
+                            <span className="absolute top-3 left-3 px-2.5 py-1 bg-[var(--accent)] text-white text-[10px] font-bold uppercase rounded-lg">Lançamento</span>
+                          )}
+                          {produto.estoque <= 5 && produto.estoque > 0 && (
+                            <span className="absolute top-3 right-3 px-2.5 py-1 bg-[var(--foreground)]/90 text-white text-[10px] font-bold uppercase rounded-lg">Últimas unidades</span>
+                          )}
+                        </div>
+                        <div className="p-3 sm:p-4">
+                          <h3 className="font-bold text-[var(--foreground)] text-sm sm:text-base mb-1 line-clamp-2 leading-snug">{produto.nome}</h3>
+                          {produto.descricao && <p className="text-[var(--muted)] text-xs line-clamp-2 mb-2 sm:mb-3">{produto.descricao}</p>}
+                          <div className="space-y-1">
+                            <div className="text-xl font-black text-[var(--accent)]">R$ {Number(produto.preco).toFixed(2).replace(".", ",")}</div>
+                            <p className="text-xs text-[var(--muted)]">ou 3x R$ {(Number(produto.preco) / 3).toFixed(2).replace(".", ",")}</p>
+                          </div>
+                        </div>
+                      </Link>
+                      <div className="p-3 sm:p-4 pt-0 flex gap-2 min-w-0">
+                        <Link href={`/produto/${produto.id}`} className="flex-1 min-w-0 py-2.5 sm:py-3 bg-[var(--accent)] text-white font-bold text-xs sm:text-sm rounded-xl text-center hover:bg-[var(--accent-hover)] transition-colors truncate">
+                          Comprar
+                        </Link>
+                        <button
+                          onClick={(e) => { e.preventDefault(); adicionarAoCarrinho(produto); }}
+                          disabled={produto.estoque === 0}
+                          className={`shrink-0 flex items-center justify-center rounded-xl border-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed w-10 h-10 sm:w-11 sm:h-11 ${
+                            produtoAdicionadoId === produto.id
+                              ? "bg-[var(--success)] border-[var(--success)] text-white"
+                              : "border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-light)]"
+                          }`}
+                          aria-label={produtoAdicionadoId === produto.id ? "Adicionado ao carrinho" : "Adicionar ao carrinho"}
+                        >
+                          {produtoAdicionadoId === produto.id ? (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
+                          ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Sidebar Filtros - só no desktop */}
+          <aside className="hidden lg:block lg:w-64 shrink-0 order-2 lg:order-1">
+            <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden sticky top-36">
               <div className="p-4 border-b border-[var(--border)]">
                 <h3 className="font-bold text-[var(--foreground)] text-sm uppercase tracking-wider">Filtrar por</h3>
               </div>
@@ -177,102 +277,6 @@ function ProdutosContent() {
               </div>
             </div>
           </aside>
-
-          {/* Grid de Produtos */}
-          <div className="flex-1 min-w-0">
-            {carregando ? (
-              <div className="flex flex-col items-center justify-center py-32">
-                <div className="w-14 h-14 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin mb-6" />
-                <p className="text-[var(--muted)] font-medium">Carregando produtos...</p>
-              </div>
-            ) : produtosFiltrados.length === 0 ? (
-              <div className="text-center py-24 bg-white rounded-2xl border border-[var(--border)]">
-                <div className="text-6xl mb-6">🌿</div>
-                <h3 className="text-xl font-bold text-[var(--foreground)] mb-2">Nenhum produto encontrado</h3>
-                <p className="text-[var(--muted)] mb-8">Tente outra categoria ou termo de busca.</p>
-                <button onClick={() => { setCategoriaSelecionada(null); setTermoBusca(""); }} className="btn-primary rounded-xl px-8 py-4">
-                  Limpar Filtros
-                </button>
-              </div>
-            ) : (
-              <>
-                {/* Header: Total + Ordenar */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                  <p className="text-[var(--muted)] text-sm">
-                    Total de <span className="font-semibold text-[var(--foreground)]">{produtosFiltrados.length}</span> produto{produtosFiltrados.length !== 1 ? "s" : ""}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-[var(--muted)]">Ordenar por:</span>
-                    <select
-                      value={ordem}
-                      onChange={(e) => setOrdem(e.target.value as any)}
-                      className="px-4 py-2.5 rounded-lg border border-[var(--border)] bg-white text-sm font-medium text-[var(--foreground)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] outline-none"
-                    >
-                      <option value="recente">Mais recentes</option>
-                      <option value="nome">Nome (A–Z)</option>
-                      <option value="preco">Menor preço</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Cards - Estilo referência */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
-                  {produtosFiltrados.map((produto, idx) => (
-                    <div key={produto.id} className="bg-white rounded-2xl border border-[var(--border)] overflow-hidden flex flex-col hover:shadow-lg hover:border-[var(--border-strong)] transition-all">
-                      <Link href={`/produto/${produto.id}`} className="block flex-1">
-                        <div className="relative aspect-square bg-[#fafafa] flex items-center justify-center p-6">
-                          <img
-                            src={getProdutoImagem(produto)}
-                            alt={produto.nome}
-                            className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform"
-                            onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=85"; }}
-                          />
-                          {idx < 2 && (
-                            <span className="absolute top-3 left-3 px-2.5 py-1 bg-[var(--accent)] text-white text-[10px] font-bold uppercase rounded-lg">Lançamento</span>
-                          )}
-                          {produto.estoque <= 5 && produto.estoque > 0 && (
-                            <span className="absolute top-3 right-3 px-2.5 py-1 bg-[var(--foreground)]/90 text-white text-[10px] font-bold uppercase rounded-lg">Últimas unidades</span>
-                          )}
-                        </div>
-                        <div className="p-4">
-                          <h3 className="font-bold text-[var(--foreground)] text-sm sm:text-base mb-1.5 line-clamp-2 leading-snug">{produto.nome}</h3>
-                          {produto.descricao && <p className="text-[var(--muted)] text-xs line-clamp-2 mb-3">{produto.descricao}</p>}
-                          <div className="space-y-1">
-                            <div className="text-xl font-black text-[var(--accent)]">R$ {Number(produto.preco).toFixed(2).replace(".", ",")}</div>
-                            <p className="text-xs text-[var(--muted)]">ou 3x R$ {(Number(produto.preco) / 3).toFixed(2).replace(".", ",")}</p>
-                          </div>
-                        </div>
-                      </Link>
-                      <div className="p-4 pt-0 flex gap-2">
-                        <Link href={`/produto/${produto.id}`} className="flex-1 py-3 bg-[var(--accent)] text-white font-bold text-sm rounded-xl text-center hover:bg-[var(--accent-hover)] transition-colors">
-                          Comprar
-                        </Link>
-                        <button
-                          onClick={(e) => { e.preventDefault(); adicionarAoCarrinho(produto); }}
-                          disabled={produto.estoque === 0}
-                          className={`shrink-0 flex items-center justify-center gap-2 rounded-xl border-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-                            produtoAdicionadoId === produto.id
-                              ? "bg-[var(--success)] border-[var(--success)] text-white px-3 py-2.5"
-                              : "w-11 h-11 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-light)]"
-                          }`}
-                          aria-label={produtoAdicionadoId === produto.id ? "Adicionado ao carrinho" : "Adicionar ao carrinho"}
-                        >
-                          {produtoAdicionadoId === produto.id ? (
-                            <>
-                              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
-                              <span className="font-bold text-sm whitespace-nowrap">Adicionado!</span>
-                            </>
-                          ) : (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
         </div>
       </main>
 
@@ -302,13 +306,8 @@ function ProdutosContent() {
         </div>
         <div className="max-w-7xl mx-auto mt-6 pt-6 border-t border-white/20">
           <p className="text-xs font-bold uppercase tracking-wider text-white/70 mb-3 text-center">Formas de pagamento</p>
-          <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 mb-4">
-            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">VISA</span>
-            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Mastercard</span>
-            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Elo</span>
-            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Hipercard</span>
-            <span className="text-[#6ee7de] font-bold text-xs px-2 py-1 rounded bg-[#32bcad]/30 border border-[#32bcad]/50">PIX</span>
-            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Boleto</span>
+          <div className="mb-4">
+            <PaymentIcons />
           </div>
         </div>
         <div className="max-w-7xl mx-auto pt-4 border-t border-white/20 text-center text-white/60 text-sm">

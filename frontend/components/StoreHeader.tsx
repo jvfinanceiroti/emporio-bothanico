@@ -164,8 +164,6 @@ export function StoreHeader() {
               <svg className="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
             </Link>
           ))}
-          <Link href="/produtos" className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors">Produtos</Link>
-          <Link href="/sobre" className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors">Sobre</Link>
         </nav>
       </div>
     </>
