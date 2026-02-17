@@ -12,7 +12,8 @@ const {
   verificarTentativasLogin,
   registrarTentativaFalha,
   limparTentativas,
-  gerarToken
+  gerarToken,
+  isAdminAutorizado
 } = require("./middleware/auth");
 const { configurarSeguranca, loginRateLimiter, sensivelRateLimiter } = require("./middleware/security");
 const cloudinary = require("cloudinary").v2;
@@ -155,8 +156,8 @@ app.post("/auth/login", loginRateLimiter, async (req, res) => {
 
     const emailLimpo = email.toLowerCase().trim().slice(0, 255);
 
-    // Verificar bloqueio por tentativas falhadas
-    const checagem = verificarTentativasLogin(emailLimpo);
+    // Verificar bloqueio por tentativas falhadas (email + IP)
+    const checagem = verificarTentativasLogin(emailLimpo, req);
     if (checagem.blocked) {
       return res.status(429).json({ error: checagem.message });
     }
@@ -167,7 +168,7 @@ app.post("/auth/login", loginRateLimiter, async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      registrarTentativaFalha(emailLimpo);
+      registrarTentativaFalha(emailLimpo, req);
       return res.status(401).json({ error: "Email ou senha incorretos" });
     }
 
@@ -175,8 +176,15 @@ app.post("/auth/login", loginRateLimiter, async (req, res) => {
     const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
 
     if (!senhaCorreta) {
-      registrarTentativaFalha(emailLimpo);
+      registrarTentativaFalha(emailLimpo, req);
       return res.status(401).json({ error: "Email ou senha incorretos" });
+    }
+
+    // PROTEÇÃO: Apenas o admin único autorizado pode acessar o painel
+    const roleAtual = usuario.role || usuario.tipo || "";
+    if (roleAtual === "admin" && !isAdminAutorizado(usuario.email)) {
+      registrarTentativaFalha(emailLimpo, req);
+      return res.status(403).json({ error: "Acesso negado" });
     }
 
     limparTentativas(emailLimpo);
@@ -207,7 +215,7 @@ app.post("/auth/login", loginRateLimiter, async (req, res) => {
 app.get("/auth/verificar", verificarToken, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, email, nome, tipo FROM usuarios WHERE id = $1",
+      "SELECT id, email, nome, tipo, role FROM usuarios WHERE id = $1",
       [req.userId]
     );
 
@@ -215,7 +223,13 @@ app.get("/auth/verificar", verificarToken, async (req, res) => {
       return res.status(401).json({ error: "Usuário não encontrado" });
     }
 
-    res.json({ usuario: result.rows[0] });
+    const usuario = result.rows[0];
+    const roleAtual = usuario.role || usuario.tipo || "";
+    if (roleAtual === "admin" && !isAdminAutorizado(usuario.email)) {
+      return res.status(403).json({ error: "Acesso negado" });
+    }
+
+    res.json({ usuario });
   } catch (error) {
     console.error("Erro ao verificar token:", error);
     res.status(500).json({ error: "Erro ao verificar token" });
@@ -1509,15 +1523,21 @@ app.get("/admin/funcionarios", verificarToken, async (req, res) => {
   }
 });
 
-// CRIAR FUNCIONÁRIO
-app.post("/admin/funcionarios", verificarToken, async (req, res) => {
+// CRIAR FUNCIONÁRIO (somente funcionário - NUNCA admin)
+app.post("/admin/funcionarios", verificarToken, verificarAdmin, async (req, res) => {
   try {
     const { 
       nome, 
       email, 
       senha,
-      permissoes 
+      permissoes,
+      role 
     } = req.body;
+
+    // SEGURANÇA: Nunca permitir criar usuário com role admin
+    if (role === "admin") {
+      return res.status(403).json({ error: "Operação não permitida" });
+    }
 
     // Validar
     if (!nome || !email || !senha) {

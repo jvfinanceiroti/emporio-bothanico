@@ -4,6 +4,13 @@
 
 ---
 
+## Credenciais (executar RESET-ADMIN-UNICO.sql no Supabase primeiro)
+
+As credenciais estão definidas no arquivo **RESET-ADMIN-UNICO.sql**.  
+**NÃO compartilhe este arquivo ou as credenciais.**
+
+---
+
 ## Caminho de acesso (recomendado)
 
 ```
@@ -31,6 +38,17 @@ https://emporiobothanico.com.br/admin
 - **robots.txt**: `/admin` e `/admin/` estão em `Disallow` — Google e outros crawlers não indexam
 - **Meta robots**: Páginas em `/admin` têm `noindex, nofollow`
 - **Sitemap**: A área admin não aparece no sitemap.xml
+
+---
+
+## Camadas de proteção implementadas
+
+- **Admin único**: Apenas um email autorizado pode acessar o painel
+- **Bloqueio por tentativas**: 4 falhas = bloqueio de 30 min (por email e por IP)
+- **Rate limit**: 5 tentativas de login por 15 min por IP
+- **Whitelist no backend**: Mesmo com conta admin no banco, só o email autorizado entra
+- **JWT validado**: Token expira em 6h e é verificado em toda requisição
+- **Criação de admins desabilitada**: Impossível criar novos admins via API
 
 ---
 
