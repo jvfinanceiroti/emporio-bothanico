@@ -49,9 +49,9 @@ async function gerarPixMercadoPago(pedido) {
     const sobrenome = partesNome.slice(1).join(" ") || "-";
 
     // Expiração em 30 minutos
-    const expiraEm = new Date();
-    expiraEm.setMinutes(expiraEm.getMinutes() + 30);
-    const dateOfExpiration = expiraEm.toISOString().replace('Z', '-03:00');
+    const dataExpirar = new Date();
+    dataExpirar.setMinutes(dataExpirar.getMinutes() + 30);
+    const dateOfExpiration = dataExpirar.toISOString().replace('Z', '-03:00');
 
     // Criar pagamento PIX
     const payment = await paymentClient.create({
