@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const senha = formData.get("senha")?.toString();
 
     if (!email || !senha) {
-      return NextResponse.redirect(new URL("/admin/login?erro=Email+e+senha+obrigat%C3%B3rios", request.url));
+      return NextResponse.redirect(new URL("/admin/login?erro=Email+e+senha+obrigat%C3%B3rios", request.url), 303);
     }
 
     const res = await fetch(`${API_URL}/auth/login`, {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     if (!res.ok) {
       const msg = encodeURIComponent(data.error || "Email ou senha incorretos");
-      return NextResponse.redirect(new URL(`/admin/login?erro=${msg}`, request.url));
+      return NextResponse.redirect(new URL(`/admin/login?erro=${msg}`, request.url), 303);
     }
 
     const host = request.headers.get("host") || "";
@@ -34,9 +34,10 @@ export async function POST(request: NextRequest) {
       redirectUrl.searchParams.set("u", JSON.stringify(data.usuario));
     }
 
-    return NextResponse.redirect(redirectUrl);
+    // 303 See Other: redireciona com GET (307 preservaria POST e causaria 405 no store-token)
+    return NextResponse.redirect(redirectUrl, 303);
   } catch (error) {
     console.error("admin-login error:", error);
-    return NextResponse.redirect(new URL("/admin/login?erro=Erro+ao+conectar", request.url));
+    return NextResponse.redirect(new URL("/admin/login?erro=Erro+ao+conectar", request.url), 303);
   }
 }
