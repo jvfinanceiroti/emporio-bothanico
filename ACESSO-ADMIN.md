@@ -11,6 +11,15 @@ As credenciais estão definidas no arquivo **RESET-ADMIN-UNICO.sql**.
 
 ---
 
+## Se o login não funcionar (404 nos chunks, erro no console)
+
+1. **Variáveis na Vercel** (frontend): `NEXT_PUBLIC_API_URL` e `NEXT_PUBLIC_SITE_URL` devem estar configurados.
+2. **Variáveis no Render** (backend): `FRONTEND_URL` ou `CORS_ORIGIN` deve incluir `https://painel.emporiobothanico.com.br`.
+3. Após o deploy com a correção de `assetPrefix`, os arquivos JS passam a carregar do domínio principal — faça um novo deploy.
+4. **Alternativa**: Acesse por `https://emporiobothanico.com.br/admin` em vez do subdomínio — o login deve funcionar.
+
+---
+
 ## Caminho de acesso (recomendado)
 
 ```

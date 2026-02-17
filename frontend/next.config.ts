@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://emporiobothanico.com.br";
+
 const nextConfig: NextConfig = {
+  // No subdomínio painel.*, os chunks 404 porque os assets estão no domínio principal
+  assetPrefix: process.env.NODE_ENV === "production" ? SITE_URL : undefined,
   async headers() {
     return [
       {
