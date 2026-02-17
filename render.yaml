@@ -35,6 +35,8 @@ services:
           type: web
           name: emporio-backend
           envVarKey: RENDER_EXTERNAL_URL
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://emporiobothanico.com.br
 
 # Banco de Dados PostgreSQL
 databases:
