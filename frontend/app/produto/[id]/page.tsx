@@ -8,10 +8,24 @@ import Link from "next/link";
 // Forçar renderização dinâmica
 export const dynamic = 'force-dynamic';
 
+function getProdutoImagem(p: any) {
+  const url = p?.imagem_url;
+  if (url && !url.includes("placeholder")) return url;
+  const n = (p?.nome || "").toLowerCase();
+  if (n.includes("essência") || n.includes("essencia")) return "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&q=85";
+  if (n.includes("refil") && n.includes("sabonete")) return "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&q=85";
+  if (n.includes("difusor")) return "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&q=85";
+  if (n.includes("sabonete") && (n.includes("lavanda") || n.includes("artesanal"))) return "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=500&q=85";
+  if (n.includes("vela") || n.includes("baunilha")) return "https://images.unsplash.com/photo-1602874801006-4e41187f7f36?w=500&q=85";
+  if (n.includes("spray") || n.includes("eucalipto") || n.includes("home spray")) return "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=85";
+  return "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=85";
+}
+
 function ProdutoContent() {
   const params = useParams();
   const router = useRouter();
   const [produto, setProduto] = useState<any>(null);
+  const [produtosRelacionados, setProdutosRelacionados] = useState<any[]>([]);
   const [mostrarToast, setMostrarToast] = useState(false);
   const [quantidade, setQuantidade] = useState(1);
 
@@ -22,6 +36,20 @@ function ProdutoContent() {
       .then((res) => res.json())
       .then((data) => setProduto(data));
   }, [params]);
+
+  useEffect(() => {
+    if (!produto) return;
+    fetch(`${API_URL}/produtos`)
+      .then((res) => res.json())
+      .then((lista: any[]) => {
+        const outros = (lista || []).filter((p) => p.id !== produto.id && p.ativo !== false);
+        const mesmaCategoria = outros.filter((p) => p.categoria_id === produto.categoria_id);
+        const restante = outros.filter((p) => p.categoria_id !== produto.categoria_id);
+        const relacionados = [...mesmaCategoria, ...restante].slice(0, 4);
+        setProdutosRelacionados(relacionados);
+      })
+      .catch(() => setProdutosRelacionados([]));
+  }, [produto]);
 
   const adicionarAoCarrinho = () => {
     const carrinhoAtual = JSON.parse(
@@ -506,6 +534,95 @@ function ProdutoContent() {
             </div>
           </div>
         </div>
+
+        {/* VEJA TAMBÉM */}
+        {produtosRelacionados.length > 0 && (
+          <section style={{
+            marginTop: "clamp(48px, 10vw, 80px)",
+            paddingTop: "clamp(40px, 8vw, 64px)",
+            borderTop: "1px solid rgba(0,0,0,0.08)"
+          }}>
+            <h2 style={{
+              textAlign: "center",
+              fontSize: "1.5rem",
+              fontWeight: "600",
+              color: "#5A736A",
+              marginBottom: "32px"
+            }}>
+              Veja também
+            </h2>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
+              gap: "24px",
+              maxWidth: "1100px",
+              margin: "0 auto"
+            }}>
+              {produtosRelacionados.map((p) => (
+                <Link
+                  key={p.id}
+                  href={`/produto/${p.id}`}
+                  style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                    background: "white",
+                    borderRadius: "12px",
+                    overflow: "hidden",
+                    border: "1px solid rgba(0,0,0,0.06)",
+                    transition: "box-shadow 0.2s, transform 0.2s"
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.1)";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.boxShadow = "none";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }}
+                >
+                  <div style={{
+                    aspectRatio: "1",
+                    background: "#fafafa",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "16px"
+                  }}>
+                    <img
+                      src={getProdutoImagem(p)}
+                      alt={p.nome}
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain"
+                      }}
+                      onError={(ev) => { (ev.target as HTMLImageElement).src = "https://via.placeholder.com/200/fafafa/ccc?text=Produto"; }}
+                    />
+                  </div>
+                  <div style={{ padding: "16px", textAlign: "center" }}>
+                    <h3 style={{
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: "#374151",
+                      lineHeight: "1.35",
+                      marginBottom: "12px",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden"
+                    }}>
+                      {p.nome}
+                    </h3>
+                    <div style={{ fontSize: "18px", fontWeight: "700", color: "#dc2626", marginBottom: "4px" }}>
+                      R$ {Number(p.preco).toFixed(2).replace(".", ",")}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#9ca3af" }}>À vista no PIX</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { API_URL } from "@/lib/api";
+import { StoreHeader } from "@/components/StoreHeader";
 
 const AVALIACOES_GOOGLE = [
   { nome: "Ana Paula Morais", iniciais: "AP", texto: "Que loja maravilhosa, cheirosa, cheia de detalhes, tudo encanta! Mas eu preciso destacar o conhecimento que a Nayara tem sobre os aromas, e suas aplicações! Coloquei um aroma na minha empresa e todos os dias é uma chuva de elogios.", extra: "Local Guide • Google" },
@@ -46,6 +47,7 @@ export default function Home() {
     else novo.push({ ...produto, quantidade: 1 });
     setCarrinho(novo);
     localStorage.setItem("carrinho", JSON.stringify(novo));
+    window.dispatchEvent(new Event("carrinho-changed"));
     const btn = e.currentTarget as HTMLButtonElement;
     btn.textContent = "✓ Adicionado!";
     btn.classList.add("!bg-[var(--success)]", "!border-[var(--success)]");
@@ -78,89 +80,52 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      {/* TOP BAR PROMOCIONAL */}
-      <div className="bg-gradient-to-r from-[var(--accent)] to-[#3d6b5a] text-white py-3 text-center text-sm font-medium tracking-wide">
-        <span className="hidden sm:inline">✨ Frete grátis em compras acima de R$ 199</span>
-        <span className="sm:hidden">✨ Frete grátis acima de R$ 199</span>
-        <span className="mx-2 opacity-80">•</span>
-        <span>Entrega para todo o Brasil</span>
-      </div>
-
-      {/* HEADER PREMIUM */}
-      <header className="store-header sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
-            <Link href="/" className="flex items-center gap-3 no-underline group">
-              <img src="/logo.png" alt="Empório Bothânico" className="h-10 w-10 lg:h-12 lg:w-12 object-contain" />
-              <div>
-                <h1 className="text-lg lg:text-xl font-extrabold text-[var(--foreground)] tracking-tight group-hover:text-[var(--accent)] transition-colors">Empório Bothânico</h1>
-                <p className="text-[10px] lg:text-xs text-[var(--muted)] font-medium uppercase tracking-wider">Delicadezas & Banho</p>
-              </div>
-            </Link>
-
-            <nav className="hidden md:flex items-center gap-1">
-              <Link href="/produtos" className="px-4 py-2 rounded-lg text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)] transition-colors">Produtos</Link>
-              <Link href="/meus-pedidos" className="px-4 py-2 rounded-lg text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)] transition-colors">Meus Pedidos</Link>
-              <Link href="/sobre" className="px-4 py-2 rounded-lg text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)] transition-colors">Sobre</Link>
-              <a href="https://www.instagram.com/emporiobothanicoita/" target="_blank" rel="noopener noreferrer" className="p-2.5 rounded-lg text-[var(--foreground)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)] transition-colors" aria-label="Instagram">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.14 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.14-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-              </a>
-            </nav>
-
-            <Link href="/carrinho" className="relative flex items-center gap-2 px-4 py-2.5 bg-[var(--foreground)] text-white rounded-xl font-bold text-sm hover:bg-[var(--accent)] transition-all hover:scale-105 active:scale-95">
-              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-              Carrinho
-              {totalItens > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full border-2 border-white">
-                  {totalItens}
-                </span>
-              )}
-            </Link>
-          </div>
-        </div>
+      <header className="sticky top-0 z-50">
+        <StoreHeader />
       </header>
 
-      {/* HERO FULL-SCREEN */}
-      <section className="relative min-h-[85vh] lg:min-h-[90vh] flex items-center overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url(https://images.unsplash.com/photo-1594035910387-fea47794261f?w=1920&q=80)" }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/45 to-black/75" />
-        <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-20 text-center">
-          <p className="text-white/90 text-sm font-semibold uppercase tracking-[0.3em] mb-4">Perfumaria Premium</p>
-          <h2 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight mb-6">
-            Fragrâncias que<br /><span className="text-[var(--accent-light)]">Contam Histórias</span>
-          </h2>
-          <p className="text-white/90 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Cada essência é selecionada para uma experiência única. Descubra produtos que transformam momentos comuns em memórias especiais.
+      {/* BANNER PROMOCIONAL MODERNO */}
+      <section className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #c44569 0%, #a55eea 35%, #6c5ce7 70%, #2d5a4a 100%)" }}>
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 40%)" }} />
+        <div className="absolute inset-0" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E\")" }} />
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-16 sm:py-20 lg:py-24 text-center">
+          <p className="text-white/90 text-xs sm:text-sm font-bold uppercase tracking-[0.4em] mb-4">Itabira • Perfumaria</p>
+          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight mb-3 drop-shadow-lg">
+            EMPÓRIO
+          </h1>
+          <p className="text-3xl sm:text-4xl lg:text-5xl font-light text-white/95 tracking-wide mb-2" style={{ fontFamily: "Georgia, serif" }}>
+            Bothânico
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/produtos" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-[var(--foreground)] font-bold text-lg rounded-xl hover:bg-[var(--accent-light)] hover:text-[var(--accent)] transition-all hover:scale-105 shadow-xl">
-              Explorar Coleção
-            </Link>
-            <Link href="/produtos" className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white text-white font-bold text-lg rounded-xl hover:bg-white hover:text-[var(--foreground)] transition-all">
-              Ver Produtos
-            </Link>
-          </div>
-          <div className="flex flex-wrap justify-center gap-10 lg:gap-20 mt-16 text-white/95">
+          <p className="text-white/90 text-base sm:text-lg max-w-xl mx-auto mb-8 sm:mb-10">
+            Fragrâncias exclusivas e produtos de banho que transformam seu dia a dia.
+          </p>
+          <Link 
+            href="/produtos" 
+            className="inline-flex items-center gap-2 px-8 sm:px-10 py-4 bg-white text-[#2d5a4a] font-bold text-base sm:text-lg rounded-xl hover:scale-105 transition-transform shadow-xl border-2 border-white"
+          >
+            Explorar Produtos
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </Link>
+          <a href="https://www.instagram.com/emporiobothanicoita/" target="_blank" rel="noopener noreferrer" className="ml-4 inline-flex items-center gap-2 px-6 py-3.5 border-2 border-white/80 text-white font-semibold rounded-xl hover:bg-white/15 transition-all">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.14 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162z"/></svg>
+            @emporiobothanicoita
+          </a>
+          <div className="flex flex-wrap justify-center gap-8 sm:gap-12 lg:gap-16 mt-12 sm:mt-14 text-white/95">
             <div className="text-center">
-              <div className="text-3xl lg:text-4xl font-black">1000+</div>
-              <div className="text-sm font-medium tracking-wide">Produtos Vendidos</div>
+              <div className="text-2xl sm:text-3xl font-black">5,0</div>
+              <div className="text-xs sm:text-sm font-medium">Avaliações Google</div>
             </div>
             <div className="text-center">
-              <div className="flex items-center justify-center gap-1.5">
-                <span className="text-2xl stars-google">★</span>
-                <span className="text-3xl lg:text-4xl font-black">5,0</span>
-              </div>
-              <div className="text-sm font-medium tracking-wide">18 avaliações Google</div>
+              <div className="text-2xl sm:text-3xl font-black">24h</div>
+              <div className="text-xs sm:text-sm font-medium">Envio Rápido</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl lg:text-4xl font-black">24h</div>
-              <div className="text-sm font-medium tracking-wide">Envio Rápido</div>
+              <div className="text-2xl sm:text-3xl font-black">1000+</div>
+              <div className="text-xs sm:text-sm font-medium">Clientes Satisfeitos</div>
             </div>
           </div>
         </div>
+        <div className="h-1.5 bg-gradient-to-r from-amber-200 via-white to-amber-200/80" />
       </section>
 
       {/* CATEGORIAS - Explore */}
@@ -192,69 +157,12 @@ export default function Home() {
         </section>
       )}
 
-      {/* PRODUTOS EM DESTAQUE */}
-      <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-[var(--background)]">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
-            <div>
-              <p className="text-[var(--accent)] font-semibold text-sm uppercase tracking-widest mb-2">Nossa Seleção</p>
-              <h2 className="text-3xl lg:text-4xl font-extrabold text-[var(--foreground)]">Produtos em Destaque</h2>
-            </div>
-            <Link href="/produtos" className="btn-primary shrink-0">
-              Ver Todos os Produtos
-            </Link>
-          </div>
-
-          {produtos.length === 0 ? (
-            <div className="text-center py-24 bg-white rounded-2xl border border-[var(--border)]">
-              <div className="text-6xl mb-4">🌿</div>
-              <p className="text-[var(--muted)] text-lg font-medium">Novos produtos em breve...</p>
-              <Link href="/produtos" className="btn-primary mt-6 inline-flex">Ver Catálogo</Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
-              {produtos.slice(0, 8).map((produto) => (
-                <Link key={produto.id} href={`/produto/${produto.id}`} className="group no-underline">
-                  <div className="store-card overflow-hidden h-full flex flex-col hover:-translate-y-1">
-                    <div className="relative aspect-square bg-[var(--accent-light)] overflow-hidden">
-                      <img 
-                        src={getProdutoImagem(produto)} 
-                        alt={produto.nome}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400&q=80"; }}
-                      />
-                      {produto.estoque <= 5 && produto.estoque > 0 && (
-                        <span className="absolute top-3 left-3 px-3 py-1 bg-[var(--foreground)] text-white text-xs font-bold uppercase rounded-lg">Últimas unidades</span>
-                      )}
-                    </div>
-                    <div className="p-5 flex-1 flex flex-col">
-                      {produto.categoria_nome && (
-                        <span className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-2">{produto.categoria_nome}</span>
-                      )}
-                      <h3 className="text-lg font-bold text-[var(--foreground)] mb-2 line-clamp-2 group-hover:text-[var(--accent)] transition-colors">{produto.nome}</h3>
-                      {produto.descricao && <p className="text-sm text-[var(--muted)] line-clamp-2 mb-4 flex-1">{produto.descricao}</p>}
-                      <div className="mt-auto">
-                        <div className="text-2xl font-black text-[var(--foreground)] mb-3">R$ {Number(produto.preco).toFixed(2)}</div>
-                        <p className={`text-xs font-semibold flex items-center gap-2 mb-4 ${produto.estoque > 5 ? "text-[var(--success)]" : "text-[var(--warning)]"}`}>
-                          <span className={`w-2 h-2 rounded-full ${produto.estoque > 5 ? "bg-[var(--success)]" : "bg-[var(--warning)]"}`} />
-                          {produto.estoque} em estoque
-                        </p>
-                        <button
-                          onClick={(e) => adicionarAoCarrinho(produto, e)}
-                          disabled={produto.estoque === 0}
-                          className="w-full py-3.5 bg-[var(--foreground)] text-white font-bold rounded-xl border-2 border-[var(--foreground)] hover:bg-white hover:text-[var(--foreground)] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--foreground)] disabled:hover:text-white"
-                        >
-                          Adicionar ao Carrinho
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      {/* PRODUTOS - CAROUSEL MODERNO */}
+      <ProdutosCarousel
+        produtos={produtos}
+        getProdutoImagem={getProdutoImagem}
+        adicionarAoCarrinho={adicionarAoCarrinho}
+      />
 
       {/* BANNER BENEFÍCIOS */}
       <section className="py-20 lg:py-24 px-4 sm:px-6 bg-gradient-to-br from-[var(--accent)] via-[#2d5a4a] to-[#234a3d] text-white">
@@ -296,7 +204,7 @@ export default function Home() {
       {/* INSTAGRAM - Siga-nos */}
       <section className="py-20 lg:py-28 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-[var(--background)] to-[#f0f4f2]">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center">
             <p className="text-[var(--accent)] font-semibold text-sm uppercase tracking-[0.25em] mb-3">Nosso dia a dia</p>
             <h2 className="text-3xl lg:text-4xl font-extrabold text-[var(--foreground)] mb-4">Siga-nos no Instagram</h2>
             <p className="text-[var(--muted)] max-w-xl mx-auto mb-8">Fragrâncias, novidades e um pouquinho da nossa loja em Itabira.</p>
@@ -310,31 +218,6 @@ export default function Home() {
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.14 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.14-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
               @emporiobothanicoita
             </a>
-          </div>
-          {/* Bento grid - galeria inspirada em feed */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4 max-w-4xl mx-auto">
-            {[
-              { img: "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=400&q=80", alt: "Sabonetes artesanais" },
-              { img: "https://images.unsplash.com/photo-1602874801006-4e41187f7f36?w=400&q=80", alt: "Velas aromáticas" },
-              { img: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&q=80", alt: "Difusores de ambiente" },
-              { img: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&q=80", alt: "Óleos essenciais" },
-              { img: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&q=80", alt: "Plantas e aromas", span: "md:col-span-2" },
-              { img: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400&q=80", alt: "Produtos de banho", span: "md:col-span-2" },
-            ].map((item, i) => (
-              <a
-                key={i}
-                href="https://www.instagram.com/emporiobothanicoita/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`group relative aspect-square rounded-2xl overflow-hidden ${item.span || ""}`}
-              >
-                <img src={item.img} alt={item.alt} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">@emporiobothanicoita</span>
-                </div>
-              </a>
-            ))}
           </div>
         </div>
       </section>
@@ -393,6 +276,111 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function ProdutosCarousel({ produtos, getProdutoImagem, adicionarAoCarrinho }: { produtos: any[]; getProdutoImagem: (p: any) => string; adicionarAoCarrinho: (p: any, e: React.MouseEvent) => void }) {
+  const [index, setIndex] = useState(0);
+  const [perPage, setPerPage] = useState(4);
+  useEffect(() => {
+    const upd = () => setPerPage(window.innerWidth >= 1280 ? 4 : window.innerWidth >= 768 ? 3 : 2);
+    upd();
+    window.addEventListener("resize", upd);
+    return () => window.removeEventListener("resize", upd);
+  }, []);
+  const sliceProdutos = produtos.slice(0, 12);
+  const totalPaginas = Math.max(1, Math.ceil(sliceProdutos.length / perPage));
+  const goTo = (i: number) => setIndex(Math.max(0, Math.min(i, totalPaginas - 1)));
+  const paginas = Array.from({ length: totalPaginas }, (_, i) => sliceProdutos.slice(i * perPage, (i + 1) * perPage));
+
+  if (produtos.length === 0) {
+    return (
+      <section className="py-20 lg:py-28 px-4 sm:px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center py-24 bg-[var(--background)] rounded-2xl border border-[var(--border)]">
+            <div className="text-6xl mb-4">🌿</div>
+            <p className="text-[var(--muted)] text-lg font-medium">Novos produtos em breve...</p>
+            <Link href="/produtos" className="btn-primary mt-6 inline-flex">Ver Catálogo</Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-16 lg:py-24 px-4 sm:px-6 bg-white">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between gap-4 mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]" style={{ color: "#2d5a4a" }}>
+            Queridinhos do Empório
+          </h2>
+          <Link href="/produtos" className="text-sm font-semibold text-[var(--accent)] hover:underline shrink-0">
+            Ver todos →
+          </Link>
+        </div>
+        <div className="relative">
+          <button
+            onClick={() => goTo(index - 1)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-4 z-10 w-12 h-12 rounded-full bg-[var(--accent)] text-white flex items-center justify-center shadow-lg hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-40 disabled:pointer-events-none"
+            disabled={index <= 0}
+            aria-label="Anterior"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <button
+            onClick={() => goTo(index + 1)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-4 z-10 w-12 h-12 rounded-full bg-[var(--accent)] text-white flex items-center justify-center shadow-lg hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-40 disabled:pointer-events-none"
+            disabled={index >= totalPaginas - 1}
+            aria-label="Próximo"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+          </button>
+          <div className="flex justify-center gap-2 mb-8">
+            {Array.from({ length: totalPaginas }).map((_, i) => (
+              <button key={i} onClick={() => goTo(i)} className={`w-2.5 h-2.5 rounded-full transition-all ${i === index ? "bg-[var(--accent)] scale-110" : "bg-[var(--muted-light)] hover:bg-[var(--muted)]"}`} aria-label={`Página ${i + 1}`} />
+            ))}
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {(paginas[index] || []).map((produto) => (
+              <div key={produto.id} className="group bg-white rounded-2xl border border-[var(--border)] overflow-hidden hover:shadow-xl transition-all flex flex-col">
+                <Link href={`/produto/${produto.id}`} className="block flex-1">
+                  <div className="relative aspect-square bg-[#fafafa] flex items-center justify-center p-4">
+                    <img src={getProdutoImagem(produto)} alt={produto.nome} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400&q=80"; }} />
+                    {produto.estoque <= 5 && produto.estoque > 0 && (
+                      <span className="absolute top-3 left-3 px-2.5 py-1 bg-[var(--foreground)] text-white text-[10px] font-bold uppercase rounded-lg">Últimas unidades</span>
+                    )}
+                    {produtos.indexOf(produto) < 2 && (
+                      <span className="absolute top-3 right-3 px-2.5 py-1 bg-white border-2 border-[var(--accent)] text-[var(--accent)] text-[10px] font-bold uppercase rounded-lg">Lançamento</span>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-sm sm:text-base font-bold text-[var(--foreground)] mb-1 line-clamp-2 group-hover:text-[var(--accent)] transition-colors">{produto.nome}</h3>
+                    {produto.descricao && <p className="text-xs text-[var(--muted)] line-clamp-2 mb-3">{produto.descricao}</p>}
+                    <div className="mb-3">
+                      <span className="text-lg sm:text-xl font-black text-[var(--foreground)]">R$ {Number(produto.preco).toFixed(2).replace(".", ",")}</span>
+                      <span className="text-xs text-[var(--muted)] ml-1">ou 3x R$ {(Number(produto.preco) / 3).toFixed(2).replace(".", ",")}</span>
+                    </div>
+                  </div>
+                </Link>
+                <div className="p-4 pt-0 flex gap-2">
+                  <Link href={`/produto/${produto.id}`} className="flex-1 py-3 bg-[var(--accent)] text-white font-bold text-sm rounded-xl text-center hover:bg-[var(--accent-hover)] transition-colors">
+                    Comprar
+                  </Link>
+                  <button
+                    onClick={(e) => adicionarAoCarrinho(produto, e)}
+                    disabled={produto.estoque === 0}
+                    className="w-12 h-12 shrink-0 flex items-center justify-center rounded-xl border-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-light)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    aria-label="Adicionar ao carrinho"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
