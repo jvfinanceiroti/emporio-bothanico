@@ -211,3 +211,27 @@ body {
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
 }
+
+/* Marquee - texto deslizante frete grátis */
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.marquee-container:hover .marquee-content {
+  animation-play-state: paused;
+}
+.marquee-content {
+  display: inline-flex;
+  animation: marquee 30s linear infinite;
+  will-change: transform;
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+
+/* Esconder scrollbar em elementos com overflow scroll */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

@@ -32,6 +32,7 @@ function ProdutosContent() {
   const [carregando, setCarregando] = useState(true);
   const [termoBusca, setTermoBusca] = useState(searchParams.get("q") || "");
   const [carrinho, setCarrinho] = useState<any[]>([]);
+  const [produtoAdicionadoId, setProdutoAdicionadoId] = useState<number | null>(null);
 
   useEffect(() => {
     const salvo = localStorage.getItem("carrinho");
@@ -65,13 +66,8 @@ function ProdutosContent() {
     setCarrinho(novo);
     localStorage.setItem("carrinho", JSON.stringify(novo));
     window.dispatchEvent(new Event("carrinho-changed"));
-
-    const notif = document.createElement("div");
-    notif.className = "fixed top-5 right-5 z-[10000] px-6 py-4 rounded-xl font-bold text-sm text-white shadow-xl";
-    notif.style.background = "var(--success)";
-    notif.textContent = `✓ ${produto.nome} adicionado ao carrinho!`;
-    document.body.appendChild(notif);
-    setTimeout(() => notif.remove(), 3000);
+    setProdutoAdicionadoId(produto.id);
+    setTimeout(() => setProdutoAdicionadoId(null), 1800);
   };
 
   const [ordem, setOrdem] = useState<"recente" | "nome" | "preco">("recente");
@@ -254,10 +250,21 @@ function ProdutosContent() {
                         <button
                           onClick={(e) => { e.preventDefault(); adicionarAoCarrinho(produto); }}
                           disabled={produto.estoque === 0}
-                          className="w-11 h-11 shrink-0 flex items-center justify-center rounded-xl border-2 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-light)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                          aria-label="Adicionar ao carrinho"
+                          className={`shrink-0 flex items-center justify-center gap-2 rounded-xl border-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                            produtoAdicionadoId === produto.id
+                              ? "bg-[var(--success)] border-[var(--success)] text-white px-3 py-2.5"
+                              : "w-11 h-11 border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent-light)]"
+                          }`}
+                          aria-label={produtoAdicionadoId === produto.id ? "Adicionado ao carrinho" : "Adicionar ao carrinho"}
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                          {produtoAdicionadoId === produto.id ? (
+                            <>
+                              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/></svg>
+                              <span className="font-bold text-sm whitespace-nowrap">Adicionado!</span>
+                            </>
+                          ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -293,7 +300,18 @@ function ProdutosContent() {
             <Link href="/contato" className="text-white/70 hover:text-white transition-colors">Contato</Link>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto mt-6 pt-6 border-t border-white/20 text-center text-white/60 text-sm">
+        <div className="max-w-7xl mx-auto mt-6 pt-6 border-t border-white/20">
+          <p className="text-xs font-bold uppercase tracking-wider text-white/70 mb-3 text-center">Formas de pagamento</p>
+          <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 mb-4">
+            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">VISA</span>
+            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Mastercard</span>
+            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Elo</span>
+            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Hipercard</span>
+            <span className="text-[#6ee7de] font-bold text-xs px-2 py-1 rounded bg-[#32bcad]/30 border border-[#32bcad]/50">PIX</span>
+            <span className="text-white/90 font-bold text-xs px-2 py-1 rounded bg-white/10">Boleto</span>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto pt-4 border-t border-white/20 text-center text-white/60 text-sm">
           © 2026 Empório Bothânico. CNPJ: 04.280.033/0001-93
         </div>
       </footer>

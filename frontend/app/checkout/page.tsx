@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_URL } from "@/lib/api";
+import { StoreHeader } from "@/components/StoreHeader";
 import { validarNumeroCartao, detectarBandeira, validarValidade, formatarNumeroCartao, formatarValidade } from "@/utils/cartao-validacao";
 
 interface ItemCarrinho {
@@ -483,141 +484,36 @@ export default function CheckoutPage() {
     setTimeout(() => setPixCopiado(false), 2000);
   };
 
+  const inputClass = "w-full px-4 py-3 rounded-xl border-2 border-[var(--border)] bg-[var(--warm-50)] text-[var(--foreground)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 outline-none transition-all";
+
   return (
-    <div style={{ minHeight: "100vh", background: "#fafafa" }}>
-      {/* HEADER */}
-      <header style={{
-        background: "rgba(255, 255, 255, 0.98)",
-        backdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(0,0,0,0.08)",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-        position: "sticky",
-        top: 0,
-        zIndex: 100
-      }}>
-        <div style={{
-          maxWidth: "1440px",
-          margin: "0 auto",
-          padding: "clamp(16px, 3vw, 20px) clamp(20px, 5vw, 48px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "12px"
-        }}>
-          <Link 
-            href="/carrinho"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              color: "#666",
-              textDecoration: "none",
-              fontSize: "clamp(13px, 2.5vw, 15px)",
-              fontWeight: "600",
-              transition: "color 0.2s",
-              flexShrink: 0,
-              whiteSpace: "nowrap"
-            }}
-            onMouseOver={(e) => e.currentTarget.style.color = "#0a0a0a"}
-            onMouseOut={(e) => e.currentTarget.style.color = "#666"}
-          >
-            <svg style={{ width: "20px", height: "20px", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            <span style={{ display: "inline" }}>Voltar ao Carrinho</span>
-          </Link>
-
-          <Link href="/" style={{ 
-            textDecoration: "none", 
-            display: "flex", 
-            alignItems: "center", 
-            gap: "clamp(8px, 2vw, 20px)",
-            overflow: "hidden",
-            flexShrink: 1,
-            minWidth: 0
-          }}>
-            <img src="/logo.png" alt="Logo" style={{ 
-              height: "clamp(40px, 8vw, 56px)", 
-              objectFit: "contain",
-              flexShrink: 0
-            }} />
-            <div style={{ overflow: "hidden" }}>
-              <h1 style={{
-                fontSize: "clamp(14px, 3vw, 20px)",
-                fontWeight: "800",
-                color: "#0a0a0a",
-                margin: 0,
-                letterSpacing: "-0.5px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap"
-              }}>
-                Empório Bothânico
-              </h1>
-            </div>
-          </Link>
-
-          <div style={{
-            fontSize: "clamp(14px, 3vw, 20px)",
-            fontWeight: "800",
-            color: "#0a0a0a",
-            letterSpacing: "-0.5px",
-            flexShrink: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis"
-          }}>
-            Finalizar Pedido
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#f5f5f4] via-[#fafaf9] to-white">
+      <header className="sticky top-0 z-50">
+        <StoreHeader />
       </header>
 
-      <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "clamp(24px, 5vw, 80px) clamp(16px, 4vw, 48px)" }}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
-          gap: "clamp(24px, 5vw, 40px)",
-          alignItems: "start"
-        }}>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        {/* Breadcrumbs */}
+        <nav className="text-sm text-[var(--muted)] mb-8">
+          <Link href="/" className="hover:text-[var(--accent)]">Home</Link>
+          <span className="mx-2">›</span>
+          <Link href="/produtos" className="hover:text-[var(--accent)]">Produtos</Link>
+          <span className="mx-2">›</span>
+          <Link href="/carrinho" className="hover:text-[var(--accent)]">Carrinho</Link>
+          <span className="mx-2">›</span>
+          <span className="text-[var(--foreground)] font-medium">Checkout</span>
+        </nav>
+
+        <div className="grid lg:grid-cols-[1fr_400px] gap-8 lg:gap-12 items-start">
           {/* FORMULÁRIO */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "clamp(16px, 4vw, 24px)" }}>
+          <div className="space-y-6">
             {/* Dados Pessoais */}
-            <div style={{
-              background: "white",
-              borderRadius: "clamp(12px, 3vw, 20px)",
-              padding: "clamp(20px, 5vw, 40px)",
-              border: "1px solid rgba(0,0,0,0.08)"
-            }}>
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "clamp(12px, 3vw, 16px)",
-                marginBottom: "clamp(20px, 5vw, 32px)",
-                flexWrap: "wrap"
-              }}>
-                <div style={{
-                  width: "clamp(40px, 10vw, 48px)",
-                  height: "clamp(40px, 10vw, 48px)",
-                  background: "#0a0a0a",
-                  color: "white",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "clamp(16px, 4vw, 20px)",
-                  fontWeight: "800",
-                  flexShrink: 0
-                }}>
+            <div className="bg-white rounded-3xl shadow-[0_4px_40px_rgba(44,90,74,0.06)] border border-[var(--border)] p-6 sm:p-8">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-[var(--accent)] text-white rounded-full flex items-center justify-center text-xl font-bold shrink-0">
                   1
                 </div>
-                <h2 style={{
-                  fontSize: "clamp(18px, 4.5vw, 24px)",
-                  fontWeight: "800",
-                  color: "#0a0a0a",
-                  margin: 0,
-                  letterSpacing: "-0.5px",
-                  wordBreak: "break-word"
-                }}>
+                <h2 className="text-xl sm:text-2xl font-semibold text-[var(--foreground)]" style={{ fontFamily: "var(--font-logo)" }}>
                   Dados Pessoais
                 </h2>
               </div>
@@ -781,42 +677,12 @@ export default function CheckoutPage() {
             </div>
 
             {/* Endereço */}
-            <div style={{
-              background: "white",
-              borderRadius: "clamp(12px, 3vw, 20px)",
-              padding: "clamp(20px, 5vw, 40px)",
-              border: "1px solid rgba(0,0,0,0.08)"
-            }}>
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "clamp(12px, 3vw, 16px)",
-                marginBottom: "clamp(20px, 5vw, 32px)",
-                flexWrap: "wrap"
-              }}>
-                <div style={{
-                  width: "clamp(40px, 10vw, 48px)",
-                  height: "clamp(40px, 10vw, 48px)",
-                  background: "#0a0a0a",
-                  color: "white",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "clamp(16px, 4vw, 20px)",
-                  fontWeight: "800",
-                  flexShrink: 0
-                }}>
+            <div className="bg-white rounded-3xl shadow-[0_4px_40px_rgba(44,90,74,0.06)] border border-[var(--border)] p-6 sm:p-8">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 bg-[var(--accent)] text-white rounded-full flex items-center justify-center text-xl font-bold shrink-0">
                   2
                 </div>
-                <h2 style={{
-                  fontSize: "clamp(18px, 4.5vw, 24px)",
-                  fontWeight: "800",
-                  color: "#0a0a0a",
-                  margin: 0,
-                  letterSpacing: "-0.5px",
-                  wordBreak: "break-word"
-                }}>
+                <h2 className="text-xl sm:text-2xl font-semibold text-[var(--foreground)]" style={{ fontFamily: "var(--font-logo)" }}>
                   Endereço de Entrega
                 </h2>
               </div>
@@ -1079,21 +945,9 @@ export default function CheckoutPage() {
           </div>
 
           {/* RESUMO */}
-          <div style={{ position: "sticky", top: "clamp(100px, 20vw, 120px)" }}>
-            <div style={{
-              background: "white",
-              borderRadius: "clamp(12px, 3vw, 20px)",
-              padding: "clamp(20px, 5vw, 32px)",
-              border: "1px solid rgba(0,0,0,0.08)"
-            }}>
-              <h2 style={{
-                fontSize: "clamp(18px, 4.5vw, 24px)",
-                fontWeight: "800",
-                color: "#0a0a0a",
-                marginBottom: "clamp(20px, 5vw, 32px)",
-                letterSpacing: "-0.5px",
-                wordBreak: "break-word"
-              }}>
+          <div className="lg:sticky lg:top-36">
+            <div className="bg-white rounded-3xl shadow-[0_4px_40px_rgba(44,90,74,0.08)] border border-[var(--border)] p-6 sm:p-8">
+              <h2 className="text-xl font-semibold text-[var(--foreground)] mb-6" style={{ fontFamily: "var(--font-logo)" }}>
                 Resumo do Pedido
               </h2>
 
@@ -1205,70 +1059,24 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                paddingTop: "clamp(16px, 4vw, 24px)",
-                paddingBottom: "clamp(20px, 5vw, 32px)",
-                borderTop: "2px solid rgba(0,0,0,0.08)",
-                marginBottom: "clamp(16px, 4vw, 24px)",
-                flexWrap: "wrap",
-                gap: "clamp(12px, 3vw, 16px)"
-              }}>
-                <span style={{
-                  fontSize: "clamp(16px, 4vw, 18px)",
-                  fontWeight: "700",
-                  color: "#0a0a0a",
-                  wordBreak: "break-word"
-                }}>
-                  Total
-                </span>
-                <span style={{
-                  fontSize: "clamp(28px, 7vw, 36px)",
-                  fontWeight: "900",
-                  color: "#0a0a0a",
-                  letterSpacing: "-1.5px"
-                }}>
-                  R$ {total.toFixed(2)}
+              <div className="flex justify-between items-center py-4 border-t-2 border-[var(--border)] mb-6">
+                <span className="text-lg font-bold text-[var(--foreground)]">Total</span>
+                <span className="text-2xl sm:text-3xl font-black text-[var(--accent)]" style={{ fontFamily: "var(--font-logo)" }}>
+                  R$ {total.toFixed(2).replace(".", ",")}
                 </span>
               </div>
 
               <button
                 onClick={abrirSelecaoPagamento}
                 disabled={carregando}
-                style={{
-                  width: "100%",
-                  padding: "clamp(16px, 4vw, 18px)",
-                  background: "#10b981",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "clamp(10px, 2.5vw, 12px)",
-                  fontSize: "clamp(15px, 3.5vw, 16px)",
-                  fontWeight: "700",
-                  cursor: carregando ? "not-allowed" : "pointer",
-                  transition: "all 0.3s ease",
-                  opacity: carregando ? 0.5 : 1,
-                  minHeight: "50px",
-                  whiteSpace: "normal",
-                  wordBreak: "break-word"
-                }}
-                onMouseOver={(e) => {
-                  if (!carregando) {
-                    e.currentTarget.style.background = "#059669";
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.boxShadow = "0 8px 16px rgba(16, 185, 129, 0.3)";
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (!carregando) {
-                    e.currentTarget.style.background = "#10b981";
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "none";
-                  }
-                }}
+                className="w-full py-5 rounded-2xl bg-[var(--accent)] text-white font-bold text-lg hover:bg-[var(--accent-hover)] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                💳 Finalizar Pagamento
+                <span className="inline-flex items-center justify-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  Finalizar Pagamento
+                </span>
               </button>
 
               <div style={{
