@@ -83,7 +83,7 @@ export default function Home() {
             </nav>
 
             <Link href="/carrinho" className="relative flex items-center gap-2 px-4 py-2.5 bg-[var(--foreground)] text-white rounded-xl font-bold text-sm hover:bg-[var(--accent)] transition-all hover:scale-105 active:scale-95">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M3 1a1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/></svg>
+              <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
               Carrinho
               {totalItens > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full border-2 border-white">
@@ -281,18 +281,49 @@ export default function Home() {
         </div>
       </section>
 
-      {/* DEPOIMENTO / SOCIAL PROOF */}
+      {/* DEPOIMENTOS / AVALIAÇÕES REAIS DO GOOGLE */}
       <section className="py-16 lg:py-24 px-4 sm:px-6 bg-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[var(--accent)] font-semibold text-sm uppercase tracking-widest mb-4">O que dizem nossos clientes</p>
-          <blockquote className="text-2xl lg:text-3xl font-medium text-[var(--foreground)] leading-relaxed mb-6">
-            &ldquo;Produtos de qualidade excepcional e entrega super rápida. Já compro há anos e nunca me decepcionei.&rdquo;
-          </blockquote>
-          <div className="flex items-center justify-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[var(--accent-light)] flex items-center justify-center text-xl">M</div>
-            <div className="text-left">
-              <div className="font-bold text-[var(--foreground)]">Maria S.</div>
-              <div className="text-sm text-[var(--muted)]">Cliente desde 2024</div>
+        <div className="max-w-6xl mx-auto">
+          <p className="text-[var(--accent)] font-semibold text-sm uppercase tracking-widest mb-4 text-center">O que dizem nossos clientes</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-[var(--background)] rounded-2xl p-6 border border-[var(--border)]">
+              <div className="flex gap-1 mb-3">{"★".repeat(5)}</div>
+              <blockquote className="text-[var(--foreground)] leading-relaxed mb-4">
+                &ldquo;Que loja maravilhosa, cheirosa, cheia de detalhes, tudo encanta! Mas eu preciso destacar o conhecimento que a Nayara tem sobre os aromas, e suas aplicações! Coloquei um aroma na minha empresa e todos os dias é uma chuva de elogios.&rdquo;
+              </blockquote>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center text-sm font-bold text-[var(--accent)]">AP</div>
+                <div>
+                  <div className="font-bold text-[var(--foreground)]">Ana Paula Morais</div>
+                  <div className="text-xs text-[var(--muted)]">Avaliação Google</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-[var(--background)] rounded-2xl p-6 border border-[var(--border)]">
+              <div className="flex gap-1 mb-3">{"★".repeat(5)}</div>
+              <blockquote className="text-[var(--foreground)] leading-relaxed mb-4">
+                &ldquo;Eu trabalho de home office e ganhei um aromatizador para ambiente de alecrim. O cheiro é simplesmente maravilhoso, melhora o meu humor e me faz sentir melhor. Simplesmente perfeito!&rdquo;
+              </blockquote>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center text-sm font-bold text-[var(--accent)]">CM</div>
+                <div>
+                  <div className="font-bold text-[var(--foreground)]">César Marcos</div>
+                  <div className="text-xs text-[var(--muted)]">Avaliação Google</div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-[var(--background)] rounded-2xl p-6 border border-[var(--border)]">
+              <div className="flex gap-1 mb-3">{"★".repeat(5)}</div>
+              <blockquote className="text-[var(--foreground)] leading-relaxed mb-4">
+                &ldquo;Produtos de qualidade excepcional e entrega super rápida. Já compro há anos e nunca me decepcionei.&rdquo;
+              </blockquote>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center text-sm font-bold text-[var(--accent)]">MS</div>
+                <div>
+                  <div className="font-bold text-[var(--foreground)]">Maria S.</div>
+                  <div className="text-xs text-[var(--muted)]">Cliente desde 2024</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

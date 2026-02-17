@@ -1,4 +1,5 @@
 import "./globals.css";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 export const metadata = {
   title: "Empório Bothânico - Delicadezas e Banho",
@@ -17,6 +18,7 @@ export default function RootLayout({
       </head>
       <body>
         <main>{children}</main>
+        <WhatsAppButton />
       </body>
     </html>
   );
