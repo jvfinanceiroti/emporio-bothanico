@@ -87,6 +87,37 @@ export default function Home() {
         {/* Overlay gradiente */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#2d5a4a]/95 via-[#2d5a4a]/75 to-[#2d5a4a]/60" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        {/* Elementos decorativos para preencher o espaço vazio */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Folhas/botânico - canto superior direito */}
+          <svg className="absolute top-4 right-[15%] w-24 h-24 sm:w-32 sm:h-32 opacity-20" viewBox="0 0 100 100" fill="none" stroke="white" strokeWidth="1">
+            <path d="M50 10 Q80 30 85 60 Q80 85 50 90 Q20 85 15 60 Q20 30 50 10" fill="rgba(255,255,255,0.05)" />
+          </svg>
+          <svg className="absolute top-16 right-[8%] w-16 h-16 sm:w-20 sm:h-20 opacity-15" viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="40" fill="rgba(255,255,255,0.08)" />
+          </svg>
+          {/* Folhas - canto inferior esquerdo */}
+          <svg className="absolute bottom-20 left-[5%] w-20 h-20 sm:w-28 sm:h-28 opacity-15" viewBox="0 0 100 100">
+            <ellipse cx="50" cy="50" rx="45" ry="20" fill="rgba(255,255,255,0.06)" transform="rotate(-30 50 50)" />
+          </svg>
+          <svg className="absolute bottom-8 left-[12%] w-14 h-14 opacity-10" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="35" fill="rgba(255,255,255,0.06)" />
+          </svg>
+          {/* Pills de categorias - preenchem laterais */}
+          <div className="absolute top-1/2 -translate-y-1/2 left-[3%] hidden lg:flex flex-col gap-3">
+            <span className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white/90 text-xs font-medium border border-white/20">Aromas</span>
+            <span className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white/90 text-xs font-medium border border-white/20">Sabonetes</span>
+            <span className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white/90 text-xs font-medium border border-white/20">Velas</span>
+          </div>
+          <div className="absolute top-1/2 -translate-y-1/2 right-[3%] hidden lg:flex flex-col gap-3">
+            <span className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white/90 text-xs font-medium border border-white/20">Perfumes</span>
+            <span className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white/90 text-xs font-medium border border-white/20">Difusores</span>
+            <span className="px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm text-white/90 text-xs font-medium border border-white/20">Presentes</span>
+          </div>
+          {/* Blobs suaves - fundo */}
+          <div className="absolute top-[10%] right-[25%] w-40 h-40 rounded-full bg-white/5 blur-3xl" />
+          <div className="absolute bottom-[15%] left-[20%] w-48 h-48 rounded-full bg-white/5 blur-3xl" />
+        </div>
         {/* Conteúdo */}
         <div className="relative z-10 w-full max-w-6xl mx-auto px-6 flex flex-col justify-center py-8 sm:py-10">
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-10 items-center">
