@@ -4,9 +4,10 @@ import { API_URL } from "@/lib/api";
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { StoreHeader } from "@/components/StoreHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
-// Forçar renderização dinâmica
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 interface Pedido {
   id: number;
@@ -25,42 +26,33 @@ function SucessoContent() {
   const [pedido, setPedido] = useState<Pedido | null>(null);
   const [carregando, setCarregando] = useState(true);
 
-  // Função para buscar pedido
   const buscarPedido = async () => {
     if (!pedidoId || !token) {
       setCarregando(false);
       return;
     }
-
     try {
       const res = await fetch(`${API_URL}/pedidos/${pedidoId}?token=${token}`);
-      
       if (!res.ok) {
         setCarregando(false);
         return;
       }
-      
       const data = await res.json();
       setPedido(data);
-      setCarregando(false);
     } catch {
+      /* ignore */
+    } finally {
       setCarregando(false);
     }
   };
 
-  // Buscar pedido inicial
   useEffect(() => {
     buscarPedido();
   }, [pedidoId]);
 
-  // Atualizar status a cada 5 segundos se estiver aguardando pagamento
   useEffect(() => {
     if (!pedido || pedido.status !== "aguardando_pagamento") return;
-
-    const interval = setInterval(() => {
-      buscarPedido();
-    }, 5000); // Atualiza a cada 5 segundos
-
+    const interval = setInterval(buscarPedido, 5000);
     return () => clearInterval(interval);
   }, [pedido?.status, pedidoId]);
 
@@ -76,496 +68,183 @@ function SucessoContent() {
   const getStatusInfo = (status: string) => {
     switch (status) {
       case "aguardando_pagamento":
-        return { 
-          label: "⏳ Aguardando Pagamento", 
-          color: "#f59e0b", 
-          bg: "rgba(245, 158, 11, 0.1)" 
-        };
+        return { label: "⏳ Aguardando Pagamento", color: "var(--warning)", bg: "var(--warning-bg)" };
       case "pago":
       case "aprovado":
-        return { 
-          label: "✓ Pago", 
-          color: "#10b981", 
-          bg: "rgba(16, 185, 129, 0.1)" 
-        };
+        return { label: "✓ Pago", color: "var(--success)", bg: "var(--success-bg)" };
       case "enviado":
-        return { 
-          label: "📦 Enviado", 
-          color: "#3b82f6", 
-          bg: "rgba(59, 130, 246, 0.1)" 
-        };
+        return { label: "📦 Enviado", color: "var(--accent)", bg: "var(--accent-light)" };
       case "entregue":
-        return { 
-          label: "✓ Entregue", 
-          color: "#22c55e", 
-          bg: "rgba(34, 197, 94, 0.1)" 
-        };
+        return { label: "✓ Entregue", color: "var(--success)", bg: "var(--success-bg)" };
       case "cancelado":
-        return { 
-          label: "✗ Cancelado", 
-          color: "#ef4444", 
-          bg: "rgba(239, 68, 68, 0.1)" 
-        };
+        return { label: "✗ Cancelado", color: "var(--error)", bg: "var(--error-bg)" };
       default:
-        return { 
-          label: status, 
-          color: "#9ca3af", 
-          bg: "rgba(156, 163, 175, 0.1)" 
-        };
+        return { label: status, color: "var(--muted)", bg: "var(--warm-200)" };
     }
   };
 
+  const LayoutWrapper = ({ children }: { children: React.ReactNode }) => (
+    <div className="min-h-screen bg-gradient-to-b from-[#f5f5f4] via-[#fafaf9] to-white">
+      <header className="sticky top-0 z-50">
+        <StoreHeader />
+      </header>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <nav className="text-sm text-[var(--muted)] mb-8">
+          <Link href="/" className="hover:text-[var(--accent)] transition-colors">Home</Link>
+          <span className="mx-2">›</span>
+          <span className="text-[var(--foreground)] font-medium">Pedido Confirmado</span>
+        </nav>
+        {children}
+      </main>
+      <SiteFooter />
+    </div>
+  );
+
   if (carregando) {
     return (
-      <div style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "clamp(16px, 4vw, 20px)"
-      }}>
-        <div style={{
-          textAlign: "center",
-          color: "white"
-        }}>
-          <div style={{
-            fontSize: "clamp(32px, 8vw, 48px)",
-            marginBottom: "clamp(12px, 3vw, 16px)",
-            animation: "spin 1s linear infinite"
-          }}>
-            ⏳
-          </div>
-          <p style={{ 
-            fontSize: "clamp(14px, 3.5vw, 18px)", 
-            fontWeight: "600",
-            wordBreak: "break-word"
-          }}>Carregando informações...</p>
+      <LayoutWrapper>
+        <div className="bg-white rounded-3xl shadow-[0_4px_40px_rgba(44,90,74,0.06)] border border-[var(--border)] p-12 sm:p-16 text-center">
+          <div className="w-16 h-16 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-6" />
+          <p className="text-[var(--muted)] font-semibold">Carregando informações do pedido...</p>
         </div>
-      </div>
+      </LayoutWrapper>
     );
   }
 
   if (!pedido) {
     return (
-      <div style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "clamp(16px, 4vw, 20px)"
-      }}>
-        <div style={{
-          background: "white",
-          borderRadius: "clamp(16px, 4vw, 24px)",
-          padding: "clamp(32px, 8vw, 60px) clamp(24px, 6vw, 40px)",
-          textAlign: "center",
-          maxWidth: "500px",
-          width: "100%"
-        }}>
-          <div style={{ 
-            fontSize: "clamp(48px, 12vw, 64px)", 
-            marginBottom: "clamp(16px, 4vw, 24px)" 
-          }}>❌</div>
-          <h2 style={{
-            fontSize: "clamp(20px, 5vw, 24px)",
-            fontWeight: "800",
-            color: "#0a0a0a",
-            marginBottom: "clamp(12px, 3vw, 16px)",
-            wordBreak: "break-word"
-          }}>
+      <LayoutWrapper>
+        <div className="bg-white rounded-3xl shadow-[0_4px_40px_rgba(44,90,74,0.06)] border border-[var(--border)] p-12 sm:p-16 text-center">
+          <div className="text-6xl mb-6">❌</div>
+          <h2 className="text-2xl font-bold text-[var(--foreground)] mb-4" style={{ fontFamily: "var(--font-logo)" }}>
             Pedido não encontrado
           </h2>
-          <Link
-            href="/"
-            style={{
-              display: "inline-block",
-              marginTop: "clamp(16px, 4vw, 24px)",
-              padding: "clamp(12px, 3vw, 14px) clamp(24px, 6vw, 32px)",
-              minHeight: "44px",
-              background: "#0a0a0a",
-              color: "white",
-              textDecoration: "none",
-              borderRadius: "clamp(8px, 2vw, 12px)",
-              fontSize: "clamp(14px, 3.5vw, 16px)",
-              fontWeight: "700",
-              transition: "all 0.3s"
-            }}
-          >
+          <p className="text-[var(--muted)] mb-8">
+            Não foi possível localizar este pedido. Verifique o link ou tente novamente.
+          </p>
+          <Link href="/" className="btn-primary">
             Voltar para a loja
           </Link>
         </div>
-      </div>
+      </LayoutWrapper>
     );
   }
 
+  const statusInfo = getStatusInfo(pedido.status);
+
   return (
-    <>
-      <style jsx global>{`
-        @keyframes checkmark {
-          0% { transform: scale(0); opacity: 0; }
-          50% { transform: scale(1.2); }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .checkmark-circle {
-          animation: checkmark 0.6s ease-out;
-        }
-        
-        .fade-in-up {
-          animation: fadeInUp 0.8s ease-out;
-        }
-        
-        .success-button:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-        }
-      `}</style>
-
-      <div style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "clamp(16px, 4vw, 20px)",
-        position: "relative",
-        overflow: "hidden"
-      }}>
-        {/* Decoração de fundo */}
-        <div style={{
-          position: "absolute",
-          top: "-50%",
-          right: "-20%",
-          width: "clamp(400px, 80vw, 800px)",
-          height: "clamp(400px, 80vw, 800px)",
-          background: "radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%)",
-          borderRadius: "50%",
-          pointerEvents: "none"
-        }} />
-        
-        <div style={{
-          position: "absolute",
-          bottom: "-30%",
-          left: "-10%",
-          width: "clamp(300px, 60vw, 600px)",
-          height: "clamp(300px, 60vw, 600px)",
-          background: "radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)",
-          borderRadius: "50%",
-          pointerEvents: "none"
-        }} />
-
-        {/* Card principal */}
-        <div
-          className="fade-in-up"
-          style={{
-            background: "white",
-            borderRadius: "clamp(20px, 5vw, 32px)",
-            padding: "clamp(32px, 8vw, 60px) clamp(24px, 6vw, 48px)",
-            maxWidth: "600px",
-            width: "100%",
-            textAlign: "center",
-            boxShadow: "0 30px 80px rgba(0, 0, 0, 0.5)",
-            position: "relative",
-            zIndex: 1
-          }}
-        >
+    <LayoutWrapper>
+      <div className="bg-white rounded-3xl shadow-[0_4px_40px_rgba(44,90,74,0.06)] border border-[var(--border)] overflow-hidden">
+        <div className="px-6 sm:px-10 py-8 sm:py-12 text-center">
           {/* Ícone de sucesso */}
           <div
-            className="checkmark-circle"
+            className="w-20 sm:w-24 h-20 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-6 sm:mb-8 checkmark-anim"
             style={{
-              width: "clamp(80px, 20vw, 120px)",
-              height: "clamp(80px, 20vw, 120px)",
-              background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto clamp(24px, 6vw, 32px)",
-              boxShadow: "0 20px 40px rgba(16, 185, 129, 0.3)"
+              background: "linear-gradient(135deg, var(--success) 0%, var(--accent) 100%)",
+              boxShadow: "0 12px 32px rgba(5, 150, 105, 0.35)",
             }}
           >
-            <div style={{ 
-              fontSize: "clamp(40px, 10vw, 64px)", 
-              color: "white" 
-            }}>✓</div>
+            <span className="text-4xl sm:text-5xl text-white font-bold">✓</span>
           </div>
 
-          {/* Título */}
-          <h1 style={{
-            fontSize: "clamp(24px, 6vw, 36px)",
-            fontWeight: "900",
-            color: "#0a0a0a",
-            marginBottom: "clamp(12px, 3vw, 16px)",
-            letterSpacing: "-1px",
-            wordBreak: "break-word"
-          }}>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[var(--foreground)] mb-3" style={{ fontFamily: "var(--font-logo)" }}>
             Pedido Confirmado!
           </h1>
-
-          <p style={{
-            fontSize: "clamp(14px, 3.5vw, 18px)",
-            color: "#666",
-            marginBottom: "clamp(24px, 6vw, 40px)",
-            lineHeight: "1.6",
-            wordBreak: "break-word"
-          }}>
+          <p className="text-[var(--muted)] text-base sm:text-lg mb-8 max-w-xl mx-auto">
             Obrigado pela sua compra! Seu pedido foi registrado com sucesso e está sendo processado.
           </p>
 
           {/* Detalhes do pedido */}
-          <div style={{
-            background: "#fafafa",
-            borderRadius: "clamp(12px, 3vw, 20px)",
-            padding: "clamp(20px, 5vw, 32px)",
-            marginBottom: "clamp(24px, 6vw, 40px)",
-            border: "1px solid rgba(0,0,0,0.06)"
-          }}>
-            {/* Número do pedido */}
-            <div style={{
-              marginBottom: "clamp(16px, 4vw, 24px)",
-              paddingBottom: "clamp(16px, 4vw, 24px)",
-              borderBottom: "2px solid rgba(0,0,0,0.06)"
-            }}>
-              <div style={{
-                fontSize: "clamp(11px, 2.8vw, 13px)",
-                color: "#666",
-                marginBottom: "clamp(6px, 1.5vw, 8px)",
-                fontWeight: "600",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px"
-              }}>
-                Número do Pedido
-              </div>
-              <div style={{
-                fontSize: "clamp(24px, 6vw, 32px)",
-                fontWeight: "900",
-                color: "#0a0a0a",
-                letterSpacing: "-1px",
-                wordBreak: "break-word"
-              }}>
-                #{pedido.id}
-              </div>
+          <div className="rounded-2xl p-6 sm:p-8 mb-8 bg-[var(--warm-100)] border border-[var(--border)] text-left">
+            <div className="pb-6 mb-6 border-b-2 border-[var(--border)]">
+              <span className="text-xs text-[var(--muted)] font-semibold uppercase tracking-wide">Número do Pedido</span>
+              <div className="text-2xl sm:text-3xl font-extrabold text-[var(--foreground)] mt-1">#{pedido.id}</div>
             </div>
 
-            {/* Grid de informações */}
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(min(140px, 100%), 1fr))",
-              gap: "clamp(16px, 4vw, 24px)",
-              textAlign: "left"
-            }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <div style={{
-                  fontSize: "clamp(11px, 2.8vw, 13px)",
-                  color: "#666",
-                  marginBottom: "clamp(6px, 1.5vw, 8px)",
-                  fontWeight: "600"
-                }}>
-                  Cliente
-                </div>
-                <div style={{
-                  fontSize: "clamp(14px, 3.5vw, 16px)",
-                  fontWeight: "700",
-                  color: "#0a0a0a",
-                  wordBreak: "break-word"
-                }}>
-                  {pedido.cliente_nome}
-                </div>
+                <span className="text-xs text-[var(--muted)] font-semibold block mb-1">Cliente</span>
+                <div className="font-bold text-[var(--foreground)]">{pedido.cliente_nome}</div>
               </div>
-
               <div>
-                <div style={{
-                  fontSize: "clamp(11px, 2.8vw, 13px)",
-                  color: "#666",
-                  marginBottom: "clamp(6px, 1.5vw, 8px)",
-                  fontWeight: "600"
-                }}>
-                  Forma de Pagamento
-                </div>
-                <div style={{
-                  fontSize: "clamp(14px, 3.5vw, 16px)",
-                  fontWeight: "700",
-                  color: "#0a0a0a",
-                  wordBreak: "break-word"
-                }}>
-                  {getFormaPagamentoLabel(pedido.forma_pagamento)}
-                </div>
+                <span className="text-xs text-[var(--muted)] font-semibold block mb-1">Forma de Pagamento</span>
+                <div className="font-bold text-[var(--foreground)]">{getFormaPagamentoLabel(pedido.forma_pagamento)}</div>
               </div>
-
               <div>
-                <div style={{
-                  fontSize: "clamp(11px, 2.8vw, 13px)",
-                  color: "#666",
-                  marginBottom: "clamp(6px, 1.5vw, 8px)",
-                  fontWeight: "600"
-                }}>
-                  Status
-                </div>
-                <div>
-                  {(() => {
-                    const statusInfo = getStatusInfo(pedido.status);
-                    return (
-                      <span style={{
-                        padding: "clamp(6px, 1.5vw, 8px) clamp(12px, 3vw, 16px)",
-                        background: statusInfo.bg,
-                        color: statusInfo.color,
-                        borderRadius: "clamp(6px, 1.5vw, 8px)",
-                        fontSize: "clamp(12px, 3vw, 14px)",
-                        fontWeight: "700",
-                        display: "inline-block",
-                        wordBreak: "break-word",
-                        transition: "all 0.3s"
-                      }}>
-                        {statusInfo.label}
-                      </span>
-                    );
-                  })()}
-                </div>
+                <span className="text-xs text-[var(--muted)] font-semibold block mb-1">Status</span>
+                <span
+                  className="inline-block px-4 py-2 rounded-lg text-sm font-bold"
+                  style={{ background: statusInfo.bg, color: statusInfo.color }}
+                >
+                  {statusInfo.label}
+                </span>
               </div>
-
               <div>
-                <div style={{
-                  fontSize: "clamp(11px, 2.8vw, 13px)",
-                  color: "#666",
-                  marginBottom: "clamp(6px, 1.5vw, 8px)",
-                  fontWeight: "600"
-                }}>
-                  Valor Total
-                </div>
-                <div style={{
-                  fontSize: "clamp(20px, 5vw, 24px)",
-                  fontWeight: "900",
-                  color: "#10b981",
-                  letterSpacing: "-0.5px",
-                  wordBreak: "break-word"
-                }}>
-                  R$ {Number(pedido.total).toFixed(2)}
+                <span className="text-xs text-[var(--muted)] font-semibold block mb-1">Valor Total</span>
+                <div className="text-xl sm:text-2xl font-extrabold text-[var(--success)]">
+                  R$ {Number(pedido.total).toFixed(2).replace(".", ",")}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Mensagem adicional */}
-          <div style={{
-            background: "linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%)",
-            borderRadius: "clamp(12px, 3vw, 16px)",
-            padding: "clamp(16px, 4vw, 20px)",
-            marginBottom: "clamp(24px, 6vw, 32px)",
-            border: "1px solid rgba(139, 92, 246, 0.2)"
-          }}>
-            <div style={{ 
-              fontSize: "clamp(20px, 5vw, 24px)", 
-              marginBottom: "clamp(6px, 1.5vw, 8px)" 
-            }}>📧</div>
-            <p style={{
-              fontSize: "clamp(13px, 3.2vw, 15px)",
-              color: "#666",
-              lineHeight: "1.6",
-              margin: 0,
-              wordBreak: "break-word"
-            }}>
-              Um e-mail de confirmação foi enviado para <strong style={{ color: "#0a0a0a" }}>{pedido.cliente_email}</strong> com todos os detalhes do seu pedido.
-            </p>
+          {/* Aviso de e-mail */}
+          <div className="rounded-xl p-5 mb-8 bg-[var(--accent-light)] border border-[var(--border)] text-left">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl shrink-0">📧</span>
+              <p className="text-sm sm:text-base text-[var(--foreground)] leading-relaxed">
+                Um e-mail de confirmação foi enviado para <strong>{pedido.cliente_email}</strong> com todos os detalhes do seu pedido.
+              </p>
+            </div>
           </div>
 
-          {/* Botões de ação */}
-          <div style={{
-            display: "flex",
-            gap: "clamp(12px, 3vw, 16px)",
-            justifyContent: "center",
-            flexWrap: "wrap"
-          }}>
-            <Link
-              href="/"
-              className="success-button"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "clamp(12px, 3vw, 16px) clamp(24px, 6vw, 40px)",
-                minHeight: "44px",
-                background: "#0a0a0a",
-                color: "white",
-                textDecoration: "none",
-                borderRadius: "clamp(8px, 2vw, 12px)",
-                fontSize: "clamp(14px, 3.5vw, 16px)",
-                fontWeight: "700",
-                transition: "all 0.3s",
-                border: "none",
-                cursor: "pointer",
-                wordBreak: "break-word"
-              }}
-            >
+          {/* Botões */}
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link href="/" className="btn-primary">
               Voltar para a loja
             </Link>
-
             <Link
               href="/meus-pedidos"
-              className="success-button"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "clamp(12px, 3vw, 16px) clamp(24px, 6vw, 40px)",
-                minHeight: "44px",
-                background: "white",
-                color: "#0a0a0a",
-                textDecoration: "none",
-                borderRadius: "clamp(8px, 2vw, 12px)",
-                fontSize: "clamp(14px, 3.5vw, 16px)",
-                fontWeight: "700",
-                transition: "all 0.3s",
-                border: "2px solid #0a0a0a",
-                cursor: "pointer",
-                wordBreak: "break-word"
-              }}
+              className="btn-secondary"
             >
               Ver meus pedidos
             </Link>
           </div>
         </div>
       </div>
-    </>
+
+      <style jsx global>{`
+        @keyframes checkmark {
+          0% { transform: scale(0); opacity: 0; }
+          50% { transform: scale(1.15); }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .checkmark-anim {
+          animation: checkmark 0.6s ease-out;
+        }
+      `}</style>
+    </LayoutWrapper>
   );
 }
 
 export default function SucessoPage() {
   return (
-    <Suspense fallback={
-      <div style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "clamp(16px, 4vw, 20px)"
-      }}>
-        <div style={{ textAlign: "center", color: "white" }}>
-          <div style={{ 
-            fontSize: "clamp(32px, 8vw, 48px)", 
-            marginBottom: "clamp(12px, 3vw, 16px)" 
-          }}>⏳</div>
-          <p style={{ 
-            fontSize: "clamp(14px, 3.5vw, 18px)", 
-            fontWeight: "600",
-            wordBreak: "break-word"
-          }}>Carregando...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-b from-[#f5f5f4] via-[#fafaf9] to-white">
+          <header className="sticky top-0 z-50">
+            <StoreHeader />
+          </header>
+          <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+            <div className="bg-white rounded-3xl border border-[var(--border)] p-16 text-center">
+              <div className="w-14 h-14 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-6" />
+              <p className="text-[var(--muted)] font-semibold">Carregando...</p>
+            </div>
+          </main>
+          <SiteFooter />
         </div>
-      </div>
-    }>
+      }
+    >
       <SucessoContent />
     </Suspense>
   );

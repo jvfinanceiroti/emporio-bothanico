@@ -25,17 +25,19 @@ export function JsonLdHome() {
         priceRange: "$$",
         address: {
           "@type": "PostalAddress",
+          streetAddress: "R. Irmãos D'Caux, 47 - LJ 09 - Centro",
           addressLocality: "Itabira",
           addressRegion: "MG",
+          postalCode: "35900-026",
           addressCountry: "BR",
         },
-        telephone: "+55-31-3831-0866",
-        email: "contato@emporiobothanico.com.br",
+        telephone: "+55-31-99550-3794",
+        email: "naibari@yahoo.com.br",
         openingHoursSpecification: {
           "@type": "OpeningHoursSpecification",
           dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
           opens: "09:00",
-          closes: "18:00",
+          closes: "19:00",
         },
       },
       {

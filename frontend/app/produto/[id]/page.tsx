@@ -35,6 +35,11 @@ function ProdutoContent() {
       .then((data) => setProduto(data));
   }, [params]);
 
+  // Resetar toast ao trocar de produto (evita mostrar "adicionado" ao entrar na página)
+  useEffect(() => {
+    setMostrarToast(false);
+  }, [params?.id]);
+
   useEffect(() => {
     if (!produto) return;
     fetch(`${API_URL}/produtos`)
