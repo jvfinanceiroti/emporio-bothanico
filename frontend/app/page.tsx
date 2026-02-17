@@ -87,15 +87,26 @@ export default function Home() {
         {/* Overlay gradiente */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#2d5a4a]/95 via-[#2d5a4a]/75 to-[#2d5a4a]/60" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-        {/* Imagens laterais: preenchem os espaços vazios com fotos de produtos/ambiente */}
+        {/* Imagens laterais e cantos: preenchem todos os espaços vazios */}
         <div className="absolute inset-0 pointer-events-none hidden lg:block">
-          <div className="absolute left-0 top-0 bottom-0 w-[18%] overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&q=60" alt="" className="w-full h-full object-cover opacity-30 scale-110" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#2d5a4a]/90 to-transparent" />
+          {/* Faixas laterais - mais largas e visíveis */}
+          <div className="absolute left-0 top-0 bottom-0 w-[22%] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=600&q=70" alt="" className="w-full h-full object-cover opacity-50 scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#2d5a4a]/80 to-transparent" />
           </div>
-          <div className="absolute right-0 top-0 bottom-0 w-[18%] overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=400&q=60" alt="" className="w-full h-full object-cover opacity-30 scale-110" />
-            <div className="absolute inset-0 bg-gradient-to-l from-[#2d5a4a]/90 to-transparent" />
+          <div className="absolute right-0 top-0 bottom-0 w-[22%] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=600&q=70" alt="" className="w-full h-full object-cover opacity-50 scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-l from-[#2d5a4a]/80 to-transparent" />
+          </div>
+          {/* Faixa superior - preenche espaço acima da foto central */}
+          <div className="absolute left-0 right-0 top-0 h-[12%] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?w=1200&q=60" alt="" className="w-full h-full object-cover object-top opacity-40" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#2d5a4a]/85 to-transparent" />
+          </div>
+          {/* Faixa inferior - preenche espaço abaixo */}
+          <div className="absolute left-0 right-0 bottom-0 h-[15%] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1602874801006-4e41187f7f36?w=1200&q=60" alt="" className="w-full h-full object-cover object-bottom opacity-40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#2d5a4a]/85 to-transparent" />
           </div>
         </div>
         {/* Conteúdo */}
