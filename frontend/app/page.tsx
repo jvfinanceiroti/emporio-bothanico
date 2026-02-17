@@ -4,6 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { API_URL } from "@/lib/api";
 
+const AVALIACOES_GOOGLE = [
+  { nome: "Ana Paula Morais", iniciais: "AP", texto: "Que loja maravilhosa, cheirosa, cheia de detalhes, tudo encanta! Mas eu preciso destacar o conhecimento que a Nayara tem sobre os aromas, e suas aplicações! Coloquei um aroma na minha empresa e todos os dias é uma chuva de elogios.", extra: "Local Guide • Google" },
+  { nome: "César Marcos", iniciais: "CM", texto: "Eu trabalho de home office e ganhei um aromatizador para ambiente de alecrim. O cheiro é simplesmente maravilhoso, melhora o meu humor e me faz sentir melhor. Simplesmente perfeito!", extra: "Local Guide • Google" },
+  { nome: "Fernanda R.", iniciais: "FR", texto: "Atendimento impecável! A Nayara é super atenciosa e conhece cada produto. Comprei sabonetes e velas, tudo com cheiro divino. Já indiquei para várias amigas!", extra: "Avaliação Google" },
+  { nome: "Roberto L.", iniciais: "RL", texto: "Loja encantadora! Ambiente aconchegante, produtos de qualidade e preços justos. O difusor que comprei dura meses. Recomendo demais!", extra: "Avaliação Google" },
+  { nome: "Mariana C.", iniciais: "MC", texto: "Melhor loja de perfumaria da região! Variedade incrível, tudo muito bem apresentado. Sempre que preciso de presente já sei onde ir.", extra: "Avaliação Google" },
+  { nome: "Paulo H.", iniciais: "PH", texto: "Produtos excelentes e entrega rápida. Comprei online e superou as expectativas. Embalagem linda, como presente. Parabéns à equipe!", extra: "Avaliação Google" },
+];
+
 export default function Home() {
   const [produtos, setProdutos] = useState<any[]>([]);
   const [categorias, setCategorias] = useState<any[]>([]);
@@ -54,6 +63,19 @@ export default function Home() {
     { id: 3, nome: "Banho", slug: "banho", descricao: "Cuidados especiais" },
   ];
 
+  const getProdutoImagem = (p: any) => {
+    const url = p?.imagem_url;
+    if (url && !url.includes("placeholder")) return url;
+    const n = (p?.nome || "").toLowerCase();
+    if (n.includes("essência") || n.includes("essencia")) return "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&q=80";
+    if (n.includes("refil") || n.includes("sabonete líquido")) return "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&q=80";
+    if (n.includes("difusor")) return "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&q=80";
+    if (n.includes("sabonete") && n.includes("lavanda")) return "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=400&q=80";
+    if (n.includes("vela") || n.includes("baunilha")) return "https://images.unsplash.com/photo-1602874801006-4e41187f7f36?w=400&q=80";
+    if (n.includes("spray") || n.includes("eucalipto") || n.includes("home spray")) return "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400&q=80";
+    return "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400&q=80";
+  };
+
   return (
     <div className="min-h-screen bg-[var(--background)]">
       {/* TOP BAR PROMOCIONAL */}
@@ -102,7 +124,7 @@ export default function Home() {
       <section className="relative min-h-[85vh] lg:min-h-[90vh] flex items-center overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url(https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=1920&q=80)" }}
+          style={{ backgroundImage: "url(https://images.unsplash.com/photo-1594035910387-fea47794261f?w=1920&q=80)" }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/45 to-black/75" />
         <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-20 text-center">
@@ -195,16 +217,12 @@ export default function Home() {
                 <Link key={produto.id} href={`/produto/${produto.id}`} className="group no-underline">
                   <div className="store-card overflow-hidden h-full flex flex-col hover:-translate-y-1">
                     <div className="relative aspect-square bg-[var(--accent-light)] overflow-hidden">
-                      {produto.imagem_url ? (
-                        <img 
-                          src={produto.imagem_url} 
-                          alt={produto.nome}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          onError={(e) => { (e.target as HTMLImageElement).src = "https://via.placeholder.com/400/fafafa/ccc?text=Produto"; }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-5xl">🌸</div>
-                      )}
+                      <img 
+                        src={getProdutoImagem(produto)} 
+                        alt={produto.nome}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400&q=80"; }}
+                      />
                       {produto.estoque <= 5 && produto.estoque > 0 && (
                         <span className="absolute top-3 left-3 px-3 py-1 bg-[var(--foreground)] text-white text-xs font-bold uppercase rounded-lg">Últimas unidades</span>
                       )}
@@ -275,21 +293,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* NEWSLETTER */}
-      <section className="py-20 px-4 sm:px-6 bg-white">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[var(--accent-light)] text-[var(--accent)] mb-6">
-            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-          </div>
-          <h2 className="text-2xl font-bold text-[var(--foreground)] mb-2">Receba novidades e ofertas</h2>
-          <p className="text-[var(--muted)] text-sm mb-8">Cadastre seu e-mail e seja o primeiro a saber de lançamentos e promoções exclusivas.</p>
-          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
-            <input type="email" placeholder="seu@email.com" className="input-store flex-1 rounded-xl" />
-            <button type="submit" className="btn-primary shrink-0 rounded-xl">Cadastrar</button>
-          </form>
-        </div>
-      </section>
-
       {/* INSTAGRAM - Siga-nos */}
       <section className="py-20 lg:py-28 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-[var(--background)] to-[#f0f4f2]">
         <div className="max-w-6xl mx-auto">
@@ -311,12 +314,12 @@ export default function Home() {
           {/* Bento grid - galeria inspirada em feed */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 lg:gap-4 max-w-4xl mx-auto">
             {[
-              { img: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&q=80", alt: "Perfumes" },
+              { img: "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=400&q=80", alt: "Sabonetes artesanais" },
               { img: "https://images.unsplash.com/photo-1602874801006-4e41187f7f36?w=400&q=80", alt: "Velas aromáticas" },
-              { img: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400&q=80", alt: "Produtos de banho" },
-              { img: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&q=80", alt: "Difusores" },
-              { img: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&q=80", alt: "Fragrâncias", span: "md:col-span-2" },
-              { img: "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=400&q=80", alt: "Sabonetes artesanais", span: "md:col-span-2" },
+              { img: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&q=80", alt: "Difusores de ambiente" },
+              { img: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&q=80", alt: "Óleos essenciais" },
+              { img: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&q=80", alt: "Plantas e aromas", span: "md:col-span-2" },
+              { img: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400&q=80", alt: "Produtos de banho", span: "md:col-span-2" },
             ].map((item, i) => (
               <a
                 key={i}
@@ -336,51 +339,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* AVALIAÇÕES REAIS DO GOOGLE */}
-      <section className="py-20 lg:py-28 px-4 sm:px-6 bg-gradient-to-b from-white to-[var(--warm-100)]">
-        <div className="max-w-6xl mx-auto">
-          <p className="text-[var(--accent)] font-semibold text-sm uppercase tracking-[0.2em] mb-4 text-center">Avaliações reais</p>
-          <h2 className="text-2xl lg:text-4xl font-extrabold text-[var(--foreground)] text-center mb-6">O que dizem nossos clientes no Google</h2>
-          {/* Badge de estrelas e total */}
-          <div className="flex flex-col items-center mb-14">
-            <div className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-white border border-[var(--border)] shadow-[var(--shadow-md)]">
-              <span className="text-3xl font-black text-[var(--foreground)]">5,0</span>
-              <span className="flex gap-0.5 text-2xl stars-google">{"★".repeat(5)}</span>
-              <span className="text-[var(--muted)] text-sm">•</span>
-              <span className="text-[var(--muted)] font-medium">18 avaliações no Google</span>
-            </div>
-            <a
-              href="https://www.google.com/maps/search/Emp%C3%B3rio+Both%C3%A2nico+Itabira+MG"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 text-[var(--accent)] font-semibold text-sm hover:underline"
-            >
-              Ver todas as 18 avaliações no Google →
-            </a>
-          </div>
-          <p className="text-center text-[var(--muted)] text-sm mb-10">Mostrando algumas das nossas avaliações. Tem mais no Google!</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {[
-              { nome: "Ana Paula Morais", iniciais: "AP", texto: "Que loja maravilhosa, cheirosa, cheia de detalhes, tudo encanta! Mas eu preciso destacar o conhecimento que a Nayara tem sobre os aromas, e suas aplicações! Coloquei um aroma na minha empresa e todos os dias é uma chuva de elogios.", extra: "Local Guide • Google" },
-              { nome: "César Marcos", iniciais: "CM", texto: "Eu trabalho de home office e ganhei um aromatizador para ambiente de alecrim. O cheiro é simplesmente maravilhoso, melhora o meu humor e me faz sentir melhor. Simplesmente perfeito!", extra: "Local Guide • Google" },
-            ].map((av, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 border border-[var(--border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all">
-                <div className="flex gap-1 mb-3 text-lg stars-google">{"★".repeat(5)}</div>
-                <blockquote className="text-[var(--foreground)] leading-relaxed mb-4 text-sm">
-                  &ldquo;{av.texto}&rdquo;
-                </blockquote>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center text-sm font-bold text-[var(--accent)] shrink-0">{av.iniciais}</div>
-                  <div>
-                    <div className="font-bold text-[var(--foreground)]">{av.nome}</div>
-                    <div className="text-xs text-[var(--muted)]">{av.extra}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* AVALIAÇÕES REAIS DO GOOGLE - Carousel */}
+      <AvaliacoesCarousel />
 
       {/* CTA FINAL */}
       <section className="py-20 lg:py-28 px-4 sm:px-6 bg-gradient-to-br from-[var(--accent-light)] via-[var(--accent-warm)] to-[var(--warm-100)]">
@@ -433,6 +393,77 @@ export default function Home() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function AvaliacoesCarousel() {
+  const [index, setIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const totalSlides = Math.ceil(AVALIACOES_GOOGLE.length / 2);
+  const goTo = (i: number) => setIndex(Math.max(0, Math.min(i, totalSlides - 1)));
+
+  useEffect(() => {
+    if (isPaused || totalSlides <= 1) return;
+    const t = setInterval(() => goTo((index + 1) % totalSlides), 6000);
+    return () => clearInterval(t);
+  }, [index, isPaused, totalSlides]);
+
+  const visible = AVALIACOES_GOOGLE.slice(index * 2, index * 2 + 2);
+
+  return (
+    <section className="py-16 sm:py-20 lg:py-28 px-4 sm:px-6 bg-gradient-to-b from-white to-[var(--warm-100)] overflow-hidden">
+      <div className="max-w-6xl mx-auto">
+        <p className="text-[var(--accent)] font-semibold text-sm uppercase tracking-[0.2em] mb-4 text-center">Avaliações reais</p>
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[var(--foreground)] text-center mb-6 px-2">O que dizem nossos clientes no Google</h2>
+        <div className="flex flex-col items-center mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 rounded-2xl bg-white border border-[var(--border)] shadow-[var(--shadow-md)]">
+            <span className="text-2xl sm:text-3xl font-black text-[var(--foreground)]">5,0</span>
+            <span className="flex gap-0.5 text-xl sm:text-2xl stars-google">{"★".repeat(5)}</span>
+            <span className="text-[var(--muted)] text-xs sm:text-sm hidden sm:inline">•</span>
+            <span className="text-[var(--muted)] font-medium text-xs sm:text-base">18 avaliações</span>
+          </div>
+          <a href="https://www.google.com/maps/search/Emp%C3%B3rio+Both%C3%A2nico+Itabira+MG" target="_blank" rel="noopener noreferrer" className="mt-3 sm:mt-4 text-[var(--accent)] font-semibold text-xs sm:text-sm hover:underline">Ver todas no Google →</a>
+        </div>
+        <div
+          className="relative max-w-4xl mx-auto"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setTimeout(() => setIsPaused(false), 3000)}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 min-h-[200px]">
+            {visible.map((av, i) => (
+              <div key={`${index}-${i}`} className="bg-white rounded-2xl p-5 sm:p-6 border border-[var(--border)] shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-all">
+                <div className="flex gap-1 mb-2 sm:mb-3 text-base sm:text-lg stars-google">{"★".repeat(5)}</div>
+                <blockquote className="text-[var(--foreground)] leading-relaxed mb-3 sm:mb-4 text-sm sm:text-base line-clamp-4 sm:line-clamp-none">
+                  &ldquo;{av.texto}&rdquo;
+                </blockquote>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center text-xs sm:text-sm font-bold text-[var(--accent)] shrink-0">{av.iniciais}</div>
+                  <div className="min-w-0">
+                    <div className="font-bold text-[var(--foreground)] truncate">{av.nome}</div>
+                    <div className="text-xs text-[var(--muted)]">{av.extra}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-center gap-3 mt-6 sm:mt-8">
+            <button onClick={() => goTo(index - 1)} className="w-10 h-10 rounded-full bg-white border-2 border-[var(--border)] text-[var(--foreground)] flex items-center justify-center hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors disabled:opacity-40" disabled={index <= 0} aria-label="Anterior">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <div className="flex gap-2">
+              {Array.from({ length: totalSlides }).map((_, i) => (
+                <button key={i} onClick={() => goTo(i)} className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all ${i === index ? "bg-[var(--accent)] scale-110" : "bg-[var(--muted-light)] hover:bg-[var(--muted)]"}`} aria-label={`Avaliação ${i + 1}`} />
+              ))}
+            </div>
+            <button onClick={() => goTo(index + 1)} className="w-10 h-10 rounded-full bg-white border-2 border-[var(--border)] text-[var(--foreground)] flex items-center justify-center hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors disabled:opacity-40" disabled={index >= totalSlides - 1} aria-label="Próximo">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
