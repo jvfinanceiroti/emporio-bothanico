@@ -163,7 +163,7 @@ app.post("/auth/login", loginRateLimiter, async (req, res) => {
     }
 
     const result = await pool.query(
-      "SELECT id, nome, email, senha, tipo, role FROM usuarios WHERE email = $1",
+      "SELECT id, nome, email, senha, role FROM usuarios WHERE email = $1",
       [emailLimpo]
     );
 
@@ -215,7 +215,7 @@ app.post("/auth/login", loginRateLimiter, async (req, res) => {
 app.get("/auth/verificar", verificarToken, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, email, nome, tipo, role FROM usuarios WHERE id = $1",
+      "SELECT id, email, nome, role FROM usuarios WHERE id = $1",
       [req.userId]
     );
 
