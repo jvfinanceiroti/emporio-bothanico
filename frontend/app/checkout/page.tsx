@@ -36,8 +36,12 @@ export default function CheckoutPage() {
   const [carregando, setCarregando] = useState(false);
   const [mostrarPagamento, setMostrarPagamento] = useState(false);
   const [formaPagamento, setFormaPagamento] = useState("");
-  const [frete, setFrete] = useState<number | null>(null);
+  const [fretePac, setFretePac] = useState<number | null>(null);
+  const [freteSedex, setFreteSedex] = useState<number | null>(null);
+  const [tipoEnvio, setTipoEnvio] = useState<"pac" | "sedex">("pac");
   const [carregandoCep, setCarregandoCep] = useState(false);
+  const FRETE_GRATIS_PAC = 299;
+  const FRETE_GRATIS_SEDEX = 800;
   const [carregandoFrete, setCarregandoFrete] = useState(false);
   const [mostrarAlerta, setMostrarAlerta] = useState(false);
   const [mensagemAlerta, setMensagemAlerta] = useState("");
@@ -123,7 +127,8 @@ export default function CheckoutPage() {
             setBairro("");
             setCidade("");
             setEstado("");
-            setFrete(null);
+            setFretePac(null);
+            setFreteSedex(null);
             return;
           }
 
@@ -178,8 +183,6 @@ export default function CheckoutPage() {
     // Simular cálculo de frete baseado no estado e peso
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    let valorFrete = 0;
-
     // Frete base por região
     const fretesBase: Record<string, number> = {
       'SP': 15.00,
@@ -211,14 +214,16 @@ export default function CheckoutPage() {
       'TO': 40.00
     };
 
-    valorFrete = fretesBase[uf] || 35.00;
-
-    // Adicionar valor por peso extra (acima de 1kg)
+    const valorPac = fretesBase[uf] || 35.00;
+    let valorPacFinal = valorPac;
     if (pesoTotal > 1) {
-      valorFrete += (pesoTotal - 1) * 5.00;
+      valorPacFinal += (pesoTotal - 1) * 5.00;
     }
+    // SEDEX é mais caro (~1.6x PAC)
+    const valorSedexFinal = Math.round(valorPacFinal * 1.6 * 100) / 100;
 
-    setFrete(valorFrete);
+    setFretePac(valorPacFinal);
+    setFreteSedex(valorSedexFinal);
     setCarregandoFrete(false);
   };
 
@@ -286,6 +291,12 @@ export default function CheckoutPage() {
       return false;
     }
 
+    if (fretePac === null && freteSedex === null && cep.replace(/\D/g, "").length === 8) {
+      setMensagemAlerta("Aguarde o cálculo do frete ou verifique o CEP e número.");
+      setMostrarAlerta(true);
+      return false;
+    }
+
     return true;
   };
 
@@ -329,7 +340,7 @@ export default function CheckoutPage() {
             cidade,
             estado
           },
-          frete: frete || 0,
+          frete: frete,
           formaPagamento: formaPagamento,
         }),
       });
@@ -423,7 +434,10 @@ export default function CheckoutPage() {
   };
 
   const subtotal = carrinho.reduce((acc, item) => acc + (Number(item.preco) * (item.quantidade || 1)), 0);
-  const total = subtotal + (frete || 0);
+  const valorFretePac = subtotal >= FRETE_GRATIS_PAC ? 0 : (fretePac ?? 0);
+  const valorFreteSedex = subtotal >= FRETE_GRATIS_SEDEX ? 0 : (freteSedex ?? 0);
+  const frete = tipoEnvio === "pac" ? valorFretePac : valorFreteSedex;
+  const total = subtotal + frete;
 
   // carrinho já está agrupado, não precisa reagrupar
   const totalItens = carrinho.reduce((acc, item) => acc + (item.quantidade || 1), 0);
@@ -1042,21 +1056,66 @@ export default function CheckoutPage() {
                     R$ {subtotal.toFixed(2)}
                   </span>
                 </div>
-                <div style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: "clamp(14px, 3.5vw, 15px)",
-                  color: "#666",
-                  flexWrap: "wrap",
-                  gap: "clamp(8px, 2vw, 12px)"
-                }}>
-                  <span style={{ wordBreak: "break-word" }}>
-                    Frete {carregandoFrete && <span style={{ fontSize: "clamp(11px, 2.5vw, 12px)", whiteSpace: "nowrap" }}>(calculando...)</span>}
-                  </span>
-                  <span style={{ fontWeight: "600", color: "#0a0a0a", whiteSpace: "nowrap" }}>
-                    {frete === null ? "Calcular" : frete === 0 ? "Grátis" : `R$ ${frete.toFixed(2)}`}
-                  </span>
-                </div>
+                {/* Opções de envio: PAC ou SEDEX */}
+                {carregandoFrete ? (
+                  <div style={{ fontSize: "clamp(14px, 3.5vw, 15px)", color: "#666", marginBottom: "clamp(12px, 3vw, 16px)" }}>
+                    Frete (calculando...)
+                  </div>
+                ) : (fretePac !== null || freteSedex !== null) ? (
+                  <div style={{ marginBottom: "clamp(12px, 3vw, 16px)" }}>
+                    <div style={{ fontSize: "clamp(12px, 2.8vw, 13px)", fontWeight: "600", color: "#666", marginBottom: "clamp(8px, 2vw, 10px)" }}>
+                      Escolha o envio:
+                    </div>
+                    <div style={{ display: "flex", gap: "clamp(8px, 2vw, 12px)", flexWrap: "wrap" }}>
+                      <button
+                        type="button"
+                        onClick={() => setTipoEnvio("pac")}
+                        style={{
+                          flex: 1,
+                          minWidth: "120px",
+                          padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
+                          borderRadius: "12px",
+                          border: `2px solid ${tipoEnvio === "pac" ? "var(--accent)" : "rgba(0,0,0,0.1)"}`,
+                          background: tipoEnvio === "pac" ? "rgba(45, 90, 74, 0.06)" : "white",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        <div style={{ fontWeight: "700", color: "#0a0a0a", fontSize: "clamp(14px, 3.5vw, 15px)", marginBottom: "2px" }}>PAC</div>
+                        <div style={{ fontSize: "clamp(12px, 2.8vw, 13px)", color: "#666" }}>
+                          {subtotal >= FRETE_GRATIS_PAC ? "Grátis" : `R$ ${(fretePac ?? 0).toFixed(2).replace(".", ",")}`}
+                          {subtotal >= FRETE_GRATIS_PAC && <span style={{ display: "block", fontSize: "11px", color: "var(--success)" }}>Compra acima de R$ 299</span>}
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTipoEnvio("sedex")}
+                        style={{
+                          flex: 1,
+                          minWidth: "120px",
+                          padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
+                          borderRadius: "12px",
+                          border: `2px solid ${tipoEnvio === "sedex" ? "var(--accent)" : "rgba(0,0,0,0.1)"}`,
+                          background: tipoEnvio === "sedex" ? "rgba(45, 90, 74, 0.06)" : "white",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        <div style={{ fontWeight: "700", color: "#0a0a0a", fontSize: "clamp(14px, 3.5vw, 15px)", marginBottom: "2px" }}>SEDEX</div>
+                        <div style={{ fontSize: "clamp(12px, 2.8vw, 13px)", color: "#666" }}>
+                          {subtotal >= FRETE_GRATIS_SEDEX ? "Grátis" : `R$ ${(freteSedex ?? 0).toFixed(2).replace(".", ",")}`}
+                          {subtotal >= FRETE_GRATIS_SEDEX && <span style={{ display: "block", fontSize: "11px", color: "var(--success)" }}>Compra acima de R$ 800</span>}
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: "clamp(14px, 3.5vw, 15px)", color: "#666", marginBottom: "clamp(12px, 3vw, 16px)" }}>
+                    Informe CEP e número para calcular o frete
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-between items-center py-4 border-t-2 border-[var(--border)] mb-6">
@@ -1068,7 +1127,7 @@ export default function CheckoutPage() {
 
               <button
                 onClick={abrirSelecaoPagamento}
-                disabled={carregando}
+                disabled={carregando || (carregandoFrete && cep.replace(/\D/g, "").length === 8)}
                 className="w-full py-5 rounded-2xl bg-[var(--accent)] text-white font-bold text-lg hover:bg-[var(--accent-hover)] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <span className="inline-flex items-center justify-center gap-2">

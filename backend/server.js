@@ -279,6 +279,7 @@ app.get("/produtos", async (req, res) => {
       );
     }
 
+    res.set("Cache-Control", "public, max-age=60");
     res.json(result.rows);
   } catch (error) {
     console.error("Erro /produtos:", error);
