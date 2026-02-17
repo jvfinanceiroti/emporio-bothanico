@@ -67,8 +67,8 @@ export function StoreHeader() {
           <Link href="/" className="flex items-center gap-3 no-underline text-white hover:opacity-90 transition-opacity shrink-0">
             <img src="/logo.png" alt="Empório Bothânico" className="h-12 w-12 sm:h-14 sm:w-14 object-contain brightness-0 invert" />
             <div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight uppercase">Empório Bothânico</h1>
-              <p className="text-[10px] sm:text-xs font-medium uppercase tracking-[0.2em] text-white/90">Delicadezas & Banho</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-logo)" }}>Empório Bothânico</h1>
+              <p className="text-[10px] sm:text-xs font-light uppercase tracking-[0.25em] text-white/90" style={{ fontFamily: "var(--font-tagline)" }}>Delicadezas e Banho</p>
             </div>
           </Link>
 
@@ -94,7 +94,7 @@ export function StoreHeader() {
             </a>
             <Link href="/meus-pedidos" className="flex flex-col items-center gap-1 text-white no-underline hover:opacity-90 transition-opacity">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-              <span className="text-[10px] sm:text-xs font-medium uppercase">Minha conta</span>
+              <span className="text-[10px] sm:text-xs font-medium uppercase">Meus pedidos</span>
             </Link>
             <Link href="/carrinho" className="relative flex flex-col items-center gap-1 text-white no-underline hover:opacity-90 transition-opacity">
               <span className="relative inline-block">

@@ -2,11 +2,11 @@
 
 import { API_URL } from "@/lib/api";
 import { useEffect, useState, Suspense } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
+import { StoreHeader } from "@/components/StoreHeader";
 
-// Forçar renderização dinâmica
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 function getProdutoImagem(p: any) {
   const url = p?.imagem_url;
@@ -23,7 +23,6 @@ function getProdutoImagem(p: any) {
 
 function ProdutoContent() {
   const params = useParams();
-  const router = useRouter();
   const [produto, setProduto] = useState<any>(null);
   const [produtosRelacionados, setProdutosRelacionados] = useState<any[]>([]);
   const [mostrarToast, setMostrarToast] = useState(false);
@@ -31,7 +30,6 @@ function ProdutoContent() {
 
   useEffect(() => {
     if (!params?.id) return;
-
     fetch(`${API_URL}/produtos/${params.id}`)
       .then((res) => res.json())
       .then((data) => setProduto(data));
@@ -45,578 +43,179 @@ function ProdutoContent() {
         const outros = (lista || []).filter((p) => p.id !== produto.id && p.ativo !== false);
         const mesmaCategoria = outros.filter((p) => p.categoria_id === produto.categoria_id);
         const restante = outros.filter((p) => p.categoria_id !== produto.categoria_id);
-        const relacionados = [...mesmaCategoria, ...restante].slice(0, 4);
-        setProdutosRelacionados(relacionados);
+        setProdutosRelacionados([...mesmaCategoria, ...restante].slice(0, 4));
       })
       .catch(() => setProdutosRelacionados([]));
   }, [produto]);
 
   const adicionarAoCarrinho = () => {
-    const carrinhoAtual = JSON.parse(
-      localStorage.getItem("carrinho") || "[]"
-    );
-
-    for (let i = 0; i < quantidade; i++) {
-      carrinhoAtual.push(produto);
-    }
-
+    const carrinhoAtual = JSON.parse(localStorage.getItem("carrinho") || "[]");
+    for (let i = 0; i < quantidade; i++) carrinhoAtual.push(produto);
     localStorage.setItem("carrinho", JSON.stringify(carrinhoAtual));
-
+    window.dispatchEvent(new Event("carrinho-changed"));
     setMostrarToast(true);
-
-    setTimeout(() => {
-      setMostrarToast(false);
-    }, 2500);
+    setTimeout(() => setMostrarToast(false), 2500);
   };
 
   if (!produto) {
     return (
-      <div style={{
-        minHeight: "100vh",
-        background: "#ffffff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{
-            width: "48px",
-            height: "48px",
-            border: "4px solid #f3f3f3",
-            borderTop: "4px solid #0a0a0a",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-            margin: "0 auto 16px"
-          }}></div>
-          <p style={{ color: "#666", fontSize: "15px" }}>Carregando produto...</p>
+      <div className="min-h-screen bg-gradient-to-b from-[#f8f6f3] to-white flex flex-col">
+        <StoreHeader />
+        <div className="flex-1 flex items-center justify-center py-32">
+          <div className="w-16 h-16 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin" />
         </div>
       </div>
     );
   }
 
+  const imgUrl = produto.imagem_url && !produto.imagem_url.includes("placeholder") ? produto.imagem_url : getProdutoImagem(produto);
+
   return (
-    <div style={{ minHeight: "100vh", background: "#ffffff" }}>
-      {/* TOAST */}
-      <div
-        style={{
-          position: "fixed",
-          top: "24px",
-          right: "24px",
-          background: "#10b981",
-          color: "white",
-          padding: "16px 24px",
-          borderRadius: "12px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
-          zIndex: 1000,
-          transform: mostrarToast ? "translateX(0)" : "translateX(400px)",
-          opacity: mostrarToast ? 1 : 0,
-          transition: "all 0.4s ease"
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <svg style={{ width: "24px", height: "24px" }} fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
-          </svg>
-          <span style={{ fontWeight: "600", fontSize: "15px" }}>Produto adicionado ao carrinho!</span>
-        </div>
-      </div>
-
-      {/* HEADER */}
-      <header style={{
-        background: "rgba(255, 255, 255, 0.98)",
-        backdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(0,0,0,0.08)",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
-        position: "sticky",
-        top: 0,
-        zIndex: 100
-      }}>
-        <div style={{
-          maxWidth: "1440px",
-          margin: "0 auto",
-          padding: "clamp(16px, 3vw, 20px) clamp(20px, 5vw, 48px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "12px"
-        }}>
-          <button
-            onClick={() => router.back()}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              color: "#666",
-              background: "none",
-              border: "none",
-              fontSize: "clamp(13px, 2.5vw, 15px)",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "color 0.2s",
-              flexShrink: 0,
-              whiteSpace: "nowrap"
-            }}
-            onMouseOver={(e) => e.currentTarget.style.color = "#0a0a0a"}
-            onMouseOut={(e) => e.currentTarget.style.color = "#666"}
-          >
-            <svg style={{ width: "20px", height: "20px", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            <span style={{ display: "inline" }}>Voltar</span>
-          </button>
-
-          <Link href="/" style={{ 
-            textDecoration: "none", 
-            display: "flex", 
-            alignItems: "center", 
-            gap: "clamp(8px, 2vw, 20px)",
-            overflow: "hidden",
-            flexShrink: 1,
-            minWidth: 0
-          }}>
-            <img src="/logo.png" alt="Logo" style={{ 
-              height: "clamp(40px, 8vw, 56px)", 
-              objectFit: "contain",
-              flexShrink: 0
-            }} />
-            <div style={{ overflow: "hidden" }}>
-              <h1 style={{
-                fontSize: "clamp(14px, 3vw, 20px)",
-                fontWeight: "800",
-                color: "#0a0a0a",
-                margin: 0,
-                letterSpacing: "-0.5px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap"
-              }}>
-                Empório Bothânico
-              </h1>
-            </div>
-          </Link>
-
-          <Link 
-            href="/carrinho"
-            style={{
-              padding: "clamp(10px, 2vw, 14px) clamp(16px, 3vw, 32px)",
-              background: "#0a0a0a",
-              color: "white",
-              borderRadius: "12px",
-              textDecoration: "none",
-              fontWeight: "600",
-              fontSize: "clamp(13px, 2.5vw, 15px)",
-              transition: "all 0.3s ease",
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              border: "2px solid #0a0a0a",
-              flexShrink: 0,
-              whiteSpace: "nowrap"
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = "white";
-              e.currentTarget.style.color = "#0a0a0a";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = "#0a0a0a";
-              e.currentTarget.style.color = "white";
-            }}
-          >
-            <svg style={{ width: "20px", height: "20px", flexShrink: 0 }} fill="currentColor" viewBox="0 0 20 20">
-              <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
-            </svg>
-            <span style={{ display: "inline" }}>Carrinho</span>
-          </Link>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#f5f5f4] via-[#fafaf9] to-white">
+      <header className="sticky top-0 z-50">
+        <StoreHeader />
       </header>
 
-      {/* CONTEÚDO PRODUTO */}
-      <main style={{ maxWidth: "1440px", margin: "0 auto", padding: "clamp(40px, 8vw, 80px) clamp(20px, 5vw, 48px)" }}>
-        <div style={{
-          background: "white",
-          borderRadius: "20px",
-          overflow: "hidden",
-          border: "1px solid rgba(0,0,0,0.08)"
-        }}>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 500px), 1fr))",
-            gap: "0"
-          }}>
-            {/* IMAGEM */}
-            <div style={{
-              position: "relative",
-              background: "#fafafa",
-              minHeight: "clamp(400px, 80vw, 600px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "clamp(20px, 5vw, 40px)"
-            }}>
-              {produto.imagem_url ? (
-                <img 
-                  src={produto.imagem_url} 
-                  alt={produto.nome}
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "100%",
-                    width: "auto",
-                    height: "auto",
-                    objectFit: "contain"
-                  }}
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://via.placeholder.com/600x600/fafafa/ccc?text=Sem+Imagem';
-                  }}
-                />
-              ) : (
-                <div style={{ fontSize: "clamp(80px, 20vw, 120px)" }}>🌸</div>
-              )}
-              
-              {produto.estoque <= 5 && produto.estoque > 0 && (
-                <div style={{
-                  position: "absolute",
-                  top: "24px",
-                  left: "24px",
-                  background: "#0a0a0a",
-                  color: "white",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px"
-                }}>
-                  Últimas {produto.estoque} Unidades
-                </div>
-              )}
+      {/* Toast */}
+      <div className={`fixed top-6 right-6 z-[2000] px-6 py-4 rounded-2xl bg-[var(--success)] text-white font-semibold shadow-xl flex items-center gap-3 transition-all duration-300 ${mostrarToast ? "translate-x-0 opacity-100" : "translate-x-32 opacity-0"}`}>
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
+        Produto adicionado ao carrinho!
+      </div>
 
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+        {/* Breadcrumbs */}
+        <nav className="text-sm text-[var(--muted)] mb-8">
+          <Link href="/" className="hover:text-[var(--accent)]">Home</Link>
+          <span className="mx-2">›</span>
+          <Link href="/produtos" className="hover:text-[var(--accent)]">Produtos</Link>
+          <span className="mx-2">›</span>
+          <span className="text-[var(--foreground)] font-medium truncate max-w-[200px] sm:max-w-xs inline-block align-bottom">{produto.nome}</span>
+        </nav>
+
+        {/* Card principal - Produto */}
+        <div className="bg-white rounded-3xl shadow-[0_4px_40px_rgba(44,90,74,0.08)] border border-[var(--border)] overflow-hidden mb-16">
+          <div className="grid lg:grid-cols-2 gap-0">
+            {/* Coluna imagem */}
+            <div className="relative bg-gradient-to-br from-[var(--accent-light)]/30 to-[var(--warm-100)] p-8 sm:p-12 lg:p-16 flex items-center justify-center min-h-[340px] sm:min-h-[480px]">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(45,90,74,0.03)_0%,transparent_70%)]" />
+              <div className="relative z-10 w-full h-full flex items-center justify-center">
+                <img
+                  src={imgUrl}
+                  alt={produto.nome}
+                  className="max-w-full max-h-[320px] sm:max-h-[420px] object-contain drop-shadow-2xl"
+                  onError={(e) => { (e.target as HTMLImageElement).src = getProdutoImagem(produto); }}
+                />
+              </div>
+              {produto.estoque <= 5 && produto.estoque > 0 && (
+                <span className="absolute top-6 left-6 px-4 py-2 bg-[var(--accent)] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg">Últimas {produto.estoque} unidades</span>
+              )}
               {produto.estoque === 0 && (
-                <div style={{
-                  position: "absolute",
-                  top: "24px",
-                  left: "24px",
-                  background: "#ef4444",
-                  color: "white",
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px"
-                }}>
-                  Esgotado
-                </div>
+                <span className="absolute top-6 left-6 px-4 py-2 bg-red-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg">Esgotado</span>
               )}
             </div>
 
-            {/* DETALHES */}
-            <div style={{
-              padding: "clamp(32px, 8vw, 64px)",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between"
-            }}>
-              <div>
-                <div style={{
-                  fontSize: "11px",
-                  fontWeight: "600",
-                  color: "#999",
-                  letterSpacing: "1px",
-                  textTransform: "uppercase",
-                  marginBottom: "16px"
-                }}>
-                  Empório Bothânico
+            {/* Coluna detalhes */}
+            <div className="p-8 sm:p-10 lg:p-14 flex flex-col">
+              <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.25em] mb-3" style={{ fontFamily: "var(--font-tagline)" }}>Empório Bothânico</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-[var(--foreground)] leading-tight mb-4" style={{ fontFamily: "var(--font-logo)" }}>
+                {produto.nome}
+              </h1>
+              {produto.descricao && (
+                <p className="text-[var(--muted)] text-base leading-relaxed mb-6">{produto.descricao}</p>
+              )}
+              {produto.sku && (
+                <p className="text-sm text-[var(--muted)] mb-4">SKU: {produto.sku}</p>
+              )}
+
+              {/* Preço + Estoque */}
+              <div className="mt-auto">
+                <div className="inline-block bg-gradient-to-r from-[var(--accent-light)] to-[var(--accent-warm)] rounded-2xl px-6 py-5 mb-6">
+                  <div className="text-3xl sm:text-4xl font-black text-[var(--accent)]" style={{ fontFamily: "var(--font-logo)" }}>
+                    R$ {Number(produto.preco).toFixed(2).replace(".", ",")}
+                  </div>
+                  <p className="text-sm text-[var(--muted)] mt-1">ou 3x de R$ {(Number(produto.preco) / 3).toFixed(2).replace(".", ",")}</p>
+                </div>
+                <div className={`flex items-center gap-2 text-sm font-semibold mb-6 ${produto.estoque > 5 ? "text-[var(--success)]" : produto.estoque > 0 ? "text-[var(--warning)]" : "text-red-500"}`}>
+                  <span className={`w-3 h-3 rounded-full ${produto.estoque > 5 ? "bg-[var(--success)]" : produto.estoque > 0 ? "bg-[var(--warning)]" : "bg-red-500"}`} />
+                  {produto.estoque > 0 ? `${produto.estoque} em estoque` : "Produto indisponível"}
                 </div>
 
-                <h1 style={{
-                  fontSize: "42px",
-                  fontWeight: "900",
-                  color: "#0a0a0a",
-                  marginBottom: "24px",
-                  letterSpacing: "-1.5px",
-                  lineHeight: "1.1"
-                }}>
-                  {produto.nome}
-                </h1>
-
-                {produto.descricao && (
-                  <p style={{
-                    fontSize: "16px",
-                    color: "#666",
-                    lineHeight: "1.7",
-                    marginBottom: "32px"
-                  }}>
-                    {produto.descricao}
-                  </p>
-                )}
-
-                {produto.sku && (
-                  <p style={{
-                    fontSize: "13px",
-                    color: "#999",
-                    marginBottom: "32px"
-                  }}>
-                    <span style={{ fontWeight: "600" }}>SKU:</span> {produto.sku}
-                  </p>
-                )}
-
-                <div style={{
-                  background: "#fafafa",
-                  borderRadius: "16px",
-                  padding: "32px",
-                  marginBottom: "32px"
-                }}>
-                  <div style={{
-                    fontSize: "48px",
-                    fontWeight: "900",
-                    color: "#0a0a0a",
-                    marginBottom: "16px",
-                    letterSpacing: "-2px"
-                  }}>
-                    R$ {Number(produto.preco).toFixed(2)}
-                  </div>
-                  
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    fontSize: "14px",
-                    color: produto.estoque > 5 ? "#10b981" : produto.estoque > 0 ? "#f59e0b" : "#ef4444",
-                    fontWeight: "600"
-                  }}>
-                    <span style={{
-                      width: "10px",
-                      height: "10px",
-                      borderRadius: "50%",
-                      background: produto.estoque > 5 ? "#10b981" : produto.estoque > 0 ? "#f59e0b" : "#ef4444"
-                    }}></span>
-                    {produto.estoque > 0 
-                      ? `${produto.estoque} em estoque` 
-                      : 'Produto indisponível'}
-                  </div>
-                </div>
-
+                {/* Quantidade + Botão */}
                 {produto.estoque > 0 && (
-                  <div style={{ marginBottom: "32px" }}>
-                    <label style={{
-                      display: "block",
-                      fontSize: "13px",
-                      fontWeight: "600",
-                      color: "#666",
-                      marginBottom: "12px",
-                      letterSpacing: "0.5px",
-                      textTransform: "uppercase"
-                    }}>
-                      Quantidade
-                    </label>
-                    <div style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "16px",
-                      background: "#fafafa",
-                      borderRadius: "12px",
-                      padding: "8px",
-                      width: "fit-content"
-                    }}>
-                      <button
-                        onClick={() => setQuantidade(Math.max(1, quantidade - 1))}
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          background: "white",
-                          border: "1px solid rgba(0,0,0,0.1)",
-                          borderRadius: "8px",
-                          fontSize: "20px",
-                          fontWeight: "700",
-                          cursor: "pointer",
-                          transition: "all 0.2s"
-                        }}
-                        onMouseOver={(e) => e.currentTarget.style.background = "#f0f0f0"}
-                        onMouseOut={(e) => e.currentTarget.style.background = "white"}
-                      >
-                        −
-                      </button>
-                      <span style={{
-                        width: "60px",
-                        textAlign: "center",
-                        fontSize: "18px",
-                        fontWeight: "700",
-                        color: "#0a0a0a"
-                      }}>
-                        {quantidade}
-                      </span>
-                      <button
-                        onClick={() => setQuantidade(Math.min(produto.estoque, quantidade + 1))}
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          background: "white",
-                          border: "1px solid rgba(0,0,0,0.1)",
-                          borderRadius: "8px",
-                          fontSize: "20px",
-                          fontWeight: "700",
-                          cursor: "pointer",
-                          transition: "all 0.2s"
-                        }}
-                        onMouseOver={(e) => e.currentTarget.style.background = "#f0f0f0"}
-                        onMouseOut={(e) => e.currentTarget.style.background = "white"}
-                      >
-                        +
-                      </button>
+                  <div className="mb-6">
+                    <label className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-3">Quantidade</label>
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="flex items-center rounded-xl border-2 border-[var(--border)] overflow-hidden bg-[var(--warm-50)]">
+                        <button
+                          onClick={() => setQuantidade(Math.max(1, quantidade - 1))}
+                          className="w-12 h-12 flex items-center justify-center text-xl font-bold text-[var(--foreground)] hover:bg-[var(--accent-light)] transition-colors"
+                        >−</button>
+                        <span className="w-14 text-center text-lg font-bold">{quantidade}</span>
+                        <button
+                          onClick={() => setQuantidade(Math.min(produto.estoque, quantidade + 1))}
+                          className="w-12 h-12 flex items-center justify-center text-xl font-bold text-[var(--foreground)] hover:bg-[var(--accent-light)] transition-colors"
+                        >+</button>
+                      </div>
                     </div>
                   </div>
                 )}
-              </div>
 
-              <div>
                 <button
                   onClick={adicionarAoCarrinho}
                   disabled={produto.estoque <= 0}
-                  style={{
-                    width: "100%",
-                    padding: "20px",
-                    background: produto.estoque > 0 ? "#0a0a0a" : "#e5e5e5",
-                    color: produto.estoque > 0 ? "white" : "#999",
-                    border: `2px solid ${produto.estoque > 0 ? "#0a0a0a" : "#e5e5e5"}`,
-                    borderRadius: "12px",
-                    fontSize: "16px",
-                    fontWeight: "700",
-                    cursor: produto.estoque > 0 ? "pointer" : "not-allowed",
-                    transition: "all 0.3s ease",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "12px",
-                    marginBottom: "16px"
-                  }}
-                  onMouseOver={(e) => {
-                    if (produto.estoque > 0) {
-                      e.currentTarget.style.background = "white";
-                      e.currentTarget.style.color = "#0a0a0a";
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (produto.estoque > 0) {
-                      e.currentTarget.style.background = "#0a0a0a";
-                      e.currentTarget.style.color = "white";
-                    }
-                  }}
+                  className={`w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 ${
+                    produto.estoque > 0
+                      ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  }`}
                 >
-                  {produto.estoque > 0 ? (
-                    <>
-                      <svg style={{ width: "22px", height: "22px" }} fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
-                      </svg>
-                      Adicionar ao Carrinho
-                    </>
-                  ) : (
-                    'Produto Indisponível'
-                  )}
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/></svg>
+                  {produto.estoque > 0 ? "Adicionar ao Carrinho" : "Indisponível"}
                 </button>
-
-                <Link
-                  href="/"
-                  style={{
-                    display: "block",
-                    textAlign: "center",
-                    color: "#666",
-                    fontSize: "15px",
-                    fontWeight: "600",
-                    textDecoration: "none",
-                    transition: "color 0.2s"
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.color = "#0a0a0a"}
-                  onMouseOut={(e) => e.currentTarget.style.color = "#666"}
-                >
-                  ← Continuar Comprando
+                <Link href="/produtos" className="block text-center text-[var(--muted)] font-medium mt-5 hover:text-[var(--accent)] transition-colors">
+                  ← Continuar comprando
                 </Link>
               </div>
             </div>
           </div>
         </div>
 
-        {/* VEJA TAMBÉM */}
+        {/* Trust badges */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-16">
+          {[
+            { icon: "🚚", titulo: "Envio para todo Brasil", desc: "Rastreamento incluído" },
+            { icon: "🔒", titulo: "Compra segura", desc: "Pagamento protegido" },
+            { icon: "↩️", titulo: "Troca facilitada", desc: "7 dias para trocar" },
+            { icon: "💚", titulo: "100% original", desc: "Produtos selecionados" },
+          ].map((b, i) => (
+            <div key={i} className="bg-white rounded-2xl p-4 border border-[var(--border)] flex items-center gap-4 hover:border-[var(--accent)] hover:shadow-md transition-all">
+              <span className="text-2xl">{b.icon}</span>
+              <div>
+                <div className="font-bold text-sm text-[var(--foreground)]">{b.titulo}</div>
+                <div className="text-xs text-[var(--muted)]">{b.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Veja também */}
         {produtosRelacionados.length > 0 && (
-          <section style={{
-            marginTop: "clamp(48px, 10vw, 80px)",
-            paddingTop: "clamp(40px, 8vw, 64px)",
-            borderTop: "1px solid rgba(0,0,0,0.08)"
-          }}>
-            <h2 style={{
-              textAlign: "center",
-              fontSize: "1.5rem",
-              fontWeight: "600",
-              color: "#5A736A",
-              marginBottom: "32px"
-            }}>
-              Veja também
-            </h2>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))",
-              gap: "24px",
-              maxWidth: "1100px",
-              margin: "0 auto"
-            }}>
+          <section>
+            <h2 className="text-2xl font-bold text-[var(--foreground)] mb-6" style={{ fontFamily: "var(--font-logo)" }}>Veja também</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
               {produtosRelacionados.map((p) => (
                 <Link
                   key={p.id}
                   href={`/produto/${p.id}`}
-                  style={{
-                    textDecoration: "none",
-                    color: "inherit",
-                    background: "white",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    border: "1px solid rgba(0,0,0,0.06)",
-                    transition: "box-shadow 0.2s, transform 0.2s"
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.1)";
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.boxShadow = "none";
-                    e.currentTarget.style.transform = "translateY(0)";
-                  }}
+                  className="group bg-white rounded-2xl overflow-hidden border border-[var(--border)] hover:shadow-xl hover:border-[var(--accent)] hover:-translate-y-1 transition-all duration-300"
                 >
-                  <div style={{
-                    aspectRatio: "1",
-                    background: "#fafafa",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "16px"
-                  }}>
-                    <img
-                      src={getProdutoImagem(p)}
-                      alt={p.nome}
-                      style={{
-                        maxWidth: "100%",
-                        maxHeight: "100%",
-                        objectFit: "contain"
-                      }}
-                      onError={(ev) => { (ev.target as HTMLImageElement).src = "https://via.placeholder.com/200/fafafa/ccc?text=Produto"; }}
-                    />
+                  <div className="aspect-square bg-gradient-to-br from-[var(--accent-light)]/20 to-[var(--warm-100)] flex items-center justify-center p-4">
+                    <img src={getProdutoImagem(p)} alt={p.nome} className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform" onError={(ev) => { (ev.target as HTMLImageElement).src = getProdutoImagem(p); }} />
                   </div>
-                  <div style={{ padding: "16px", textAlign: "center" }}>
-                    <h3 style={{
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      color: "#374151",
-                      lineHeight: "1.35",
-                      marginBottom: "12px",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden"
-                    }}>
-                      {p.nome}
-                    </h3>
-                    <div style={{ fontSize: "18px", fontWeight: "700", color: "#dc2626", marginBottom: "4px" }}>
-                      R$ {Number(p.preco).toFixed(2).replace(".", ",")}
-                    </div>
-                    <div style={{ fontSize: "12px", color: "#9ca3af" }}>À vista no PIX</div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-[var(--foreground)] text-sm line-clamp-2 mb-2 group-hover:text-[var(--accent)]">{p.nome}</h3>
+                    <div className="text-lg font-black text-[var(--accent)]">R$ {Number(p.preco).toFixed(2).replace(".", ",")}</div>
+                    <p className="text-xs text-[var(--muted)]">À vista no PIX</p>
                   </div>
                 </Link>
               ))}
@@ -631,15 +230,10 @@ function ProdutoContent() {
 export default function ProdutoPage() {
   return (
     <Suspense fallback={
-      <div style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "48px", marginBottom: "16px" }}>⏳</div>
-          <p style={{ fontSize: "18px", fontWeight: "600", color: "#666" }}>Carregando produto...</p>
+      <div className="min-h-screen bg-[#f8f6f3] flex flex-col">
+        <StoreHeader />
+        <div className="flex-1 flex items-center justify-center py-32">
+          <div className="w-16 h-16 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin" />
         </div>
       </div>
     }>

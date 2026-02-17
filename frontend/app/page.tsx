@@ -16,7 +16,6 @@ const AVALIACOES_GOOGLE = [
 
 export default function Home() {
   const [produtos, setProdutos] = useState<any[]>([]);
-  const [categorias, setCategorias] = useState<any[]>([]);
   const [carrinho, setCarrinho] = useState<any[]>([]);
 
   useEffect(() => {
@@ -33,7 +32,6 @@ export default function Home() {
         console.error("Erro ao carregar produtos:", err);
         setProdutos([]);
       });
-    fetch(`${API_URL}/categorias`).then(res => res.json()).then(setCategorias).catch(() => {});
     const salvo = localStorage.getItem("carrinho");
     if (salvo) setCarrinho(JSON.parse(salvo));
   }, []);
@@ -59,12 +57,6 @@ export default function Home() {
 
   const totalItens = carrinho.reduce((acc: number, i: any) => acc + (i.quantidade || 1), 0);
 
-  const categoriasDestaque = categorias.slice(0, 3).length > 0 ? categorias.slice(0, 3) : [
-    { id: 1, nome: "Perfumes", slug: "perfume", descricao: "Fragrâncias exclusivas" },
-    { id: 2, nome: "Aromas", slug: "aromas", descricao: "Ambientes perfumados" },
-    { id: 3, nome: "Banho", slug: "banho", descricao: "Cuidados especiais" },
-  ];
-
   const getProdutoImagem = (p: any) => {
     const url = p?.imagem_url;
     if (url && !url.includes("placeholder")) return url;
@@ -84,78 +76,84 @@ export default function Home() {
         <StoreHeader />
       </header>
 
-      {/* BANNER PROMOCIONAL MODERNO */}
-      <section className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #c44569 0%, #a55eea 35%, #6c5ce7 70%, #2d5a4a 100%)" }}>
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 40%)" }} />
-        <div className="absolute inset-0" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E\")" }} />
-        <div className="relative z-10 max-w-6xl mx-auto px-6 py-16 sm:py-20 lg:py-24 text-center">
-          <p className="text-white/90 text-xs sm:text-sm font-bold uppercase tracking-[0.4em] mb-4">Itabira • Perfumaria</p>
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.05] tracking-tight mb-3 drop-shadow-lg">
-            EMPÓRIO
-          </h1>
-          <p className="text-3xl sm:text-4xl lg:text-5xl font-light text-white/95 tracking-wide mb-2" style={{ fontFamily: "Georgia, serif" }}>
-            Bothânico
-          </p>
-          <p className="text-white/90 text-base sm:text-lg max-w-xl mx-auto mb-8 sm:mb-10">
-            Fragrâncias exclusivas e produtos de banho que transformam seu dia a dia.
-          </p>
-          <Link 
-            href="/produtos" 
-            className="inline-flex items-center gap-2 px-8 sm:px-10 py-4 bg-white text-[#2d5a4a] font-bold text-base sm:text-lg rounded-xl hover:scale-105 transition-transform shadow-xl border-2 border-white"
-          >
-            Explorar Produtos
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-          </Link>
-          <a href="https://www.instagram.com/emporiobothanicoita/" target="_blank" rel="noopener noreferrer" className="ml-4 inline-flex items-center gap-2 px-6 py-3.5 border-2 border-white/80 text-white font-semibold rounded-xl hover:bg-white/15 transition-all">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.14 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162z"/></svg>
-            @emporiobothanicoita
-          </a>
-          <div className="flex flex-wrap justify-center gap-8 sm:gap-12 lg:gap-16 mt-12 sm:mt-14 text-white/95">
+      {/* BANNER LIVE / PROMOCIONAL - Com foto da loja */}
+      <section className="relative min-h-[85vh] sm:min-h-[90vh] flex overflow-hidden">
+        {/* Imagem de fundo - foto da mulher/loja (cole sua foto em public/banner-loja.jpg) */}
+        <div className="absolute inset-0">
+          <img
+            src="/banner-loja.png"
+            alt="Empório Bothânico - Nossa loja em Itabira"
+            className="w-full h-full object-cover"
+            onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1920&q=80"; }}
+          />
+        </div>
+        {/* Overlay gradiente */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#2d5a4a]/95 via-[#2d5a4a]/75 to-[#2d5a4a]/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        {/* Conteúdo */}
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-6 flex flex-col justify-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="text-[var(--accent-light)]/90 text-xs sm:text-sm font-medium uppercase tracking-[0.35em] mb-4" style={{ fontFamily: "var(--font-tagline)" }}>
+                Itabira • Perfumaria
+              </p>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold text-white leading-[1.05] mb-2 drop-shadow-lg" style={{ fontFamily: "var(--font-logo)" }}>
+                Empório Bothânico
+              </h1>
+              <p className="text-sm sm:text-base uppercase tracking-[0.3em] text-white/90 mb-6" style={{ fontFamily: "var(--font-tagline)" }}>
+                Delicadezas e Banho
+              </p>
+              <p className="text-white/95 text-lg sm:text-xl max-w-md mb-8 leading-relaxed">
+                Fragrâncias exclusivas e produtos de banho que transformam seu dia a dia. Conheça nossa loja em Itabira.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/produtos"
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-white text-[#2d5a4a] font-bold text-base rounded-xl hover:scale-105 transition-transform shadow-xl"
+                >
+                  Explorar Produtos
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </Link>
+                <a
+                  href="https://www.instagram.com/emporiobothanicoita/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-4 border-2 border-white text-white font-semibold rounded-xl hover:bg-white/15 transition-all"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.14 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162z"/></svg>
+                  @emporiobothanicoita
+                </a>
+              </div>
+            </div>
+            {/* Card estilo "Live" */}
+            <div className="hidden lg:flex flex-col items-end">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-white/20 max-w-sm">
+                <p className="text-white/80 text-xs uppercase tracking-[0.3em] mb-2" style={{ fontFamily: "var(--font-tagline)" }}>Ao vivo no Instagram</p>
+                <p className="text-white text-2xl sm:text-3xl font-semibold mb-2" style={{ fontFamily: "var(--font-logo)" }}>Lives semanais</p>
+                <p className="text-white/90 text-sm mb-4">Novidades, dicas de aromas e promoções exclusivas. Siga e ative as notificações!</p>
+                <a href="https://www.instagram.com/emporiobothanicoita/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-3 bg-white text-[#2d5a4a] font-bold rounded-xl hover:scale-105 transition-transform">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.14 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162z"/></svg>
+                  Ver no Instagram
+                </a>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap justify-center gap-8 sm:gap-12 lg:gap-16 mt-12 sm:mt-16 text-white/95 py-8">
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-black">5,0</div>
-              <div className="text-xs sm:text-sm font-medium">Avaliações Google</div>
+              <div className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: "var(--font-logo)" }}>5,0</div>
+              <div className="text-xs sm:text-sm font-medium" style={{ fontFamily: "var(--font-tagline)" }}>Avaliações Google</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-black">24h</div>
-              <div className="text-xs sm:text-sm font-medium">Envio Rápido</div>
+              <div className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: "var(--font-logo)" }}>24h</div>
+              <div className="text-xs sm:text-sm font-medium" style={{ fontFamily: "var(--font-tagline)" }}>Envio Rápido</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl font-black">1000+</div>
-              <div className="text-xs sm:text-sm font-medium">Clientes Satisfeitos</div>
+              <div className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: "var(--font-logo)" }}>1000+</div>
+              <div className="text-xs sm:text-sm font-medium" style={{ fontFamily: "var(--font-tagline)" }}>Clientes Satisfeitos</div>
             </div>
           </div>
         </div>
-        <div className="h-1.5 bg-gradient-to-r from-amber-200 via-white to-amber-200/80" />
       </section>
-
-      {/* CATEGORIAS - Explore */}
-      {categoriasDestaque.length > 0 && (
-        <section className="py-20 lg:py-28 px-4 sm:px-6 lg:px-8 bg-white">
-          <div className="max-w-7xl mx-auto">
-            <p className="text-[var(--accent)] font-semibold text-sm uppercase tracking-[0.2em] mb-2">Navegue</p>
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-[var(--foreground)] mb-14">Explore por Categoria</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-              {categoriasDestaque.map((cat: any) => (
-                <Link 
-                  key={cat.id} 
-                  href={cat.slug ? `/produtos?categoria=${cat.slug}` : "/produtos"}
-                  className="group relative overflow-hidden rounded-[var(--radius-xl)] aspect-[4/3] bg-gradient-to-br from-[var(--accent-light)] via-[var(--warm-50)] to-white border border-[var(--border)] hover:border-[var(--accent)] transition-all duration-300 hover:shadow-[var(--shadow-lg)]"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute inset-0 flex flex-col justify-end p-6 text-[var(--foreground)]">
-                    <h3 className="text-xl font-bold mb-1">{cat.nome}</h3>
-                    <p className="text-sm text-[var(--muted)]">{cat.descricao || "Ver produtos"}</p>
-                    <span className="text-[var(--accent)] font-semibold mt-2 inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                      Explorar
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* PRODUTOS - CAROUSEL MODERNO */}
       <ProdutosCarousel
@@ -242,7 +240,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             <div>
               <img src="/logo.png" alt="Logo" className="h-12 w-12 mb-4 invert opacity-90" />
-              <h3 className="text-lg font-bold mb-2">Empório Bothânico</h3>
+              <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: "var(--font-logo)" }}>Empório Bothânico</h3>
               <p className="text-white/70 text-sm leading-relaxed">Fragrâncias e produtos de banho selecionados para você.</p>
             </div>
             <div>

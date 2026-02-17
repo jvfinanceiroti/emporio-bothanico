@@ -16,7 +16,7 @@ export default function LayoutInstitucional({ titulo, children }: LayoutInstituc
           <div className="flex flex-wrap items-center justify-between gap-4">
             <Link href="/" className="flex items-center gap-3 no-underline">
               <img src="/logo.png" alt="Empório Bothânico" className="h-12 w-12 object-contain" />
-              <span className="text-xl font-extrabold text-[var(--accent)] tracking-tight">
+              <span className="text-xl font-semibold text-[var(--accent)] tracking-tight" style={{ fontFamily: "var(--font-logo)" }}>
                 Empório Bothânico
               </span>
             </Link>
