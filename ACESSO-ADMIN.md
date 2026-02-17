@@ -20,13 +20,13 @@ As credenciais estão definidas no arquivo **RESET-ADMIN-UNICO.sql**.
 
 ---
 
-## Caminho de acesso (recomendado)
+## Caminho de acesso (único)
 
 ```
 https://painel.emporiobothanico.com.br
 ```
 
-ou diretamente na página de login:
+ou na página de login:
 
 ```
 https://painel.emporiobothanico.com.br/login
@@ -34,11 +34,10 @@ https://painel.emporiobothanico.com.br/login
 
 ---
 
-## Acesso alternativo (domínio principal)
+## Segurança: /admin no domínio principal
 
-```
-https://emporiobothanico.com.br/admin
-```
+Se alguém acessar `emporiobothanico.com.br/admin`, será **redirecionado** para `painel.emporiobothanico.com.br`.  
+O painel **não é servido** no domínio principal — apenas o subdomínio.
 
 ---
 
