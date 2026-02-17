@@ -36,6 +36,10 @@ process.on('uncaughtException', (error) => {
 
 const app = express();
 
+// Trust proxy: necessário quando rodando atrás de proxy (Render, Nginx, etc)
+// para que express-rate-limit identifique corretamente o IP do cliente via X-Forwarded-For
+app.set("trust proxy", 1);
+
 // Configurar Cloudinary (apenas via variáveis de ambiente - sem credenciais hardcoded)
 if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
   cloudinary.config({
@@ -51,14 +55,23 @@ const mercadoPagoAtivo = configurarMercadoPago();
 // Segurança: Helmet + Rate Limit
 configurarSeguranca(app);
 
-// CORS restrito às origens permitidas (Vercel + localhost)
-const allowList = ["http://localhost:3000", "http://127.0.0.1:3000"];
+// CORS restrito às origens permitidas (Vercel + localhost + produção)
+const allowList = [
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "https://www.emporiobothanico.com.br",
+  "https://emporiobothanico.com.br",
+];
 if (process.env.FRONTEND_URL) allowList.push(process.env.FRONTEND_URL.trim());
 if (process.env.CORS_ORIGIN) allowList.push(process.env.CORS_ORIGIN.trim());
 const corsOptions = {
   origin: (origin, cb) => {
     if (!origin) return cb(null, true);
-    if (allowList.includes(origin) || origin.endsWith(".vercel.app")) {
+    if (
+      allowList.includes(origin) ||
+      origin.endsWith(".vercel.app") ||
+      origin.endsWith("emporiobothanico.com.br")
+    ) {
       cb(null, true);
     } else {
       cb(null, false);
@@ -210,7 +223,7 @@ app.get("/auth/verificar", verificarToken, async (req, res) => {
 });
 
 // 🔥 BUSCAR PRODUTOS DO BANCO
-// LISTAR CATEGORIAS
+// LISTAR CATEGORIAS (retorna vazio se tabela não existir)
 app.get("/categorias", async (req, res) => {
   try {
     const result = await pool.query(
@@ -218,8 +231,8 @@ app.get("/categorias", async (req, res) => {
     );
     res.json(result.rows);
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro ao listar categorias");
+    console.warn("Tabela categorias ainda não existe:", error.message);
+    res.json([]);
   }
 });
 
@@ -227,28 +240,35 @@ app.get("/categorias", async (req, res) => {
 app.get("/produtos", async (req, res) => {
   try {
     const { categoria } = req.query;
-    
-    let query = `
-      SELECT p.*, c.nome as categoria_nome, c.slug as categoria_slug
-      FROM produtos p
-      LEFT JOIN categorias c ON p.categoria_id = c.id
-      WHERE p.ativo = true
-    `;
-    
-    const params = [];
-    
-    if (categoria) {
-      query += " AND c.slug = $1";
-      params.push(categoria);
+    let result;
+
+    try {
+      // Query com categorias (se tabela existir)
+      let query = `
+        SELECT p.*, c.nome as categoria_nome, c.slug as categoria_slug
+        FROM produtos p
+        LEFT JOIN categorias c ON p.categoria_id = c.id
+        WHERE p.ativo = true
+      `;
+      const params = [];
+      if (categoria) {
+        query += " AND c.slug = $1";
+        params.push(categoria);
+      }
+      query += " ORDER BY p.id DESC";
+      result = await pool.query(query, params);
+    } catch (err) {
+      // Fallback: tabela categorias pode não existir ainda
+      console.warn("Usando fallback de produtos (sem categorias):", err.message);
+      result = await pool.query(
+        "SELECT * FROM produtos WHERE ativo = true ORDER BY id DESC"
+      );
     }
-    
-    query += " ORDER BY p.id DESC";
-    
-    const result = await pool.query(query, params);
+
     res.json(result.rows);
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro ao buscar produtos");
+    console.error("Erro /produtos:", error);
+    res.status(500).json({ error: "Erro ao buscar produtos" });
   }
 });
 

@@ -10,9 +10,19 @@ export default function Home() {
   const [carrinho, setCarrinho] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch(`${API_URL}/produtos`).then(res => res.json()).then(data => {
-      setProdutos(data.filter((p: any) => p.ativo !== false && p.estoque > 0));
-    });
+    fetch(`${API_URL}/produtos`)
+      .then(res => {
+        if (!res.ok) throw new Error(`API ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        const arr = Array.isArray(data) ? data : [];
+        setProdutos(arr.filter((p: any) => p.ativo !== false && (p.estoque ?? 0) > 0));
+      })
+      .catch(err => {
+        console.error("Erro ao carregar produtos:", err);
+        setProdutos([]);
+      });
     fetch(`${API_URL}/categorias`).then(res => res.json()).then(setCategorias).catch(() => {});
     const salvo = localStorage.getItem("carrinho");
     if (salvo) setCarrinho(JSON.parse(salvo));

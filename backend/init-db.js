@@ -106,6 +106,35 @@ async function initDatabase() {
       }
     }
 
+    // Criar tabela categorias (para filtro de produtos)
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS categorias (
+          id SERIAL PRIMARY KEY,
+          nome VARCHAR(100) NOT NULL UNIQUE,
+          slug VARCHAR(100) NOT NULL UNIQUE,
+          descricao TEXT,
+          ativo BOOLEAN DEFAULT true,
+          created_at TIMESTAMP DEFAULT NOW()
+        );
+      `);
+      await pool.query(`
+        ALTER TABLE produtos ADD COLUMN IF NOT EXISTS categoria_id INTEGER REFERENCES categorias(id);
+      `);
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS idx_produtos_categoria ON produtos(categoria_id);
+      `);
+      await pool.query(`
+        INSERT INTO categorias (nome, slug, descricao) VALUES
+          ('Perfume', 'perfume', 'Perfumes e fragrâncias'),
+          ('Aromas', 'aromas', 'Aromatizadores e difusores'),
+          ('Banho', 'banho', 'Produtos para banho')
+        ON CONFLICT (slug) DO NOTHING;
+      `);
+    } catch (err) {
+      console.log("⚠️ Categorias: já existem ou erro:", err.message);
+    }
+
     // Criar índices (se as colunas existirem)
     try {
       await pool.query(`
