@@ -4,6 +4,15 @@
 
 ---
 
+## ⚠️ Se alterações no site não aparecerem após deploy
+
+1. **Vercel Root Directory** deve ser `frontend` (Settings do projeto)
+2. **Redeploy** com "Clear build cache" marcado
+3. **Hard refresh** no navegador: Ctrl+Shift+R ou modo anônimo
+4. A home usa ISR (revalidate 60) — pode levar até 1 min para atualizar
+
+---
+
 ## Credenciais (executar RESET-ADMIN-UNICO.sql no Supabase primeiro)
 
 As credenciais estão definidas no arquivo **RESET-ADMIN-UNICO.sql**.  
