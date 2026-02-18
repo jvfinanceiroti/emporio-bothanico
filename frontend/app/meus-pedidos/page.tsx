@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { API_URL } from "@/lib/api";
+import LayoutInstitucional from "@/components/LayoutInstitucional";
 
 interface Pedido {
   id: number;
@@ -78,12 +78,7 @@ export default function MeusPedidos() {
       // NOVO ENDPOINT SIMPLES!
       const parametro = tipoBusca === "cpf" ? "cpf" : "email";
       const url = `${API_URL}/api/buscar-pedido-simples?${parametro}=${encodeURIComponent(valor)}`;
-      
-      console.log("🔥 Chamando endpoint SIMPLES:", url);
-      
       const response = await fetch(url);
-      
-      console.log("📡 Status da resposta:", response.status);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -91,8 +86,6 @@ export default function MeusPedidos() {
       }
 
       const data = await response.json();
-      console.log("✅ Pedidos recebidos:", data);
-      
       setPedidos(data || []);
       setBuscaRealizada(true);
     } catch (error: any) {
@@ -106,11 +99,7 @@ export default function MeusPedidos() {
   };
 
   const carregarDetalhesPedido = async (id: number) => {
-    console.log("🔍 Carregando detalhes do pedido ID:", id);
-    console.log("🌐 API URL:", API_URL);
-    
     if (!API_URL) {
-      console.error("❌ API URL não está definida!");
       alert("Erro: API URL não configurada. Aguarde um momento e tente novamente.");
       return;
     }
@@ -118,24 +107,14 @@ export default function MeusPedidos() {
     setCarregandoDetalhes(true);
     try {
       const url = `${API_URL}/pedidos/${id}/detalhes`;
-      console.log("📡 Fazendo requisição para:", url);
-      
       const response = await fetch(url);
-      console.log("📊 Status da resposta:", response.status);
-      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("❌ Erro na resposta:", errorText);
         throw new Error(`Erro ${response.status}: ${errorText}`);
       }
       
       const data = await response.json();
-      console.log("✅ Dados recebidos:", data);
-      console.log("📅 Data do pedido (criado_em):", data.pedido?.criado_em);
-      console.log("📊 Tipo da data:", typeof data.pedido?.criado_em);
-      
       setPedidoSelecionado(data);
-      console.log("✅ Modal deve abrir agora!");
     } catch (error: any) {
       console.error("❌ Erro completo:", error);
       alert("Erro ao carregar detalhes do pedido: " + error.message);
@@ -163,33 +142,18 @@ export default function MeusPedidos() {
   };
 
   const formatarData = (data: string | null | undefined) => {
-    console.log("📅 Formatando data:", data, "Tipo:", typeof data);
-    
-    if (!data) {
-      console.warn("⚠️ Data não fornecida");
-      return "Data não disponível";
-    }
-    
+    if (!data) return "Data não disponível";
     try {
       const dataObj = new Date(data);
-      console.log("📅 Data convertida:", dataObj);
-      
-      if (isNaN(dataObj.getTime())) {
-        console.error("❌ Data inválida:", data);
-        return "Data inválida";
-      }
-      
-      const formatada = dataObj.toLocaleDateString("pt-BR", {
+      if (isNaN(dataObj.getTime())) return "Data inválida";
+      return dataObj.toLocaleDateString("pt-BR", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit"
       });
-      console.log("✅ Data formatada:", formatada);
-      return formatada;
-    } catch (error) {
-      console.error("❌ Erro ao formatar data:", error);
+    } catch {
       return "Data inválida";
     }
   };
@@ -204,509 +168,224 @@ export default function MeusPedidos() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f8f9fa" }}>
-      {/* HEADER PADRÃO */}
-      <header style={{
-        background: "rgba(255, 255, 255, 0.98)",
-        backdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(0,0,0,0.08)",
-        position: "sticky",
-        top: 0,
-        zIndex: 100
-      }}>
-        <div style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          padding: "clamp(16px, 4vw, 20px) clamp(20px, 5vw, 40px)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "clamp(16px, 4vw, 20px)",
-          flexWrap: "wrap"
-        }}>
-          <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px" }}>
-            <img 
-              src="/logo.png" 
-              alt="Empório Bothânico" 
-              style={{ height: "clamp(40px, 10vw, 50px)", objectFit: "contain" }}
-            />
-            <div>
-              <h1 style={{
-                fontSize: "clamp(18px, 4.5vw, 24px)",
-                fontWeight: "800",
-                color: "#0a0a0a",
-                margin: 0,
-                lineHeight: 1
-              }}>
-                Empório Bothânico
-              </h1>
-              <p style={{ fontSize: "clamp(10px, 2.5vw, 12px)", color: "#666", margin: "4px 0 0 0", letterSpacing: "1px" }}>
-                DELICADEZAS & BANHO
+    <LayoutInstitucional titulo="📦 Meus Pedidos" breadcrumbLabel="Meus Pedidos">
+      <p className="text-[var(--muted)] text-center mb-8">
+        Acompanhe o status dos seus pedidos. Busque por email ou CPF.
+      </p>
+
+      {/* Barra de Pesquisa */}
+      <div className="store-card p-6 sm:p-8 mb-8">
+        <div className="flex gap-4 mb-6 justify-center flex-wrap">
+          <button
+            type="button"
+            onClick={() => { setTipoBusca("email"); setBusca(""); }}
+            className={`px-8 py-3.5 rounded-xl font-bold text-sm transition-all min-h-[48px] border-2 ${
+              tipoBusca === "email"
+                ? "bg-[var(--accent)] border-[var(--accent)] text-white"
+                : "bg-white border-[var(--foreground)] text-[var(--foreground)] hover:bg-[var(--accent-light)]"
+            }`}
+          >
+            📧 Buscar por Email
+          </button>
+          <button
+            type="button"
+            onClick={() => { setTipoBusca("cpf"); setBusca(""); }}
+            className={`px-8 py-3.5 rounded-xl font-bold text-sm transition-all min-h-[48px] border-2 ${
+              tipoBusca === "cpf"
+                ? "bg-[var(--accent)] border-[var(--accent)] text-white"
+                : "bg-white border-[var(--foreground)] text-[var(--foreground)] hover:bg-[var(--accent-light)]"
+            }`}
+          >
+            🆔 Buscar por CPF
+          </button>
+        </div>
+
+        <div className="flex gap-3 flex-wrap">
+          <input
+            type={tipoBusca === "email" ? "email" : "text"}
+            value={busca}
+            onChange={(e) => {
+              const valor = e.target.value;
+              setBusca(tipoBusca === "cpf" ? formatarCPF(valor) : valor);
+            }}
+            placeholder={tipoBusca === "email" ? "Digite seu email" : "Digite seu CPF"}
+            className="flex-1 min-w-[280px] px-6 py-4 border-2 border-[var(--border)] rounded-xl text-base font-medium text-[var(--foreground)] focus:border-[var(--accent)] focus:outline-none transition-colors"
+          />
+          <button
+            type="button"
+            onClick={buscarPedidos}
+            disabled={carregando}
+            className="px-10 py-4 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-[var(--muted-light)] text-white font-bold rounded-xl transition-colors min-h-[56px] whitespace-nowrap disabled:cursor-not-allowed"
+          >
+            {carregando ? "Buscando..." : "🔍 Buscar Pedidos"}
+          </button>
+        </div>
+      </div>
+
+      {/* Resultados */}
+      {buscaRealizada && (
+        <div>
+          {pedidos.length === 0 ? (
+            <div className="store-card p-16 text-center">
+              <div className="text-6xl mb-4">📦</div>
+              <h3 className="text-xl font-bold text-[var(--foreground)] mb-2">
+                Nenhum pedido encontrado
+              </h3>
+              <p className="text-[var(--muted)] text-sm">
+                Verifique se o {tipoBusca === "email" ? "email" : "CPF"} está correto
               </p>
             </div>
-          </Link>
-
-          <div style={{ display: "flex", gap: "clamp(12px, 3vw, 16px)", alignItems: "center" }}>
-            <Link
-              href="/carrinho"
-              style={{
-                textDecoration: "none",
-                padding: "clamp(10px, 2.5vw, 12px) clamp(20px, 5vw, 24px)",
-                background: "#0a0a0a",
-                color: "white",
-                borderRadius: "clamp(8px, 2vw, 12px)",
-                fontSize: "clamp(13px, 3vw, 14px)",
-                fontWeight: "700",
-                transition: "all 0.3s",
-                minHeight: "44px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px"
-              }}
-            >
-              🛒 Carrinho
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Container Principal */}
-      <div style={{
-        maxWidth: "1200px",
-        margin: "0 auto",
-        padding: "clamp(32px, 8vw, 64px) clamp(20px, 5vw, 40px)"
-      }}>
-        {/* Botão Voltar */}
-        <Link 
-          href="/"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "12px 24px",
-            background: "white",
-            color: "#0a0a0a",
-            borderRadius: "12px",
-            fontSize: "14px",
-            fontWeight: "600",
-            textDecoration: "none",
-            border: "2px solid #e5e7eb",
-            transition: "all 0.3s",
-            marginBottom: "24px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "#f9fafb";
-            e.currentTarget.style.borderColor = "#0a0a0a";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "white";
-            e.currentTarget.style.borderColor = "#e5e7eb";
-          }}
-        >
-          ← Voltar para a loja
-        </Link>
-
-        {/* Título */}
-        <h1 style={{
-          fontSize: "clamp(28px, 7vw, 42px)",
-          fontWeight: "800",
-          color: "#0a0a0a",
-          marginBottom: "clamp(12px, 3vw, 16px)",
-          textAlign: "center",
-          lineHeight: "1.2"
-        }}>
-          📦 Meus Pedidos
-        </h1>
-        <p style={{
-          fontSize: "clamp(14px, 3.5vw, 18px)",
-          color: "#666",
-          textAlign: "center",
-          marginBottom: "clamp(32px, 8vw, 48px)"
-        }}>
-          Acompanhe o status dos seus pedidos
-        </p>
-
-        {/* Barra de Pesquisa Grande */}
-        <div style={{
-          background: "white",
-          borderRadius: "20px",
-          padding: "clamp(32px, 8vw, 48px)",
-          boxShadow: "0 10px 40px rgba(0,0,0,0.06)",
-          marginBottom: "clamp(32px, 8vw, 48px)",
-          border: "1px solid rgba(0,0,0,0.05)"
-        }}>
-          <div style={{
-            display: "flex",
-            gap: "16px",
-            marginBottom: "24px",
-            justifyContent: "center",
-            flexWrap: "wrap"
-          }}>
-            <button
-              onClick={() => {
-                setTipoBusca("email");
-                setBusca("");
-              }}
-              style={{
-                padding: "14px 32px",
-                background: tipoBusca === "email" ? "#0a0a0a" : "white",
-                color: tipoBusca === "email" ? "white" : "#0a0a0a",
-                border: `2px solid #0a0a0a`,
-                borderRadius: "12px",
-                fontSize: "15px",
-                fontWeight: "700",
-                cursor: "pointer",
-                transition: "all 0.3s",
-                minHeight: "48px"
-              }}
-            >
-              📧 Buscar por Email
-            </button>
-            <button
-              onClick={() => {
-                setTipoBusca("cpf");
-                setBusca("");
-              }}
-              style={{
-                padding: "14px 32px",
-                background: tipoBusca === "cpf" ? "#0a0a0a" : "white",
-                color: tipoBusca === "cpf" ? "white" : "#0a0a0a",
-                border: `2px solid #0a0a0a`,
-                borderRadius: "12px",
-                fontSize: "15px",
-                fontWeight: "700",
-                cursor: "pointer",
-                transition: "all 0.3s",
-                minHeight: "48px"
-              }}
-            >
-              🆔 Buscar por CPF
-            </button>
-          </div>
-
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-            <input
-              type={tipoBusca === "email" ? "email" : "text"}
-              value={busca}
-              onChange={(e) => {
-                const valor = e.target.value;
-                setBusca(tipoBusca === "cpf" ? formatarCPF(valor) : valor);
-              }}
-              placeholder={tipoBusca === "email" ? "Digite seu email" : "Digite seu CPF"}
-              style={{
-                flex: 1,
-                minWidth: "280px",
-                padding: "18px 24px",
-                border: "2px solid #e5e7eb",
-                borderRadius: "12px",
-                fontSize: "16px",
-                fontWeight: "500",
-                color: "#0a0a0a",
-                transition: "all 0.3s"
-              }}
-              onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
-              onBlur={(e) => e.currentTarget.style.borderColor = "#e5e7eb"}
-            />
-            <button
-              onClick={buscarPedidos}
-              disabled={carregando}
-              style={{
-                padding: "18px 40px",
-                background: carregando ? "#9ca3af" : "#10b981",
-                color: "white",
-                border: "none",
-                borderRadius: "12px",
-                fontSize: "16px",
-                fontWeight: "700",
-                cursor: carregando ? "not-allowed" : "pointer",
-                transition: "all 0.3s",
-                minHeight: "56px",
-                whiteSpace: "nowrap"
-              }}
-            >
-              {carregando ? "Buscando..." : "🔍 Buscar Pedidos"}
-            </button>
-          </div>
-        </div>
-
-        {/* Resultados */}
-        {buscaRealizada && (
-          <div>
-            {pedidos.length === 0 ? (
-              <div style={{
-                background: "white",
-                borderRadius: "20px",
-                padding: "60px 24px",
-                textAlign: "center",
-                boxShadow: "0 10px 40px rgba(0,0,0,0.06)"
-              }}>
-                <div style={{ fontSize: "64px", marginBottom: "16px" }}>📦</div>
-                <h3 style={{ fontSize: "22px", fontWeight: "700", color: "#0a0a0a", marginBottom: "8px" }}>
-                  Nenhum pedido encontrado
-                </h3>
-                <p style={{ fontSize: "14px", color: "#666" }}>
-                  Verifique se o {tipoBusca === "email" ? "email" : "CPF"} está correto
-                </p>
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                {pedidos.map((pedido) => {
-                  const statusInfo = getStatusInfo(pedido.status);
-                  return (
-                    <div
-                      key={pedido.id}
-                      style={{
-                        background: "white",
-                        borderRadius: "16px",
-                        padding: "24px",
-                        boxShadow: "0 4px 20px rgba(0,0,0,0.06)",
-                        cursor: "pointer",
-                        transition: "all 0.3s",
-                        border: "2px solid transparent"
-                      }}
-                      onClick={() => carregarDetalhesPedido(pedido.id)}
-                      onMouseOver={(e) => {
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                        e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.12)";
-                        e.currentTarget.style.borderColor = "#0a0a0a";
-                      }}
-                      onMouseOut={(e) => {
-                        e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.06)";
-                        e.currentTarget.style.borderColor = "transparent";
-                      }}
-                    >
-                      <div style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        gap: "16px",
-                        flexWrap: "wrap"
-                      }}>
-                        <div style={{ flex: 1, minWidth: "200px" }}>
-                          <div style={{ marginBottom: "12px" }}>
-                            <span style={{ fontSize: "12px", color: "#666", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                              Pedido #{pedido.id}
-                            </span>
-                          </div>
-                          <h3 style={{
-                            fontSize: "18px",
-                            fontWeight: "700",
-                            color: "#0a0a0a",
-                            marginBottom: "8px"
-                          }}>
-                            {pedido.cliente_nome}
-                          </h3>
-                          <p style={{ fontSize: "14px", color: "#666", marginBottom: "4px" }}>
-                            📅 {formatarData(pedido.criado_em)}
-                          </p>
-                          <p style={{ fontSize: "14px", color: "#666" }}>
-                            {getFormaPagamentoLabel(pedido.forma_pagamento)}
-                          </p>
-                        </div>
-
-                        <div style={{ textAlign: "right" }}>
-                          <div style={{
-                            display: "inline-block",
-                            padding: "8px 16px",
-                            background: statusInfo.bg,
-                            color: statusInfo.color,
-                            borderRadius: "8px",
-                            fontSize: "13px",
-                            fontWeight: "700",
-                            marginBottom: "12px"
-                          }}>
-                            {statusInfo.label}
-                          </div>
-                          <div style={{
-                            fontSize: "28px",
-                            fontWeight: "800",
-                            color: "#0a0a0a"
-                          }}>
-                            R$ {Number(pedido.total).toFixed(2)}
-                          </div>
+          ) : (
+            <div className="flex flex-col gap-5">
+              {pedidos.map((pedido) => {
+                const statusInfo = getStatusInfo(pedido.status);
+                return (
+                  <div
+                    key={pedido.id}
+                    className="store-card p-6 cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg border-2 border-transparent hover:border-[var(--accent)]"
+                    onClick={() => carregarDetalhesPedido(pedido.id)}
+                  >
+                    <div className="flex justify-between items-start gap-4 flex-wrap">
+                      <div className="flex-1 min-w-[200px]">
+                        <span className="text-xs text-[var(--muted)] font-semibold uppercase tracking-wide block mb-3">
+                          Pedido #{pedido.id}
+                        </span>
+                        <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">
+                          {pedido.cliente_nome}
+                        </h3>
+                        <p className="text-sm text-[var(--muted)] mb-1">
+                          📅 {formatarData(pedido.criado_em)}
+                        </p>
+                        <p className="text-sm text-[var(--muted)]">
+                          {getFormaPagamentoLabel(pedido.forma_pagamento)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className="inline-block px-4 py-2 rounded-lg text-xs font-bold mb-3"
+                          style={{ background: statusInfo.bg, color: statusInfo.color }}
+                        >
+                          {statusInfo.label}
+                        </span>
+                        <div className="text-2xl font-extrabold text-[var(--foreground)]">
+                          R$ {Number(pedido.total).toFixed(2)}
                         </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
-        {/* Modal de Detalhes */}
-        {pedidoSelecionado && (
+      {/* Modal de Detalhes */}
+      {pedidoSelecionado && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000] p-5 backdrop-blur-sm"
+          onClick={() => setPedidoSelecionado(null)}
+        >
           <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: "rgba(0,0,0,0.5)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 1000,
-              padding: "20px",
-              backdropFilter: "blur(4px)"
-            }}
-            onClick={() => setPedidoSelecionado(null)}
+            className="bg-white rounded-2xl p-8 max-w-[700px] w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div
-              style={{
-                background: "white",
-                borderRadius: "20px",
-                padding: "32px",
-                maxWidth: "700px",
-                width: "100%",
-                maxHeight: "90vh",
-                overflowY: "auto",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.3)"
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-                <h2 style={{ fontSize: "24px", fontWeight: "800", color: "#0a0a0a", margin: 0 }}>
-                  Detalhes do Pedido #{pedidoSelecionado.pedido.id}
-                </h2>
-                <button
-                  onClick={() => setPedidoSelecionado(null)}
-                  style={{
-                    background: "#f3f4f6",
-                    border: "none",
-                    borderRadius: "8px",
-                    width: "36px",
-                    height: "36px",
-                    cursor: "pointer",
-                    fontSize: "18px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center"
-                  }}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-extrabold text-[var(--foreground)]">
+                Detalhes do Pedido #{pedidoSelecionado.pedido.id}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setPedidoSelecionado(null)}
+                className="w-9 h-9 rounded-lg bg-[var(--warm-200)] border-none cursor-pointer flex items-center justify-center text-lg hover:bg-[var(--muted-light)] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="bg-[var(--warm-100)] rounded-xl p-5 mb-6">
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-sm text-[var(--muted)] font-semibold">STATUS</span>
+                <span
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold"
+                  style={{ background: getStatusInfo(pedidoSelecionado.pedido.status).bg, color: getStatusInfo(pedidoSelecionado.pedido.status).color }}
                 >
-                  ✕
-                </button>
+                  {getStatusInfo(pedidoSelecionado.pedido.status).label}
+                </span>
               </div>
-
-              {/* Status e Data */}
-              <div style={{
-                background: "#f8f9fa",
-                borderRadius: "12px",
-                padding: "20px",
-                marginBottom: "24px"
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-                  <span style={{ fontSize: "13px", color: "#666", fontWeight: "600" }}>STATUS</span>
-                  <span style={{
-                    padding: "6px 12px",
-                    background: getStatusInfo(pedidoSelecionado.pedido.status).bg,
-                    color: getStatusInfo(pedidoSelecionado.pedido.status).color,
-                    borderRadius: "6px",
-                    fontSize: "12px",
-                    fontWeight: "700"
-                  }}>
-                    {getStatusInfo(pedidoSelecionado.pedido.status).label}
-                  </span>
-                </div>
-                <div style={{ fontSize: "14px", color: "#666" }}>
-                  📅 Pedido realizado em {formatarData(pedidoSelecionado.pedido.criado_em)}
-                </div>
-                {pedidoSelecionado.pedido.codigo_rastreio && (
-                  <div style={{ fontSize: "14px", color: "#666", marginTop: "8px" }}>
-                    📦 Código de rastreio: <strong>{pedidoSelecionado.pedido.codigo_rastreio}</strong>
-                  </div>
-                )}
+              <div className="text-sm text-[var(--muted)]">
+                📅 Pedido realizado em {formatarData(pedidoSelecionado.pedido.criado_em)}
               </div>
-
-              {/* Informações do Cliente */}
-              <div style={{ marginBottom: "24px" }}>
-                <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#0a0a0a", marginBottom: "12px" }}>
-                  👤 Informações do Cliente
-                </h3>
-                <div style={{ fontSize: "14px", color: "#666", lineHeight: "1.8" }}>
-                  <p><strong>Nome:</strong> {pedidoSelecionado.pedido.cliente_nome}</p>
-                  <p><strong>Email:</strong> {pedidoSelecionado.pedido.cliente_email}</p>
-                  <p><strong>Telefone:</strong> {pedidoSelecionado.pedido.cliente_telefone}</p>
-                </div>
-              </div>
-
-              {/* Endereço de Entrega */}
-              {pedidoSelecionado.pedido.endereco_rua && (
-                <div style={{ marginBottom: "24px" }}>
-                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#0a0a0a", marginBottom: "12px" }}>
-                    📍 Endereço de Entrega
-                  </h3>
-                  <div style={{ fontSize: "14px", color: "#666", lineHeight: "1.8" }}>
-                    <p>{pedidoSelecionado.pedido.endereco_rua}, {pedidoSelecionado.pedido.endereco_numero}</p>
-                    {pedidoSelecionado.pedido.endereco_complemento && <p>{pedidoSelecionado.pedido.endereco_complemento}</p>}
-                    <p>{pedidoSelecionado.pedido.endereco_bairro}</p>
-                    <p>{pedidoSelecionado.pedido.endereco_cidade} - {pedidoSelecionado.pedido.endereco_estado}</p>
-                    <p>CEP: {pedidoSelecionado.pedido.endereco_cep}</p>
-                  </div>
+              {pedidoSelecionado.pedido.codigo_rastreio && (
+                <div className="text-sm text-[var(--muted)] mt-2">
+                  📦 Código de rastreio: <strong>{pedidoSelecionado.pedido.codigo_rastreio}</strong>
                 </div>
               )}
+            </div>
 
-              {/* Itens do Pedido */}
-              <div style={{ marginBottom: "24px" }}>
-                <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#0a0a0a", marginBottom: "16px" }}>
-                  🛒 Itens do Pedido
-                </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                  {pedidoSelecionado.itens.map((item) => (
-                    <div key={item.id} style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "12px",
-                      background: "#f8f9fa",
-                      borderRadius: "8px"
-                    }}>
-                      <div>
-                        <div style={{ fontSize: "14px", fontWeight: "600", color: "#0a0a0a", marginBottom: "4px" }}>
-                          {item.nome}
-                        </div>
-                        <div style={{ fontSize: "13px", color: "#666" }}>
-                          Quantidade: {item.quantidade} × R$ {Number(item.preco_unitario).toFixed(2)}
-                        </div>
-                      </div>
-                      <div style={{ fontSize: "16px", fontWeight: "700", color: "#0a0a0a" }}>
-                        R$ {(item.quantidade * Number(item.preco_unitario)).toFixed(2)}
-                      </div>
-                    </div>
-                  ))}
+            <div className="mb-6">
+              <h3 className="text-base font-bold text-[var(--foreground)] mb-3">👤 Informações do Cliente</h3>
+              <div className="text-sm text-[var(--muted)] leading-relaxed">
+                <p><strong>Nome:</strong> {pedidoSelecionado.pedido.cliente_nome}</p>
+                <p><strong>Email:</strong> {pedidoSelecionado.pedido.cliente_email}</p>
+                <p><strong>Telefone:</strong> {pedidoSelecionado.pedido.cliente_telefone}</p>
+              </div>
+            </div>
+
+            {pedidoSelecionado.pedido.endereco_rua && (
+              <div className="mb-6">
+                <h3 className="text-base font-bold text-[var(--foreground)] mb-3">📍 Endereço de Entrega</h3>
+                <div className="text-sm text-[var(--muted)] leading-relaxed">
+                  <p>{pedidoSelecionado.pedido.endereco_rua}, {pedidoSelecionado.pedido.endereco_numero}</p>
+                  {pedidoSelecionado.pedido.endereco_complemento && <p>{pedidoSelecionado.pedido.endereco_complemento}</p>}
+                  <p>{pedidoSelecionado.pedido.endereco_bairro}</p>
+                  <p>{pedidoSelecionado.pedido.endereco_cidade} - {pedidoSelecionado.pedido.endereco_estado}</p>
+                  <p>CEP: {pedidoSelecionado.pedido.endereco_cep}</p>
                 </div>
               </div>
+            )}
 
-              {/* Resumo do Pedido */}
-              <div style={{
-                borderTop: "2px solid #e5e7eb",
-                paddingTop: "20px"
-              }}>
-                {pedidoSelecionado.pedido.frete && (
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
-                    <span style={{ fontSize: "14px", color: "#666" }}>Frete:</span>
-                    <span style={{ fontSize: "14px", fontWeight: "600", color: "#0a0a0a" }}>
-                      R$ {Number(pedidoSelecionado.pedido.frete).toFixed(2)}
-                    </span>
+            <div className="mb-6">
+              <h3 className="text-base font-bold text-[var(--foreground)] mb-4">🛒 Itens do Pedido</h3>
+              <div className="flex flex-col gap-3">
+                {pedidoSelecionado.itens.map((item) => (
+                  <div key={item.id} className="flex justify-between items-center p-3 bg-[var(--warm-100)] rounded-lg">
+                    <div>
+                      <div className="text-sm font-semibold text-[var(--foreground)] mb-1">{item.nome}</div>
+                      <div className="text-xs text-[var(--muted)]">
+                        Quantidade: {item.quantidade} × R$ {Number(item.preco_unitario).toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="text-base font-bold text-[var(--foreground)]">
+                      R$ {(item.quantidade * Number(item.preco_unitario)).toFixed(2)}
+                    </div>
                   </div>
-                )}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "18px", fontWeight: "700", color: "#0a0a0a" }}>Total:</span>
-                  <span style={{ fontSize: "28px", fontWeight: "800", color: "#0a0a0a" }}>
-                    R$ {Number(pedidoSelecionado.pedido.total).toFixed(2)}
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t-2 border-[var(--border)] pt-5">
+              {(pedidoSelecionado.pedido.frete ?? 0) > 0 ? (
+                <div className="flex justify-between mb-3">
+                  <span className="text-sm text-[var(--muted)]">Frete:</span>
+                  <span className="text-sm font-semibold text-[var(--foreground)]">
+                    R$ {Number(pedidoSelecionado.pedido.frete).toFixed(2)}
                   </span>
                 </div>
-                <div style={{ fontSize: "13px", color: "#666", marginTop: "8px" }}>
-                  {getFormaPagamentoLabel(pedidoSelecionado.pedido.forma_pagamento)}
-                </div>
+              ) : null}
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-bold text-[var(--foreground)]">Total:</span>
+                <span className="text-2xl font-extrabold text-[var(--foreground)]">
+                  R$ {Number(pedidoSelecionado.pedido.total).toFixed(2)}
+                </span>
+              </div>
+              <div className="text-sm text-[var(--muted)] mt-2">
+                {getFormaPagamentoLabel(pedidoSelecionado.pedido.forma_pagamento)}
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </LayoutInstitucional>
   );
 }
