@@ -158,6 +158,10 @@ export function StoreHeader() {
       <div className={`${headerBgDark} text-white py-2 sm:py-2.5 px-3 sticky top-0 z-50`}>
         <nav className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto scrollbar-hide py-1 -mx-1" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
           <Link href="/produtos" className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors">Todos</Link>
+          <Link href="/promocoes" className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors flex items-center gap-1 text-amber-300">
+            Promoções
+            <span className="text-[10px]">🔥</span>
+          </Link>
           {categorias.map((cat) => (
             <Link key={cat.id} href={`/produtos?categoria=${cat.slug}`} className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors flex items-center gap-1">
               {cat.nome}

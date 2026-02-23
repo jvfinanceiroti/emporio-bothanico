@@ -23,6 +23,7 @@ export function SiteFooter() {
             <h4 className="text-xs font-bold uppercase tracking-wider text-white/90 mb-4">Navegação</h4>
             <FooterLink href="/">Início</FooterLink>
             <FooterLink href="/produtos">Produtos</FooterLink>
+            <FooterLink href="/promocoes">Promoções</FooterLink>
             <FooterLink href="/sobre">Sobre Nós</FooterLink>
             <FooterLink href="/contato">Contato</FooterLink>
           </div>
