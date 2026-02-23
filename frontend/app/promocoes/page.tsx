@@ -147,7 +147,8 @@ export default function PromocoesPage() {
             onEnded={handleEnded}
             className="w-full rounded-xl block"
           >
-            <source src="/promo-video.mp4" type="video/mp4" />
+            <source src="/promo-video.mov" type="video/quicktime" />
+            <source src="/promo-video.mov" type="video/mp4" />
           </video>
 
           {muted && (
