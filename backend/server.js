@@ -1986,7 +1986,9 @@ app.post("/frete/calcular", async (req, res) => {
     }
 
     const token = process.env.MELHOR_ENVIO_TOKEN;
-    const permitirFallback = process.env.FRETE_PERMITIR_FALLBACK === "true";
+    const exigirMelhorEnvio = process.env.FRETE_EXIGIR_MELHOR_ENVIO === "true";
+    const permitirFallback =
+      process.env.FRETE_PERMITIR_FALLBACK === "true" || !exigirMelhorEnvio;
 
     if (token) {
       try {
