@@ -1113,7 +1113,7 @@ export default function CheckoutPage() {
                         </div>
                       </button>
                       )}
-                      {!retiradaNaLoja && (
+                      {freteSedex !== null && (
                       <button
                         type="button"
                         onClick={() => setTipoEnvio("sedex")}

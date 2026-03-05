@@ -2015,17 +2015,13 @@ app.post("/frete/calcular", async (req, res) => {
       return res.status(400).json({ error: "CEP inválido" });
     }
 
-    // Mesmo município da loja => retirada local, sem PAC/SEDEX.
+    let mesmoMunicipioLoja = false;
     try {
       const viaCepDestino = await axios.get(`https://viacep.com.br/ws/${cepLimpo}/json/`, { timeout: 5000 });
       if (viaCepDestino.data && !viaCepDestino.data.erro) {
         const cidadeDestino = String(viaCepDestino.data.localidade || "").trim().toLowerCase();
         const ufDestino = String(viaCepDestino.data.uf || "").trim().toUpperCase();
-        if (ufDestino === "MG" && cidadeDestino === CIDADE_ORIGEM_LOJA) {
-          return res.json([
-            { servico: "RETIRADA_NA_LOJA", preco: 0, prazo: 0, erro: null }
-          ]);
-        }
+        mesmoMunicipioLoja = ufDestino === "MG" && cidadeDestino === CIDADE_ORIGEM_LOJA;
       }
     } catch (_) {}
 
@@ -2089,7 +2085,26 @@ app.post("/frete/calcular", async (req, res) => {
           .filter(Boolean);
 
         if (opcoes.length > 0) {
-          return res.json(opcoes);
+          let opcoesFinal = opcoes;
+
+          // Itabira/MG: oferecer Retirada na Loja + SEDEX (sem PAC).
+          if (mesmoMunicipioLoja) {
+            opcoesFinal = opcoesFinal.filter(o => !String(o.servico).toUpperCase().includes("PAC"));
+
+            const temSedex = opcoesFinal.some(o => String(o.servico).toUpperCase().includes("SEDEX"));
+            if (!temSedex) {
+              let pesoTotalLocal = 0;
+              produtos.forEach(p => {
+                pesoTotalLocal += (p.peso_kg || 0.3) * (p.quantidade || 1);
+              });
+              const sedexFallback = calcularFreteFallback("MG", pesoTotalLocal).find(o => o.servico === "SEDEX");
+              if (sedexFallback) opcoesFinal.push(sedexFallback);
+            }
+
+            opcoesFinal.unshift({ servico: "RETIRADA_NA_LOJA", preco: 0, prazo: 0, erro: null });
+          }
+
+          return res.json(opcoesFinal);
         }
 
         // Serviços retornaram erro
@@ -2139,7 +2154,11 @@ app.post("/frete/calcular", async (req, res) => {
       pesoTotal += (p.peso_kg || 0.3) * (p.quantidade || 1);
     });
 
-    const fallback = calcularFreteFallback(uf, pesoTotal);
+    let fallback = calcularFreteFallback(uf, pesoTotal);
+    if (mesmoMunicipioLoja) {
+      fallback = fallback.filter(o => o.servico === "SEDEX");
+      fallback.unshift({ servico: "RETIRADA_NA_LOJA", preco: 0, prazo: 0, erro: null });
+    }
     return res.json(fallback);
 
   } catch (err) {
