@@ -187,7 +187,10 @@ export default function CheckoutPage() {
         }),
       });
 
-      if (!res.ok) throw new Error("Erro ao calcular frete");
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody?.detalhe || errBody?.error || "Erro ao calcular frete");
+      }
       const opcoes = await res.json();
 
       const pac = opcoes.find((o: any) => o.servico.toUpperCase().includes("PAC"));
@@ -197,12 +200,12 @@ export default function CheckoutPage() {
       setFreteSedex(sedex ? sedex.preco : null);
       setPrazoPac(pac ? pac.prazo : null);
       setPrazoSedex(sedex ? sedex.prazo : null);
-    } catch {
+    } catch (err: any) {
       setFretePac(null);
       setFreteSedex(null);
       setPrazoPac(null);
       setPrazoSedex(null);
-      setMensagemAlerta("Erro ao calcular frete. Tente novamente.");
+      setMensagemAlerta(err?.message || "Erro ao calcular frete. Tente novamente.");
       setMostrarAlerta(true);
     } finally {
       setCarregandoFrete(false);

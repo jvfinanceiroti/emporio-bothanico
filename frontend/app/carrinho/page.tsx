@@ -122,7 +122,10 @@ export default function CarrinhoPage() {
         }),
       });
 
-      if (!res.ok) throw new Error("Erro ao calcular frete");
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody?.detalhe || errBody?.error || "Erro ao calcular frete");
+      }
       const data: OpcaoFrete[] = await res.json();
 
       if (data.length === 0) {
@@ -134,8 +137,8 @@ export default function CarrinhoPage() {
         if (temPac) setTipoEnvio("PAC");
         else setTipoEnvio(data[0].servico);
       }
-    } catch {
-      setErroFrete("Erro ao calcular frete. Tente novamente.");
+    } catch (err: any) {
+      setErroFrete(err?.message || "Erro ao calcular frete. Tente novamente.");
     } finally {
       setCarregandoFrete(false);
     }
