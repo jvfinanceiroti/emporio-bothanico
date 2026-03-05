@@ -45,6 +45,11 @@ export default function PromocoesPage() {
 
   const handleCta = () => {
     setRedirecting(true);
+    fetch(`${API_URL}/promo/visita`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tipo: "resgate" }),
+    }).catch(() => {});
     setTimeout(() => {
       window.location.href =
         "https://wa.me/5531995503794?text=Quero%20meu%20brinde";

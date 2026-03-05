@@ -17,13 +17,17 @@ export default function AdminPromocoes() {
 
 interface VisitaData {
   total: number;
+  totalAcessos: number;
+  totalResgates: number;
   hoje: number;
+  hojeResgates: number;
   semana: number;
   mes: number;
-  porDia: { dia: string; total: string }[];
+  porDia: { dia: string; total: string; resgates: string }[];
   porHora: { hora: string; total: string }[];
   recentes: {
     id: number;
+    tipo: string;
     ip: string;
     user_agent: string;
     referrer: string;
@@ -194,29 +198,31 @@ function PromocoesConteudo() {
         >
           <StatCard
             icon="👁️"
-            title="Total de Visitas"
-            value={dados.total}
+            title="Total de Acessos"
+            value={dados.totalAcessos}
             color="#3b82f6"
             bgColor="rgba(59, 130, 246, 0.1)"
           />
           <StatCard
+            icon="🎁"
+            title="Total de Resgates"
+            value={dados.totalResgates}
+            color="#10b981"
+            bgColor="rgba(16, 185, 129, 0.1)"
+            subtitle={dados.totalAcessos > 0 ? `${((dados.totalResgates / dados.totalAcessos) * 100).toFixed(1)}% conversão` : undefined}
+          />
+          <StatCard
             icon="🔥"
-            title="Visitas Hoje"
+            title="Acessos Hoje"
             value={dados.hoje}
             color="#f59e0b"
             bgColor="rgba(245, 158, 11, 0.1)"
+            subtitle={dados.hojeResgates > 0 ? `${dados.hojeResgates} resgates` : undefined}
           />
           <StatCard
             icon="📅"
             title="Últimos 7 dias"
             value={dados.semana}
-            color="#10b981"
-            bgColor="rgba(16, 185, 129, 0.1)"
-          />
-          <StatCard
-            icon="📆"
-            title="Últimos 30 dias"
-            value={dados.mes}
             color="#8b5cf6"
             bgColor="rgba(139, 92, 246, 0.1)"
           />
@@ -480,63 +486,79 @@ function PromocoesConteudo() {
                     Nenhuma visita registrada ainda
                   </p>
                 )}
-                {dados.porDia.map((d) => (
-                  <div
-                    key={d.dia}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      padding: "8px 0",
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: "90px",
-                        fontSize: "13px",
-                        fontWeight: "600",
-                        color: "#374151",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {formatarDia(d.dia)}
-                    </span>
+                {dados.porDia.map((d) => {
+                  const resgates = parseInt(d.resgates || "0");
+                  return (
                     <div
+                      key={d.dia}
                       style={{
-                        flex: 1,
-                        height: "24px",
-                        background: "#f3f4f6",
-                        borderRadius: "6px",
-                        overflow: "hidden",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        padding: "8px 0",
                       }}
                     >
-                      <div
+                      <span
                         style={{
-                          width: `${(parseInt(d.total) / maxVisitasDia) * 100}%`,
-                          height: "100%",
-                          background:
-                            "linear-gradient(90deg, #667eea, #764ba2)",
-                          borderRadius: "6px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "flex-end",
-                          paddingRight: "8px",
-                          minWidth: "40px",
+                          width: "90px",
+                          fontSize: "13px",
+                          fontWeight: "600",
+                          color: "#374151",
+                          flexShrink: 0,
                         }}
                       >
-                        <span
+                        {formatarDia(d.dia)}
+                      </span>
+                      <div
+                        style={{
+                          flex: 1,
+                          height: "24px",
+                          background: "#f3f4f6",
+                          borderRadius: "6px",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
                           style={{
-                            color: "white",
-                            fontSize: "11px",
-                            fontWeight: "700",
+                            width: `${(parseInt(d.total) / maxVisitasDia) * 100}%`,
+                            height: "100%",
+                            background:
+                              "linear-gradient(90deg, #667eea, #764ba2)",
+                            borderRadius: "6px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            paddingRight: "8px",
+                            minWidth: "40px",
                           }}
                         >
-                          {d.total}
-                        </span>
+                          <span
+                            style={{
+                              color: "white",
+                              fontSize: "11px",
+                              fontWeight: "700",
+                            }}
+                          >
+                            {d.total}
+                          </span>
+                        </div>
                       </div>
+                      {resgates > 0 && (
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            fontWeight: "700",
+                            color: "#059669",
+                            flexShrink: 0,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          🎁 {resgates}
+                        </span>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
@@ -560,6 +582,9 @@ function PromocoesConteudo() {
                         Data/Hora
                       </th>
                       <th style={{ padding: "10px 12px", fontWeight: "700", color: "#374151" }}>
+                        Ação
+                      </th>
+                      <th style={{ padding: "10px 12px", fontWeight: "700", color: "#374151" }}>
                         IP
                       </th>
                       <th style={{ padding: "10px 12px", fontWeight: "700", color: "#374151" }}>
@@ -571,7 +596,7 @@ function PromocoesConteudo() {
                     {dados.recentes.length === 0 && (
                       <tr>
                         <td
-                          colSpan={3}
+                          colSpan={4}
                           style={{
                             padding: "20px",
                             textAlign: "center",
@@ -585,7 +610,10 @@ function PromocoesConteudo() {
                     {dados.recentes.map((v) => (
                       <tr
                         key={v.id}
-                        style={{ borderBottom: "1px solid #f3f4f6" }}
+                        style={{
+                          borderBottom: "1px solid #f3f4f6",
+                          background: v.tipo === "resgate" ? "rgba(16, 185, 129, 0.05)" : "transparent",
+                        }}
                       >
                         <td
                           style={{
@@ -595,6 +623,35 @@ function PromocoesConteudo() {
                           }}
                         >
                           {formatarData(v.created_at)}
+                        </td>
+                        <td style={{ padding: "10px 12px" }}>
+                          {v.tipo === "resgate" ? (
+                            <span
+                              style={{
+                                background: "#d1fae5",
+                                color: "#065f46",
+                                padding: "3px 10px",
+                                borderRadius: "20px",
+                                fontSize: "11px",
+                                fontWeight: "700",
+                              }}
+                            >
+                              🎁 Resgatou
+                            </span>
+                          ) : (
+                            <span
+                              style={{
+                                background: "#e0e7ff",
+                                color: "#3730a3",
+                                padding: "3px 10px",
+                                borderRadius: "20px",
+                                fontSize: "11px",
+                                fontWeight: "700",
+                              }}
+                            >
+                              👁️ Acessou
+                            </span>
+                          )}
                         </td>
                         <td
                           style={{
@@ -628,12 +685,14 @@ function StatCard({
   value,
   color,
   bgColor,
+  subtitle,
 }: {
   icon: string;
   title: string;
   value: number;
   color: string;
   bgColor: string;
+  subtitle?: string;
 }) {
   return (
     <div
@@ -700,6 +759,19 @@ function StatCard({
           >
             {value}
           </p>
+          {subtitle && (
+            <p
+              style={{
+                color: "#6b7280",
+                fontSize: "11px",
+                fontWeight: "600",
+                margin: 0,
+                marginTop: "2px",
+              }}
+            >
+              {subtitle}
+            </p>
+          )}
         </div>
       </div>
     </div>

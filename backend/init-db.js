@@ -173,6 +173,7 @@ async function initDatabase() {
       await pool.query(`
         CREATE TABLE IF NOT EXISTS visitas_promo (
           id SERIAL PRIMARY KEY,
+          tipo VARCHAR(20) DEFAULT 'acesso',
           ip VARCHAR(100),
           user_agent TEXT,
           referrer TEXT,
@@ -181,6 +182,9 @@ async function initDatabase() {
       `);
       await pool.query(`
         CREATE INDEX IF NOT EXISTS idx_visitas_promo_data ON visitas_promo(created_at);
+      `);
+      await pool.query(`
+        ALTER TABLE visitas_promo ADD COLUMN IF NOT EXISTS tipo VARCHAR(20) DEFAULT 'acesso';
       `);
     } catch (err) {
       console.log("⚠️ visitas_promo: já existe ou erro:", err.message);

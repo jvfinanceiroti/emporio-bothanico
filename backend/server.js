@@ -1955,9 +1955,10 @@ app.post("/promo/visita", async (req, res) => {
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "desconhecido";
     const user_agent = req.headers["user-agent"] || "";
     const referrer = req.headers["referer"] || req.headers["referrer"] || "";
+    const tipo = req.body?.tipo === "resgate" ? "resgate" : "acesso";
     await pool.query(
-      "INSERT INTO visitas_promo (ip, user_agent, referrer) VALUES ($1, $2, $3)",
-      [String(ip).split(",")[0].trim(), user_agent, referrer]
+      "INSERT INTO visitas_promo (tipo, ip, user_agent, referrer) VALUES ($1, $2, $3, $4)",
+      [tipo, String(ip).split(",")[0].trim(), user_agent, referrer]
     );
     res.json({ ok: true });
   } catch (err) {
@@ -1969,8 +1970,13 @@ app.post("/promo/visita", async (req, res) => {
 app.get("/admin/promo/visitas", verificarToken, async (req, res) => {
   try {
     const total = await pool.query("SELECT COUNT(*) FROM visitas_promo");
+    const totalAcessos = await pool.query("SELECT COUNT(*) FROM visitas_promo WHERE tipo = 'acesso'");
+    const totalResgates = await pool.query("SELECT COUNT(*) FROM visitas_promo WHERE tipo = 'resgate'");
     const hoje = await pool.query(
       "SELECT COUNT(*) FROM visitas_promo WHERE created_at::date = CURRENT_DATE"
+    );
+    const hojeResgates = await pool.query(
+      "SELECT COUNT(*) FROM visitas_promo WHERE created_at::date = CURRENT_DATE AND tipo = 'resgate'"
     );
     const semana = await pool.query(
       "SELECT COUNT(*) FROM visitas_promo WHERE created_at >= NOW() - INTERVAL '7 days'"
@@ -1980,7 +1986,8 @@ app.get("/admin/promo/visitas", verificarToken, async (req, res) => {
     );
 
     const porDia = await pool.query(`
-      SELECT DATE(created_at) as dia, COUNT(*) as total
+      SELECT DATE(created_at) as dia, COUNT(*) as total,
+        SUM(CASE WHEN tipo = 'resgate' THEN 1 ELSE 0 END) as resgates
       FROM visitas_promo
       WHERE created_at >= NOW() - INTERVAL '30 days'
       GROUP BY dia ORDER BY dia DESC
@@ -1994,7 +2001,7 @@ app.get("/admin/promo/visitas", verificarToken, async (req, res) => {
     `);
 
     const recentes = await pool.query(`
-      SELECT id, ip, user_agent, referrer, created_at
+      SELECT id, tipo, ip, user_agent, referrer, created_at
       FROM visitas_promo
       ORDER BY created_at DESC
       LIMIT 50
@@ -2002,7 +2009,10 @@ app.get("/admin/promo/visitas", verificarToken, async (req, res) => {
 
     res.json({
       total: parseInt(total.rows[0].count),
+      totalAcessos: parseInt(totalAcessos.rows[0].count),
+      totalResgates: parseInt(totalResgates.rows[0].count),
       hoje: parseInt(hoje.rows[0].count),
+      hojeResgates: parseInt(hojeResgates.rows[0].count),
       semana: parseInt(semana.rows[0].count),
       mes: parseInt(mes.rows[0].count),
       porDia: porDia.rows,
