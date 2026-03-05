@@ -1972,6 +1972,19 @@ function obterTokenMelhorEnvio() {
     .trim();
 }
 
+function parsePrecoFrete(valor) {
+  if (typeof valor === "number") return valor;
+  if (valor === null || valor === undefined) return NaN;
+  const txt = String(valor).trim();
+  if (!txt) return NaN;
+  // Suporta "12.34", "12,34", "R$ 12,34"
+  const limpo = txt
+    .replace(/[^\d,.-]/g, "")
+    .replace(/\.(?=\d{3}(?:\D|$))/g, "")
+    .replace(",", ".");
+  return Number(limpo);
+}
+
 function calcularFreteFallback(uf, pesoTotal) {
   const fretesBase = {
     'SP': 15, 'RJ': 18, 'MG': 20, 'ES': 22, 'PR': 25, 'SC': 27, 'RS': 30,
@@ -2038,12 +2051,27 @@ app.post("/frete/calcular", async (req, res) => {
 
         const opcoes = response.data
           .filter(s => !s.error)
-          .map(s => ({
-            servico: s.name,
-            preco: parseFloat(s.custom_price || s.price),
-            prazo: parseInt(s.custom_delivery_time || s.delivery_time),
-            erro: null
-          }));
+          .map(s => {
+            const precoCustom = parsePrecoFrete(s.custom_price);
+            const precoBase = parsePrecoFrete(s.price);
+            const preco =
+              Number.isFinite(precoCustom) && precoCustom > 0
+                ? precoCustom
+                : precoBase;
+
+            const prazo = parseInt(s.custom_delivery_time || s.delivery_time, 10);
+            if (!Number.isFinite(preco) || preco <= 0 || !Number.isFinite(prazo) || prazo <= 0) {
+              return null;
+            }
+
+            return {
+              servico: s.name,
+              preco: Math.round(preco * 100) / 100,
+              prazo,
+              erro: null
+            };
+          })
+          .filter(Boolean);
 
         if (opcoes.length > 0) {
           return res.json(opcoes);
