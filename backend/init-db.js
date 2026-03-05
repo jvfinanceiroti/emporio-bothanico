@@ -168,6 +168,24 @@ async function initDatabase() {
       console.log("⚠️  Índice idx_pedidos_data não criado");
     }
 
+    // Criar tabela de visitas da promoção (QR code)
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS visitas_promo (
+          id SERIAL PRIMARY KEY,
+          ip VARCHAR(100),
+          user_agent TEXT,
+          referrer TEXT,
+          created_at TIMESTAMP DEFAULT NOW()
+        );
+      `);
+      await pool.query(`
+        CREATE INDEX IF NOT EXISTS idx_visitas_promo_data ON visitas_promo(created_at);
+      `);
+    } catch (err) {
+      console.log("⚠️ visitas_promo: já existe ou erro:", err.message);
+    }
+
     console.log("✅ Banco de dados verificado e pronto!");
     await pool.end();
   } catch (error) {

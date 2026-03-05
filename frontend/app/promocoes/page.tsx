@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
+import { API_URL } from "@/lib/api";
 import { SiteFooter } from "@/components/SiteFooter";
 
 export default function PromocoesPage() {
@@ -10,6 +11,10 @@ export default function PromocoesPage() {
   const [showCta, setShowCta] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
   const lastTimeRef = useRef(0);
+
+  useEffect(() => {
+    fetch(`${API_URL}/promo/visita`, { method: "POST" }).catch(() => {});
+  }, []);
 
   const handleTimeUpdate = () => {
     const video = videoRef.current;

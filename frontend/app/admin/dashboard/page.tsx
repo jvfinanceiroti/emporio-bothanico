@@ -129,6 +129,16 @@ function DashboardConteudo() {
             gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))",
             gap: "clamp(12px, 3vw, 20px)"
           }}>
+            {temPermissao('pode_acessar_dashboard') && (
+              <ActionButton
+                href="/admin/promocoes"
+                icon="🎯"
+                title="Promoções & QR Code"
+                description="Visitas, estatísticas e QR Code"
+                color="#667eea"
+              />
+            )}
+
             {temPermissao('pode_criar_produtos') && (
               <ActionButton
                 href="/admin/produtos"

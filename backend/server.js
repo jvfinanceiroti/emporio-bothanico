@@ -1945,3 +1945,88 @@ app.delete("/admin/produtos/:id", verificarToken, async (req, res) => {
 
   res.json({ ok: true });
 });
+
+// =============================================
+// PROMOÇÕES - QR CODE & VISITAS
+// =============================================
+
+app.post("/promo/visita", async (req, res) => {
+  try {
+    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "desconhecido";
+    const user_agent = req.headers["user-agent"] || "";
+    const referrer = req.headers["referer"] || req.headers["referrer"] || "";
+    await pool.query(
+      "INSERT INTO visitas_promo (ip, user_agent, referrer) VALUES ($1, $2, $3)",
+      [String(ip).split(",")[0].trim(), user_agent, referrer]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Erro ao registrar visita promo:", err);
+    res.status(500).json({ error: "Erro ao registrar visita" });
+  }
+});
+
+app.get("/admin/promo/visitas", verificarToken, async (req, res) => {
+  try {
+    const total = await pool.query("SELECT COUNT(*) FROM visitas_promo");
+    const hoje = await pool.query(
+      "SELECT COUNT(*) FROM visitas_promo WHERE created_at::date = CURRENT_DATE"
+    );
+    const semana = await pool.query(
+      "SELECT COUNT(*) FROM visitas_promo WHERE created_at >= NOW() - INTERVAL '7 days'"
+    );
+    const mes = await pool.query(
+      "SELECT COUNT(*) FROM visitas_promo WHERE created_at >= NOW() - INTERVAL '30 days'"
+    );
+
+    const porDia = await pool.query(`
+      SELECT DATE(created_at) as dia, COUNT(*) as total
+      FROM visitas_promo
+      WHERE created_at >= NOW() - INTERVAL '30 days'
+      GROUP BY dia ORDER BY dia DESC
+    `);
+
+    const porHora = await pool.query(`
+      SELECT EXTRACT(HOUR FROM created_at) as hora, COUNT(*) as total
+      FROM visitas_promo
+      WHERE created_at >= NOW() - INTERVAL '30 days'
+      GROUP BY hora ORDER BY hora
+    `);
+
+    const recentes = await pool.query(`
+      SELECT id, ip, user_agent, referrer, created_at
+      FROM visitas_promo
+      ORDER BY created_at DESC
+      LIMIT 50
+    `);
+
+    res.json({
+      total: parseInt(total.rows[0].count),
+      hoje: parseInt(hoje.rows[0].count),
+      semana: parseInt(semana.rows[0].count),
+      mes: parseInt(mes.rows[0].count),
+      porDia: porDia.rows,
+      porHora: porHora.rows,
+      recentes: recentes.rows
+    });
+  } catch (err) {
+    console.error("Erro ao buscar visitas promo:", err);
+    res.status(500).json({ error: "Erro ao buscar visitas" });
+  }
+});
+
+app.get("/admin/promo/qrcode", verificarToken, async (req, res) => {
+  try {
+    const siteUrl = process.env.FRONTEND_URL || "https://emporiobothanico.com.br";
+    const promoUrl = `${siteUrl}/promocoes`;
+    const qrDataUrl = await QRCode.toDataURL(promoUrl, {
+      width: 1024,
+      margin: 2,
+      color: { dark: "#2d5a4a", light: "#ffffff" }
+    });
+    res.json({ qrcode: qrDataUrl, url: promoUrl });
+  } catch (err) {
+    console.error("Erro ao gerar QR code:", err);
+    res.status(500).json({ error: "Erro ao gerar QR code" });
+  }
+});

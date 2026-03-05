@@ -45,6 +45,7 @@ export default function AdminHeader() {
 
   const getMenuAtivo = () => {
     if (pathname?.includes("/dashboard")) return "dashboard";
+    if (pathname?.includes("/promocoes")) return "promocoes";
     if (pathname?.includes("/produtos")) return "produtos";
     if (pathname?.includes("/pedidos")) return "pedidos";
     if (pathname?.includes("/usuarios")) return "usuarios";
@@ -164,6 +165,14 @@ export default function AdminHeader() {
               href={getAdminPath("/dashboard")}
               label="📊 Dashboard"
               ativo={menuAtivo === "dashboard"}
+            />
+          )}
+
+          {temPermissao('pode_acessar_dashboard') && (
+            <MenuLink
+              href={getAdminPath("/promocoes")}
+              label="🎯 Promoções"
+              ativo={menuAtivo === "promocoes"}
             />
           )}
 
