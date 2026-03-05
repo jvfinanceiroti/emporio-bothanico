@@ -6,6 +6,7 @@ const multer = require("multer");
 const path = require("path");
 const bcrypt = require("bcrypt");
 const QRCode = require("qrcode");
+const axios = require("axios");
 const { 
   verificarToken, 
   verificarAdmin,
@@ -1944,6 +1945,124 @@ app.delete("/admin/produtos/:id", verificarToken, async (req, res) => {
   );
 
   res.json({ ok: true });
+});
+
+// =============================================
+// FRETE - CÁLCULO VIA MELHOR ENVIO / FALLBACK
+// =============================================
+
+const CEP_ORIGEM_LOJA = "35900082"; // Itabira - MG
+const MELHOR_ENVIO_URL = process.env.MELHOR_ENVIO_SANDBOX === "true"
+  ? "https://sandbox.melhorenvio.com.br"
+  : "https://melhorenvio.com.br";
+
+function calcularFreteFallback(uf, pesoTotal) {
+  const fretesBase = {
+    'SP': 15, 'RJ': 18, 'MG': 20, 'ES': 22, 'PR': 25, 'SC': 27, 'RS': 30,
+    'GO': 28, 'DF': 25, 'MT': 35, 'MS': 32, 'BA': 30, 'SE': 32, 'AL': 33,
+    'PE': 35, 'PB': 36, 'RN': 37, 'CE': 38, 'PI': 40, 'MA': 42, 'PA': 45,
+    'AP': 50, 'AM': 52, 'RR': 55, 'AC': 57, 'RO': 48, 'TO': 40
+  };
+  const base = fretesBase[uf] || 35;
+  let pac = base;
+  if (pesoTotal > 1) pac += (pesoTotal - 1) * 5;
+  const sedex = Math.round(pac * 1.6 * 100) / 100;
+  return [
+    { servico: "PAC", preco: Math.round(pac * 100) / 100, prazo: uf === "MG" ? 5 : 10, erro: null },
+    { servico: "SEDEX", preco: sedex, prazo: uf === "MG" ? 2 : 5, erro: null }
+  ];
+}
+
+app.post("/frete/calcular", async (req, res) => {
+  try {
+    const { cepDestino, produtos } = req.body;
+    if (!cepDestino || !produtos || !Array.isArray(produtos) || produtos.length === 0) {
+      return res.status(400).json({ error: "CEP e produtos são obrigatórios" });
+    }
+
+    const cepLimpo = String(cepDestino).replace(/\D/g, "");
+    if (cepLimpo.length !== 8) {
+      return res.status(400).json({ error: "CEP inválido" });
+    }
+
+    const token = process.env.MELHOR_ENVIO_TOKEN;
+
+    if (token) {
+      try {
+        const produtosME = produtos.map(p => ({
+          id: String(p.id),
+          width: p.largura_cm || 11,
+          height: p.altura_cm || 10,
+          length: p.comprimento_cm || 16,
+          weight: p.peso_kg || 0.3,
+          insurance_value: Number(p.preco) || 0,
+          quantity: p.quantidade || 1
+        }));
+
+        const response = await axios.post(
+          `${MELHOR_ENVIO_URL}/api/v2/me/shipment/calculate`,
+          {
+            from: { postal_code: CEP_ORIGEM_LOJA },
+            to: { postal_code: cepLimpo },
+            products: produtosME,
+            options: { receipt: false, own_hand: false },
+            services: "1,2"
+          },
+          {
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+              "User-Agent": "Emporio Bothanico (contato@emporiobothanico.com.br)"
+            },
+            timeout: 10000
+          }
+        );
+
+        const opcoes = response.data
+          .filter(s => !s.error)
+          .map(s => ({
+            servico: s.name,
+            preco: parseFloat(s.custom_price || s.price),
+            prazo: parseInt(s.custom_delivery_time || s.delivery_time),
+            erro: null
+          }));
+
+        if (opcoes.length > 0) {
+          return res.json(opcoes);
+        }
+
+        // Serviços retornaram erro, tentar extrair info
+        const erros = response.data.filter(s => s.error);
+        if (erros.length > 0) {
+          console.warn("MelhorEnvio retornou erros:", erros.map(e => e.error));
+        }
+      } catch (apiErr) {
+        console.error("Erro MelhorEnvio API:", apiErr.response?.data || apiErr.message);
+      }
+    }
+
+    // Fallback: buscar UF via ViaCEP para calcular
+    let uf = "MG";
+    try {
+      const viaCep = await axios.get(`https://viacep.com.br/ws/${cepLimpo}/json/`, { timeout: 5000 });
+      if (viaCep.data && !viaCep.data.erro) {
+        uf = viaCep.data.uf || "MG";
+      }
+    } catch (_) {}
+
+    let pesoTotal = 0;
+    produtos.forEach(p => {
+      pesoTotal += (p.peso_kg || 0.3) * (p.quantidade || 1);
+    });
+
+    const fallback = calcularFreteFallback(uf, pesoTotal);
+    return res.json(fallback);
+
+  } catch (err) {
+    console.error("Erro geral frete:", err);
+    res.status(500).json({ error: "Erro ao calcular frete" });
+  }
 });
 
 // =============================================

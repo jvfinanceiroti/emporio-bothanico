@@ -42,6 +42,8 @@ export default function CheckoutPage() {
   const [carregandoCep, setCarregandoCep] = useState(false);
   const FRETE_GRATIS_PAC = 299;
   const FRETE_GRATIS_SEDEX = 800;
+  const [prazoPac, setPrazoPac] = useState<number | null>(null);
+  const [prazoSedex, setPrazoSedex] = useState<number | null>(null);
   const [carregandoFrete, setCarregandoFrete] = useState(false);
   const [mostrarAlerta, setMostrarAlerta] = useState(false);
   const [mensagemAlerta, setMensagemAlerta] = useState("");
@@ -137,9 +139,8 @@ export default function CheckoutPage() {
           setCidade(data.localidade || "");
           setEstado(data.uf || "");
 
-          // Calcular frete automaticamente após buscar CEP
           if (numero) {
-            calcularFrete(data.uf);
+            calcularFreteAPI(cepLimpo);
           }
         } catch (error) {
           setMensagemAlerta("Erro ao buscar CEP. Verifique sua conexão.");
@@ -158,73 +159,54 @@ export default function CheckoutPage() {
   }, [cep]);
 
   useEffect(() => {
-    if (cep.replace(/\D/g, "").length === 8 && numero && estado) {
-      calcularFrete(estado);
+    const cepLimpo = cep.replace(/\D/g, "");
+    if (cepLimpo.length === 8 && numero && estado) {
+      calcularFreteAPI(cepLimpo);
     }
   }, [numero, estado, cep]);
 
-  const calcularFrete = async (uf: string) => {
+  const calcularFreteAPI = async (cepDestino: string) => {
+    if (carrinho.length === 0) return;
     setCarregandoFrete(true);
 
-    // Calcular peso total e dimensões máximas (carrinho já está agrupado)
-    let pesoTotal = 0;
-    let alturaMax = 0;
-    let larguraMax = 0;
-    let comprimentoMax = 0;
+    try {
+      const res = await fetch(`${API_URL}/frete/calcular`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cepDestino,
+          produtos: carrinho.map(item => ({
+            id: item.id,
+            peso_kg: item.peso_kg,
+            altura_cm: item.altura_cm,
+            largura_cm: item.largura_cm,
+            comprimento_cm: item.comprimento_cm,
+            preco: item.preco,
+            quantidade: item.quantidade || 1,
+          })),
+        }),
+      });
 
-    carrinho.forEach(item => {
-      const quantidade = item.quantidade || 1;
-      pesoTotal += (item.peso_kg || 0.5) * quantidade;
-      alturaMax = Math.max(alturaMax, item.altura_cm || 10);
-      larguraMax = Math.max(larguraMax, item.largura_cm || 10);
-      comprimentoMax = Math.max(comprimentoMax, item.comprimento_cm || 15);
-    });
+      if (!res.ok) throw new Error("Erro ao calcular frete");
+      const opcoes = await res.json();
 
-    // Simular cálculo de frete baseado no estado e peso
-    await new Promise(resolve => setTimeout(resolve, 800));
+      const pac = opcoes.find((o: any) => o.servico.toUpperCase().includes("PAC"));
+      const sedex = opcoes.find((o: any) => o.servico.toUpperCase().includes("SEDEX"));
 
-    // Frete base por região
-    const fretesBase: Record<string, number> = {
-      'SP': 15.00,
-      'RJ': 18.00,
-      'MG': 20.00,
-      'ES': 22.00,
-      'PR': 25.00,
-      'SC': 27.00,
-      'RS': 30.00,
-      'GO': 28.00,
-      'DF': 25.00,
-      'MT': 35.00,
-      'MS': 32.00,
-      'BA': 30.00,
-      'SE': 32.00,
-      'AL': 33.00,
-      'PE': 35.00,
-      'PB': 36.00,
-      'RN': 37.00,
-      'CE': 38.00,
-      'PI': 40.00,
-      'MA': 42.00,
-      'PA': 45.00,
-      'AP': 50.00,
-      'AM': 52.00,
-      'RR': 55.00,
-      'AC': 57.00,
-      'RO': 48.00,
-      'TO': 40.00
-    };
-
-    const valorPac = fretesBase[uf] || 35.00;
-    let valorPacFinal = valorPac;
-    if (pesoTotal > 1) {
-      valorPacFinal += (pesoTotal - 1) * 5.00;
+      setFretePac(pac ? pac.preco : null);
+      setFreteSedex(sedex ? sedex.preco : null);
+      setPrazoPac(pac ? pac.prazo : null);
+      setPrazoSedex(sedex ? sedex.prazo : null);
+    } catch {
+      setFretePac(null);
+      setFreteSedex(null);
+      setPrazoPac(null);
+      setPrazoSedex(null);
+      setMensagemAlerta("Erro ao calcular frete. Tente novamente.");
+      setMostrarAlerta(true);
+    } finally {
+      setCarregandoFrete(false);
     }
-    // SEDEX é mais caro (~1.6x PAC)
-    const valorSedexFinal = Math.round(valorPacFinal * 1.6 * 100) / 100;
-
-    setFretePac(valorPacFinal);
-    setFreteSedex(valorSedexFinal);
-    setCarregandoFrete(false);
   };
 
   const validarFormulario = () => {
@@ -1082,7 +1064,9 @@ export default function CheckoutPage() {
                           transition: "all 0.2s"
                         }}
                       >
-                        <div style={{ fontWeight: "700", color: "#0a0a0a", fontSize: "clamp(14px, 3.5vw, 15px)", marginBottom: "2px" }}>PAC</div>
+                        <div style={{ fontWeight: "700", color: "#0a0a0a", fontSize: "clamp(14px, 3.5vw, 15px)", marginBottom: "2px" }}>
+                          PAC {prazoPac && <span style={{ fontWeight: "400", fontSize: "11px", color: "#888" }}>({prazoPac} {prazoPac === 1 ? "dia útil" : "dias úteis"})</span>}
+                        </div>
                         <div style={{ fontSize: "clamp(12px, 2.8vw, 13px)", color: "#666" }}>
                           {subtotal >= FRETE_GRATIS_PAC ? "Grátis" : `R$ ${(fretePac ?? 0).toFixed(2).replace(".", ",")}`}
                           {subtotal >= FRETE_GRATIS_PAC && <span style={{ display: "block", fontSize: "11px", color: "var(--success)" }}>Compra acima de R$ 299</span>}
@@ -1103,7 +1087,9 @@ export default function CheckoutPage() {
                           transition: "all 0.2s"
                         }}
                       >
-                        <div style={{ fontWeight: "700", color: "#0a0a0a", fontSize: "clamp(14px, 3.5vw, 15px)", marginBottom: "2px" }}>SEDEX</div>
+                        <div style={{ fontWeight: "700", color: "#0a0a0a", fontSize: "clamp(14px, 3.5vw, 15px)", marginBottom: "2px" }}>
+                          SEDEX {prazoSedex && <span style={{ fontWeight: "400", fontSize: "11px", color: "#888" }}>({prazoSedex} {prazoSedex === 1 ? "dia útil" : "dias úteis"})</span>}
+                        </div>
                         <div style={{ fontSize: "clamp(12px, 2.8vw, 13px)", color: "#666" }}>
                           {subtotal >= FRETE_GRATIS_SEDEX ? "Grátis" : `R$ ${(freteSedex ?? 0).toFixed(2).replace(".", ",")}`}
                           {subtotal >= FRETE_GRATIS_SEDEX && <span style={{ display: "block", fontSize: "11px", color: "var(--success)" }}>Compra acima de R$ 800</span>}

@@ -4,14 +4,29 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { StoreHeader } from "@/components/StoreHeader";
+import { API_URL } from "@/lib/api";
 
 interface ItemCarrinho {
   id: number;
   nome: string;
   preco: number;
   imagem_url?: string;
+  peso_kg?: number;
+  altura_cm?: number;
+  largura_cm?: number;
+  comprimento_cm?: number;
   quantidade: number;
 }
+
+interface OpcaoFrete {
+  servico: string;
+  preco: number;
+  prazo: number;
+  erro: string | null;
+}
+
+const FRETE_GRATIS_PAC = 299;
+const FRETE_GRATIS_SEDEX = 800;
 
 function getProdutoImagem(p: any) {
   const url = p?.imagem_url;
@@ -30,9 +45,11 @@ export default function CarrinhoPage() {
   const router = useRouter();
   const [carrinho, setCarrinho] = useState<ItemCarrinho[]>([]);
   const [cep, setCep] = useState("");
-  const [frete, setFrete] = useState<number | null>(null);
+  const [opcoesFrete, setOpcoesFrete] = useState<OpcaoFrete[]>([]);
+  const [tipoEnvio, setTipoEnvio] = useState<string>("PAC");
   const [carregandoFrete, setCarregandoFrete] = useState(false);
   const [erroFrete, setErroFrete] = useState("");
+  const [freteCalculado, setFreteCalculado] = useState(false);
 
   useEffect(() => {
     const carrinhoSalvo = JSON.parse(localStorage.getItem("carrinho") || "[]");
@@ -59,12 +76,20 @@ export default function CarrinhoPage() {
     );
     setCarrinho(novo);
     atualizarLocalStorage(novo);
+    if (freteCalculado) {
+      setFreteCalculado(false);
+      setOpcoesFrete([]);
+    }
   };
 
   const removerProduto = (id: number) => {
     const novo = carrinho.filter((item) => item.id !== id);
     setCarrinho(novo);
     atualizarLocalStorage(novo);
+    if (freteCalculado) {
+      setFreteCalculado(false);
+      setOpcoesFrete([]);
+    }
   };
 
   const calcularFrete = async () => {
@@ -73,20 +98,63 @@ export default function CarrinhoPage() {
       setErroFrete("CEP inválido. Digite 8 dígitos.");
       return;
     }
+    if (carrinho.length === 0) return;
+
     setCarregandoFrete(true);
     setErroFrete("");
-    await new Promise((r) => setTimeout(r, 1200));
-    const n = parseInt(cepNum);
-    if (n >= 1000000 && n <= 5999999) setFrete(0);
-    else if (n >= 6000000 && n <= 19999999) setFrete(15);
-    else if (n >= 20000000 && n <= 28999999) setFrete(12);
-    else if (n >= 29000000 && n <= 39999999) setFrete(18);
-    else setFrete(25);
-    setCarregandoFrete(false);
+    setOpcoesFrete([]);
+
+    try {
+      const res = await fetch(`${API_URL}/frete/calcular`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cepDestino: cepNum,
+          produtos: carrinho.map(item => ({
+            id: item.id,
+            peso_kg: item.peso_kg,
+            altura_cm: item.altura_cm,
+            largura_cm: item.largura_cm,
+            comprimento_cm: item.comprimento_cm,
+            preco: item.preco,
+            quantidade: item.quantidade,
+          })),
+        }),
+      });
+
+      if (!res.ok) throw new Error("Erro ao calcular frete");
+      const data: OpcaoFrete[] = await res.json();
+
+      if (data.length === 0) {
+        setErroFrete("Não foi possível calcular o frete para este CEP.");
+      } else {
+        setOpcoesFrete(data);
+        setFreteCalculado(true);
+        const temPac = data.find(o => o.servico.toUpperCase().includes("PAC"));
+        if (temPac) setTipoEnvio("PAC");
+        else setTipoEnvio(data[0].servico);
+      }
+    } catch {
+      setErroFrete("Erro ao calcular frete. Tente novamente.");
+    } finally {
+      setCarregandoFrete(false);
+    }
   };
 
   const subtotal = carrinho.reduce((acc, i) => acc + Number(i.preco) * i.quantidade, 0);
-  const total = subtotal + (frete ?? 0);
+
+  const getFreteValor = () => {
+    if (!freteCalculado || opcoesFrete.length === 0) return null;
+    const opcao = opcoesFrete.find(o => o.servico.toUpperCase().includes(tipoEnvio.toUpperCase())) || opcoesFrete[0];
+    const isPac = opcao.servico.toUpperCase().includes("PAC");
+    const isSedex = opcao.servico.toUpperCase().includes("SEDEX");
+    if (isPac && subtotal >= FRETE_GRATIS_PAC) return 0;
+    if (isSedex && subtotal >= FRETE_GRATIS_SEDEX) return 0;
+    return opcao.preco;
+  };
+
+  const freteAtual = getFreteValor();
+  const total = subtotal + (freteAtual ?? 0);
   const totalItens = carrinho.reduce((acc, i) => acc + i.quantidade, 0);
 
   const formatarCep = (v: string) => {
@@ -101,7 +169,6 @@ export default function CarrinhoPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        {/* Breadcrumbs */}
         <nav className="text-sm text-[var(--muted)] mb-8">
           <Link href="/" className="hover:text-[var(--accent)]">Home</Link>
           <span className="mx-2">›</span>
@@ -127,7 +194,6 @@ export default function CarrinhoPage() {
           </div>
         ) : (
           <div className="grid lg:grid-cols-[1fr_400px] gap-8 lg:gap-12 items-start">
-            {/* Lista de itens */}
             <div>
               <h1 className="text-2xl sm:text-3xl font-semibold text-[var(--foreground)] mb-6" style={{ fontFamily: "var(--font-logo)" }}>
                 Itens no Carrinho ({totalItens})
@@ -175,7 +241,6 @@ export default function CarrinhoPage() {
               </div>
             </div>
 
-            {/* Resumo - sticky */}
             <div className="lg:sticky lg:top-36">
               <div className="bg-white rounded-3xl shadow-[0_4px_40px_rgba(44,90,74,0.08)] border border-[var(--border)] p-6 sm:p-8">
                 <h2 className="text-xl font-semibold text-[var(--foreground)] mb-6" style={{ fontFamily: "var(--font-logo)" }}>
@@ -199,15 +264,75 @@ export default function CarrinhoPage() {
                       disabled={carregandoFrete}
                       className="px-6 py-3 bg-[var(--accent)] text-white font-bold rounded-xl hover:bg-[var(--accent-hover)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {carregandoFrete ? "..." : "OK"}
+                      {carregandoFrete ? (
+                        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                      ) : "OK"}
                     </button>
                   </div>
                   {erroFrete && <p className="text-red-500 text-sm mt-2 font-medium">{erroFrete}</p>}
-                  {frete !== null && (
-                    <p className="flex items-center gap-2 mt-3 text-[var(--success)] font-semibold text-sm">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
-                      {frete === 0 ? "Frete grátis!" : `Frete: R$ ${frete.toFixed(2).replace(".", ",")}`}
-                    </p>
+
+                  {/* Opções PAC / SEDEX */}
+                  {freteCalculado && opcoesFrete.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      {opcoesFrete.map((opcao) => {
+                        const isPac = opcao.servico.toUpperCase().includes("PAC");
+                        const isSedex = opcao.servico.toUpperCase().includes("SEDEX");
+                        const gratis = (isPac && subtotal >= FRETE_GRATIS_PAC) || (isSedex && subtotal >= FRETE_GRATIS_SEDEX);
+                        const selecionado = tipoEnvio.toUpperCase().includes(opcao.servico.toUpperCase().includes("SEDEX") ? "SEDEX" : "PAC");
+
+                        return (
+                          <button
+                            key={opcao.servico}
+                            onClick={() => setTipoEnvio(opcao.servico.toUpperCase().includes("SEDEX") ? "SEDEX" : "PAC")}
+                            className={`w-full text-left p-3 rounded-xl border-2 transition-all ${
+                              selecionado
+                                ? "border-[var(--accent)] bg-[var(--accent-light)]"
+                                : "border-[var(--border)] hover:border-[var(--accent)]/50"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                                  selecionado ? "border-[var(--accent)]" : "border-[var(--muted-light)]"
+                                }`}>
+                                  {selecionado && <div className="w-2 h-2 rounded-full bg-[var(--accent)]" />}
+                                </div>
+                                <div>
+                                  <span className="font-bold text-sm text-[var(--foreground)]">
+                                    {isSedex ? "SEDEX" : "PAC"}
+                                  </span>
+                                  <span className="text-xs text-[var(--muted)] ml-2">
+                                    {opcao.prazo} {opcao.prazo === 1 ? "dia útil" : "dias úteis"}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                {gratis ? (
+                                  <div>
+                                    <span className="text-[var(--success)] font-bold text-sm">Grátis</span>
+                                    <span className="block text-[10px] text-[var(--muted)] line-through">
+                                      R$ {opcao.preco.toFixed(2).replace(".", ",")}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="font-bold text-sm text-[var(--foreground)]">
+                                    R$ {opcao.preco.toFixed(2).replace(".", ",")}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                      {subtotal < FRETE_GRATIS_PAC && (
+                        <p className="text-[10px] text-[var(--muted)] mt-1">
+                          Frete grátis PAC acima de R$ {FRETE_GRATIS_PAC} | SEDEX acima de R$ {FRETE_GRATIS_SEDEX}
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -217,10 +342,10 @@ export default function CarrinhoPage() {
                     <span>Subtotal ({totalItens} {totalItens === 1 ? "item" : "itens"})</span>
                     <span className="font-semibold text-[var(--foreground)]">R$ {subtotal.toFixed(2).replace(".", ",")}</span>
                   </div>
-                  {frete !== null && (
+                  {freteAtual !== null && (
                     <div className="flex justify-between text-[var(--muted)]">
-                      <span>Frete</span>
-                      <span className="font-semibold text-[var(--foreground)]">{frete === 0 ? "Grátis" : `R$ ${frete.toFixed(2).replace(".", ",")}`}</span>
+                      <span>Frete ({tipoEnvio})</span>
+                      <span className="font-semibold text-[var(--foreground)]">{freteAtual === 0 ? "Grátis" : `R$ ${freteAtual.toFixed(2).replace(".", ",")}`}</span>
                     </div>
                   )}
                 </div>
@@ -244,7 +369,6 @@ export default function CarrinhoPage() {
                 </Link>
               </div>
 
-              {/* Trust badges */}
               <div className="mt-6 flex flex-wrap gap-3">
                 {["🚚 Envio rápido", "🔒 Compra segura", "↩️ Troca fácil"].map((t, i) => (
                   <span key={i} className="text-xs text-[var(--muted)] font-medium">{t}</span>
