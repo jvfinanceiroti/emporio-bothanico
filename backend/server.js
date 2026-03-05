@@ -1986,6 +1986,7 @@ app.post("/frete/calcular", async (req, res) => {
     }
 
     const token = process.env.MELHOR_ENVIO_TOKEN;
+    const permitirFallback = process.env.FRETE_PERMITIR_FALLBACK === "true";
 
     if (token) {
       try {
@@ -2032,14 +2033,37 @@ app.post("/frete/calcular", async (req, res) => {
           return res.json(opcoes);
         }
 
-        // Serviços retornaram erro, tentar extrair info
+        // Serviços retornaram erro
         const erros = response.data.filter(s => s.error);
         if (erros.length > 0) {
           console.warn("MelhorEnvio retornou erros:", erros.map(e => e.error));
+          if (!permitirFallback) {
+            return res.status(502).json({
+              error: "Não foi possível cotar frete no Melhor Envio",
+              detalhe: erros.map(e => e.error).join(" | ")
+            });
+          }
         }
       } catch (apiErr) {
         console.error("Erro MelhorEnvio API:", apiErr.response?.data || apiErr.message);
+        if (!permitirFallback) {
+          return res.status(502).json({
+            error: "Não foi possível cotar frete no Melhor Envio",
+            detalhe: apiErr.response?.data?.message || apiErr.message
+          });
+        }
       }
+    } else if (!permitirFallback) {
+      return res.status(503).json({
+        error: "Frete indisponível no momento",
+        detalhe: "MELHOR_ENVIO_TOKEN não configurado no backend"
+      });
+    }
+
+    if (!permitirFallback) {
+      return res.status(502).json({
+        error: "Não foi possível cotar frete no Melhor Envio"
+      });
     }
 
     // Fallback: buscar UF via ViaCEP para calcular
