@@ -1956,6 +1956,22 @@ const MELHOR_ENVIO_URL = process.env.MELHOR_ENVIO_SANDBOX === "true"
   ? "https://sandbox.melhorenvio.com.br"
   : "https://www.melhorenvio.com.br";
 
+function obterTokenMelhorEnvio() {
+  // Aceita variações comuns de nome para evitar erro de configuração em painel.
+  const bruto =
+    process.env.MELHOR_ENVIO_TOKEN ||
+    process.env["MELHOR_ENVIO-TOKEN"] ||
+    process.env.MELHORENVIO_TOKEN ||
+    "";
+
+  // Remove aspas acidentais e prefixo Bearer, se vier colado no valor.
+  return String(bruto)
+    .trim()
+    .replace(/^"(.*)"$/, "$1")
+    .replace(/^Bearer\s+/i, "")
+    .trim();
+}
+
 function calcularFreteFallback(uf, pesoTotal) {
   const fretesBase = {
     'SP': 15, 'RJ': 18, 'MG': 20, 'ES': 22, 'PR': 25, 'SC': 27, 'RS': 30,
@@ -1985,7 +2001,7 @@ app.post("/frete/calcular", async (req, res) => {
       return res.status(400).json({ error: "CEP inválido" });
     }
 
-    const token = process.env.MELHOR_ENVIO_TOKEN;
+    const token = obterTokenMelhorEnvio();
     const permitirFallback = process.env.FRETE_PERMITIR_FALLBACK === "true";
 
     if (token) {
@@ -2056,7 +2072,7 @@ app.post("/frete/calcular", async (req, res) => {
     } else if (!permitirFallback) {
       return res.status(503).json({
         error: "Frete indisponível no momento",
-        detalhe: "MELHOR_ENVIO_TOKEN não configurado no backend"
+        detalhe: "Token do Melhor Envio não configurado (MELHOR_ENVIO_TOKEN)"
       });
     }
 
