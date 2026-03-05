@@ -1952,6 +1952,7 @@ app.delete("/admin/produtos/:id", verificarToken, async (req, res) => {
 // =============================================
 
 const CEP_ORIGEM_LOJA = "35900082"; // Itabira - MG
+const CIDADE_ORIGEM_LOJA = "itabira";
 const MELHOR_ENVIO_URL = process.env.MELHOR_ENVIO_SANDBOX === "true"
   ? "https://sandbox.melhorenvio.com.br"
   : "https://www.melhorenvio.com.br";
@@ -2013,6 +2014,20 @@ app.post("/frete/calcular", async (req, res) => {
     if (cepLimpo.length !== 8) {
       return res.status(400).json({ error: "CEP inválido" });
     }
+
+    // Mesmo município da loja => retirada local, sem PAC/SEDEX.
+    try {
+      const viaCepDestino = await axios.get(`https://viacep.com.br/ws/${cepLimpo}/json/`, { timeout: 5000 });
+      if (viaCepDestino.data && !viaCepDestino.data.erro) {
+        const cidadeDestino = String(viaCepDestino.data.localidade || "").trim().toLowerCase();
+        const ufDestino = String(viaCepDestino.data.uf || "").trim().toUpperCase();
+        if (ufDestino === "MG" && cidadeDestino === CIDADE_ORIGEM_LOJA) {
+          return res.json([
+            { servico: "RETIRADA_NA_LOJA", preco: 0, prazo: 0, erro: null }
+          ]);
+        }
+      }
+    } catch (_) {}
 
     const token = obterTokenMelhorEnvio();
     const permitirFallback = process.env.FRETE_PERMITIR_FALLBACK === "true";

@@ -38,7 +38,8 @@ export default function CheckoutPage() {
   const [formaPagamento, setFormaPagamento] = useState("");
   const [fretePac, setFretePac] = useState<number | null>(null);
   const [freteSedex, setFreteSedex] = useState<number | null>(null);
-  const [tipoEnvio, setTipoEnvio] = useState<"pac" | "sedex">("pac");
+  const [retiradaNaLoja, setRetiradaNaLoja] = useState(false);
+  const [tipoEnvio, setTipoEnvio] = useState<"pac" | "sedex" | "retirada">("pac");
   const [carregandoCep, setCarregandoCep] = useState(false);
   const FRETE_GRATIS_PAC = 299;
   const FRETE_GRATIS_SEDEX = 800;
@@ -195,16 +196,27 @@ export default function CheckoutPage() {
 
       const pac = opcoes.find((o: any) => o.servico.toUpperCase().includes("PAC"));
       const sedex = opcoes.find((o: any) => o.servico.toUpperCase().includes("SEDEX"));
+      const retirada = opcoes.find((o: any) => o.servico.toUpperCase().includes("RETIRADA"));
 
       setFretePac(pac ? pac.preco : null);
       setFreteSedex(sedex ? sedex.preco : null);
       setPrazoPac(pac ? pac.prazo : null);
       setPrazoSedex(sedex ? sedex.prazo : null);
+      setRetiradaNaLoja(!!retirada);
+
+      if (retirada) {
+        setTipoEnvio("retirada");
+      } else if (pac) {
+        setTipoEnvio("pac");
+      } else if (sedex) {
+        setTipoEnvio("sedex");
+      }
     } catch (err: any) {
       setFretePac(null);
       setFreteSedex(null);
       setPrazoPac(null);
       setPrazoSedex(null);
+      setRetiradaNaLoja(false);
       setMensagemAlerta(err?.message || "Erro ao calcular frete. Tente novamente.");
       setMostrarAlerta(true);
     } finally {
@@ -276,7 +288,7 @@ export default function CheckoutPage() {
       return false;
     }
 
-    if (fretePac === null && freteSedex === null && cep.replace(/\D/g, "").length === 8) {
+    if (!retiradaNaLoja && fretePac === null && freteSedex === null && cep.replace(/\D/g, "").length === 8) {
       setMensagemAlerta("Aguarde o cálculo do frete ou verifique o CEP e número.");
       setMostrarAlerta(true);
       return false;
@@ -421,7 +433,7 @@ export default function CheckoutPage() {
   const subtotal = carrinho.reduce((acc, item) => acc + (Number(item.preco) * (item.quantidade || 1)), 0);
   const valorFretePac = subtotal >= FRETE_GRATIS_PAC ? 0 : (fretePac ?? 0);
   const valorFreteSedex = subtotal >= FRETE_GRATIS_SEDEX ? 0 : (freteSedex ?? 0);
-  const frete = tipoEnvio === "pac" ? valorFretePac : valorFreteSedex;
+  const frete = tipoEnvio === "retirada" ? 0 : (tipoEnvio === "pac" ? valorFretePac : valorFreteSedex);
   const total = subtotal + frete;
 
   // carrinho já está agrupado, não precisa reagrupar
@@ -1046,12 +1058,37 @@ export default function CheckoutPage() {
                   <div style={{ fontSize: "clamp(14px, 3.5vw, 15px)", color: "#666", marginBottom: "clamp(12px, 3vw, 16px)" }}>
                     Frete (calculando...)
                   </div>
-                ) : (fretePac !== null || freteSedex !== null) ? (
+                ) : (retiradaNaLoja || fretePac !== null || freteSedex !== null) ? (
                   <div style={{ marginBottom: "clamp(12px, 3vw, 16px)" }}>
                     <div style={{ fontSize: "clamp(12px, 2.8vw, 13px)", fontWeight: "600", color: "#666", marginBottom: "clamp(8px, 2vw, 10px)" }}>
                       Escolha o envio:
                     </div>
                     <div style={{ display: "flex", gap: "clamp(8px, 2vw, 12px)", flexWrap: "wrap" }}>
+                      {retiradaNaLoja && (
+                        <button
+                          type="button"
+                          onClick={() => setTipoEnvio("retirada")}
+                          style={{
+                            flex: 1,
+                            minWidth: "120px",
+                            padding: "clamp(12px, 3vw, 14px) clamp(14px, 3.5vw, 16px)",
+                            borderRadius: "12px",
+                            border: `2px solid ${tipoEnvio === "retirada" ? "var(--accent)" : "rgba(0,0,0,0.1)"}`,
+                            background: tipoEnvio === "retirada" ? "rgba(45, 90, 74, 0.06)" : "white",
+                            cursor: "pointer",
+                            textAlign: "left",
+                            transition: "all 0.2s"
+                          }}
+                        >
+                          <div style={{ fontWeight: "700", color: "#0a0a0a", fontSize: "clamp(14px, 3.5vw, 15px)", marginBottom: "2px" }}>
+                            Retirada na Loja
+                          </div>
+                          <div style={{ fontSize: "clamp(12px, 2.8vw, 13px)", color: "#666" }}>
+                            Grátis <span style={{ display: "block", fontSize: "11px", color: "#888" }}>Mesmo município (Itabira/MG)</span>
+                          </div>
+                        </button>
+                      )}
+                      {!retiradaNaLoja && (
                       <button
                         type="button"
                         onClick={() => setTipoEnvio("pac")}
@@ -1075,6 +1112,8 @@ export default function CheckoutPage() {
                           {subtotal >= FRETE_GRATIS_PAC && <span style={{ display: "block", fontSize: "11px", color: "var(--success)" }}>Compra acima de R$ 299</span>}
                         </div>
                       </button>
+                      )}
+                      {!retiradaNaLoja && (
                       <button
                         type="button"
                         onClick={() => setTipoEnvio("sedex")}
@@ -1098,6 +1137,7 @@ export default function CheckoutPage() {
                           {subtotal >= FRETE_GRATIS_SEDEX && <span style={{ display: "block", fontSize: "11px", color: "var(--success)" }}>Compra acima de R$ 800</span>}
                         </div>
                       </button>
+                      )}
                     </div>
                   </div>
                 ) : (

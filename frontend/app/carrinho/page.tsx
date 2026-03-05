@@ -134,8 +134,12 @@ export default function CarrinhoPage() {
         setOpcoesFrete(data);
         setFreteCalculado(true);
         const temPac = data.find(o => o.servico.toUpperCase().includes("PAC"));
+        const temSedex = data.find(o => o.servico.toUpperCase().includes("SEDEX"));
+        const temRetirada = data.find(o => o.servico.toUpperCase().includes("RETIRADA"));
         if (temPac) setTipoEnvio("PAC");
-        else setTipoEnvio(data[0].servico);
+        else if (temSedex) setTipoEnvio("SEDEX");
+        else if (temRetirada) setTipoEnvio("RETIRADA");
+        else setTipoEnvio("PAC");
       }
     } catch (err: any) {
       setErroFrete(err?.message || "Erro ao calcular frete. Tente novamente.");
@@ -145,6 +149,12 @@ export default function CarrinhoPage() {
   };
 
   const subtotal = carrinho.reduce((acc, i) => acc + Number(i.preco) * i.quantidade, 0);
+  const labelTipoEnvio =
+    tipoEnvio.toUpperCase().includes("RETIRADA")
+      ? "RETIRADA NA LOJA"
+      : tipoEnvio.toUpperCase().includes("SEDEX")
+      ? "SEDEX"
+      : "PAC";
 
   const getFreteValor = () => {
     if (!freteCalculado || opcoesFrete.length === 0) return null;
@@ -283,13 +293,15 @@ export default function CarrinhoPage() {
                       {opcoesFrete.map((opcao) => {
                         const isPac = opcao.servico.toUpperCase().includes("PAC");
                         const isSedex = opcao.servico.toUpperCase().includes("SEDEX");
+                        const isRetirada = opcao.servico.toUpperCase().includes("RETIRADA");
                         const gratis = (isPac && subtotal >= FRETE_GRATIS_PAC) || (isSedex && subtotal >= FRETE_GRATIS_SEDEX);
-                        const selecionado = tipoEnvio.toUpperCase().includes(opcao.servico.toUpperCase().includes("SEDEX") ? "SEDEX" : "PAC");
+                        const chaveServico = isSedex ? "SEDEX" : isRetirada ? "RETIRADA" : "PAC";
+                        const selecionado = tipoEnvio.toUpperCase().includes(chaveServico);
 
                         return (
                           <button
                             key={opcao.servico}
-                            onClick={() => setTipoEnvio(opcao.servico.toUpperCase().includes("SEDEX") ? "SEDEX" : "PAC")}
+                            onClick={() => setTipoEnvio(chaveServico)}
                             className={`w-full text-left p-3 rounded-xl border-2 transition-all ${
                               selecionado
                                 ? "border-[var(--accent)] bg-[var(--accent-light)]"
@@ -305,11 +317,13 @@ export default function CarrinhoPage() {
                                 </div>
                                 <div>
                                   <span className="font-bold text-sm text-[var(--foreground)]">
-                                    {isSedex ? "SEDEX" : "PAC"}
+                                    {isRetirada ? "RETIRADA NA LOJA" : isSedex ? "SEDEX" : "PAC"}
                                   </span>
-                                  <span className="text-xs text-[var(--muted)] ml-2">
-                                    {opcao.prazo} {opcao.prazo === 1 ? "dia útil" : "dias úteis"}
-                                  </span>
+                                  {opcao.prazo > 0 && (
+                                    <span className="text-xs text-[var(--muted)] ml-2">
+                                      {opcao.prazo} {opcao.prazo === 1 ? "dia útil" : "dias úteis"}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                               <div className="text-right">
@@ -322,7 +336,7 @@ export default function CarrinhoPage() {
                                   </div>
                                 ) : (
                                   <span className="font-bold text-sm text-[var(--foreground)]">
-                                    R$ {opcao.preco.toFixed(2).replace(".", ",")}
+                                    {isRetirada ? "Grátis" : `R$ ${opcao.preco.toFixed(2).replace(".", ",")}`}
                                   </span>
                                 )}
                               </div>
@@ -347,7 +361,7 @@ export default function CarrinhoPage() {
                   </div>
                   {freteAtual !== null && (
                     <div className="flex justify-between text-[var(--muted)]">
-                      <span>Frete ({tipoEnvio})</span>
+                      <span>Frete ({labelTipoEnvio})</span>
                       <span className="font-semibold text-[var(--foreground)]">{freteAtual === 0 ? "Grátis" : `R$ ${freteAtual.toFixed(2).replace(".", ",")}`}</span>
                     </div>
                   )}
