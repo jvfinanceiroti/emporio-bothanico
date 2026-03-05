@@ -1954,7 +1954,7 @@ app.delete("/admin/produtos/:id", verificarToken, async (req, res) => {
 const CEP_ORIGEM_LOJA = "35900082"; // Itabira - MG
 const MELHOR_ENVIO_URL = process.env.MELHOR_ENVIO_SANDBOX === "true"
   ? "https://sandbox.melhorenvio.com.br"
-  : "https://melhorenvio.com.br";
+  : "https://www.melhorenvio.com.br";
 
 function calcularFreteFallback(uf, pesoTotal) {
   const fretesBase = {
