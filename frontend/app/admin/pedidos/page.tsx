@@ -64,7 +64,6 @@ function PedidosConteudo() {
   const [carregandoDetalhes, setCarregandoDetalhes] = useState(false);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 20;
-  const [editandoStatus, setEditandoStatus] = useState(false);
   const [novoStatus, setNovoStatus] = useState("");
   const [codigoRastreio, setCodigoRastreio] = useState("");
   const [salvandoStatus, setSalvandoStatus] = useState(false);
@@ -135,7 +134,6 @@ function PedidosConteudo() {
       setPedidoSelecionado(data);
       setNovoStatus(data.pedido.status);
       setCodigoRastreio(data.pedido.codigo_rastreio || "");
-      setEditandoStatus(false);
     } catch (error) {
       console.error("Erro ao carregar detalhes:", error);
     } finally {
@@ -146,9 +144,10 @@ function PedidosConteudo() {
   const pedidosFiltrados = pedidos.filter(pedido => {
     const matchNome = pedido.cliente_nome?.toLowerCase().includes(filtro.toLowerCase()) || false;
     const matchEmail = pedido.cliente_email?.toLowerCase().includes(filtro.toLowerCase()) || false;
+    const matchId = String(pedido.id).includes(filtro.trim());
     const matchStatus = statusFiltro === "todos" || pedido.status === statusFiltro;
     
-    return (matchNome || matchEmail) && matchStatus;
+    return (matchNome || matchEmail || matchId) && matchStatus;
   });
 
   // Cálculo da paginação
@@ -166,16 +165,16 @@ function PedidosConteudo() {
     switch (status) {
       case "pago":
       case "aprovado":
-        return { bg: "rgba(16, 185, 129, 0.1)", color: "#10b981", label: "✓ Pago" };
+        return { bg: "rgba(16, 185, 129, 0.1)", color: "#10b981", label: "🟢 Pago" };
       case "enviado":
-        return { bg: "rgba(59, 130, 246, 0.1)", color: "#3b82f6", label: "📦 Enviado" };
+        return { bg: "rgba(59, 130, 246, 0.1)", color: "#3b82f6", label: "🔵 Enviado" };
       case "entregue":
-        return { bg: "rgba(34, 197, 94, 0.1)", color: "#22c55e", label: "✓ Entregue" };
+        return { bg: "rgba(31, 41, 55, 0.08)", color: "#111827", label: "⚫ Entregue" };
       case "pendente":
       case "aguardando_pagamento":
-        return { bg: "rgba(245, 158, 11, 0.1)", color: "#f59e0b", label: "⏳ Pendente" };
+        return { bg: "rgba(245, 158, 11, 0.1)", color: "#f59e0b", label: "🟡 Pendente" };
       case "cancelado":
-        return { bg: "rgba(239, 68, 68, 0.1)", color: "#ef4444", label: "✗ Cancelado" };
+        return { bg: "rgba(239, 68, 68, 0.1)", color: "#ef4444", label: "🔴 Cancelado" };
       default:
         return { bg: "rgba(156, 163, 175, 0.1)", color: "#9ca3af", label: status };
     }
@@ -203,6 +202,15 @@ function PedidosConteudo() {
       case "boleto": return "📄 Boleto Bancário";
       default: return forma || "Não informado";
     }
+  };
+
+  const getStatusEtapa = (status: string) => {
+    const normalizado = (status || "").toLowerCase();
+    if (normalizado === "cancelado") return -1;
+    if (normalizado === "entregue") return 3;
+    if (normalizado === "enviado") return 2;
+    if (normalizado === "pago" || normalizado === "aprovado") return 1;
+    return 0;
   };
 
   const atualizarStatusPedido = async () => {
@@ -240,9 +248,7 @@ function PedidosConteudo() {
             codigo_rastreio: codigoRastreio
           }
         });
-        
-        setEditandoStatus(false);
-        
+
         // Notificação de sucesso
         const notification = document.createElement("div");
         notification.innerHTML = "✓ Status atualizado com sucesso!";
@@ -311,7 +317,7 @@ function PedidosConteudo() {
             {/* Busca */}
             <input
               type="text"
-              placeholder="Buscar por nome ou email..."
+              placeholder="Buscar por nome, email ou pedido..."
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
               style={{
@@ -343,11 +349,11 @@ function PedidosConteudo() {
               }}
             >
               <option value="todos">Todos os Status</option>
-              <option value="aguardando_pagamento">Pendente</option>
-              <option value="pago">Pago</option>
-              <option value="enviado">Enviado</option>
-              <option value="entregue">Entregue</option>
-              <option value="cancelado">Cancelado</option>
+              <option value="aguardando_pagamento">🟡 Pendente</option>
+              <option value="pago">🟢 Pago</option>
+              <option value="enviado">🔵 Enviado</option>
+              <option value="entregue">⚫ Entregue</option>
+              <option value="cancelado">🔴 Cancelado</option>
             </select>
           </div>
 
@@ -365,7 +371,7 @@ function PedidosConteudo() {
           </div>
         </div>
 
-        {/* Lista de Pedidos - Cards Mobile-First */}
+        {/* Lista de Pedidos */}
         {carregando ? (
           <div style={{
             background: "white",
@@ -401,81 +407,80 @@ function PedidosConteudo() {
             </p>
           </div>
         ) : (
-          <>
-            {/* NO MOBILE: Cards empilhados verticalmente */}
-            <div style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "clamp(12px, 3vw, 16px)"
-            }}>
-              {pedidosPaginados.map((pedido) => {
-                const statusInfo = getStatusColor(pedido.status);
-                return (
-                  <div
-                    key={pedido.id}
-                    onClick={() => carregarDetalhesPedido(pedido.id)}
-                    style={{
-                      background: "white",
-                      borderRadius: "clamp(8px, 2vw, 12px)",
-                      padding: "clamp(12px, 3vw, 16px)",
-                      border: "1px solid rgba(0,0,0,0.08)",
-                      cursor: "pointer",
-                      transition: "all 0.2s"
-                    }}
-                    onMouseOver={(e) => {
-                      e.currentTarget.style.background = "#fafafa";
-                      e.currentTarget.style.transform = "scale(1.01)";
-                    }}
-                    onMouseOut={(e) => {
-                      e.currentTarget.style.background = "white";
-                      e.currentTarget.style.transform = "scale(1)";
-                    }}
-                  >
-                    <div style={{ display: "flex", flexDirection: "column", gap: "clamp(8px, 2vw, 12px)" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "8px" }}>
-                        <div style={{ flex: "1", minWidth: "150px" }}>
-                          <div style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#666", marginBottom: "4px" }}>
-                            Pedido #{pedido.id}
-                          </div>
-                          <div style={{ fontSize: "clamp(13px, 2.8vw, 15px)", fontWeight: "600", color: "#0a0a0a", marginBottom: "4px" }}>
-                            {pedido.cliente_nome}
-                          </div>
-                          <div style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#666" }}>
-                            {pedido.cliente_email}
-                          </div>
-                          <div style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#666", marginTop: "2px" }}>
-                            {pedido.cliente_telefone}
-                          </div>
-                        </div>
-                        
-                        <div style={{ textAlign: "right" }}>
-                          <div style={{ fontSize: "clamp(16px, 4vw, 20px)", fontWeight: "800", color: "#10b981", marginBottom: "8px" }}>
-                            R$ {Number(pedido.total).toFixed(2)}
-                          </div>
-                          <span style={{
-                            padding: "clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)",
-                            background: statusInfo.bg,
-                            color: statusInfo.color,
-                            borderRadius: "clamp(6px, 1.5vw, 8px)",
-                            fontSize: "clamp(10px, 2vw, 11px)",
-                            fontWeight: "700",
-                            display: "inline-block",
-                            whiteSpace: "nowrap"
-                          }}>
-                            {statusInfo.label}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div style={{ fontSize: "clamp(10px, 2vw, 12px)", color: "#999", paddingTop: "8px", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-                        {formatarData(pedido.criado_em)}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </>
+          <div style={{
+            background: "white",
+            borderRadius: "clamp(12px, 3vw, 20px)",
+            border: "1px solid rgba(0,0,0,0.08)",
+            overflowX: "auto"
+          }}>
+            <table style={{ width: "100%", minWidth: "860px", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "#f8fafc" }}>
+                  <th style={{ textAlign: "left", padding: "12px 14px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Pedido</th>
+                  <th style={{ textAlign: "left", padding: "12px 14px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Cliente</th>
+                  <th style={{ textAlign: "left", padding: "12px 14px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Data</th>
+                  <th style={{ textAlign: "left", padding: "12px 14px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Status</th>
+                  <th style={{ textAlign: "left", padding: "12px 14px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Total</th>
+                  <th style={{ textAlign: "left", padding: "12px 14px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pedidosPaginados.map((pedido) => {
+                  const statusInfo = getStatusColor(pedido.status);
+                  return (
+                    <tr
+                      key={pedido.id}
+                      onClick={() => carregarDetalhesPedido(pedido.id)}
+                      style={{ borderTop: "1px solid rgba(0,0,0,0.06)", cursor: "pointer", transition: "background-color 0.2s ease" }}
+                      onMouseOver={(e) => { e.currentTarget.style.background = "#fafafa"; }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = "white"; }}
+                    >
+                      <td style={{ padding: "10px 14px", fontSize: "13px", color: "#0a0a0a", fontWeight: 700 }}>#{pedido.id}</td>
+                      <td style={{ padding: "10px 14px", fontSize: "13px", color: "#111827", fontWeight: 600 }}>{pedido.cliente_nome}</td>
+                      <td style={{ padding: "10px 14px", fontSize: "12px", color: "#6b7280" }}>{formatarData(pedido.criado_em)}</td>
+                      <td style={{ padding: "10px 14px" }}>
+                        <span style={{
+                          padding: "4px 9px",
+                          background: statusInfo.bg,
+                          color: statusInfo.color,
+                          borderRadius: "999px",
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          display: "inline-block",
+                          whiteSpace: "nowrap"
+                        }}>
+                          {statusInfo.label}
+                        </span>
+                      </td>
+                      <td style={{ padding: "10px 14px", fontSize: "14px", color: "#10b981", fontWeight: 800 }}>
+                        R$ {Number(pedido.total).toFixed(2)}
+                      </td>
+                      <td style={{ padding: "10px 14px" }}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            carregarDetalhesPedido(pedido.id);
+                          }}
+                          style={{
+                            padding: "7px 10px",
+                            borderRadius: "8px",
+                            border: "1px solid rgba(0,0,0,0.12)",
+                            background: "white",
+                            color: "#0a0a0a",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            cursor: "pointer"
+                          }}
+                        >
+                          Ver Pedido
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
 
         {/* Resumo */}
@@ -739,6 +744,46 @@ function PedidosConteudo() {
 
                 {/* Conteúdo */}
                 <div style={{ padding: "32px" }}>
+                  <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "20px" }}>
+                    <button
+                      onClick={() => window.print()}
+                      style={{
+                        padding: "8px 12px",
+                        background: "#111827",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "8px",
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        cursor: "pointer"
+                      }}
+                    >
+                      🖨 Imprimir pedido
+                    </button>
+                    {podeAlterar && (
+                      <button
+                        onClick={() => {
+                          setNovoStatus("enviado");
+                          setTimeout(() => atualizarStatusPedido(), 0);
+                        }}
+                        disabled={salvandoStatus || pedidoSelecionado.pedido.status === "enviado" || pedidoSelecionado.pedido.status === "entregue"}
+                        style={{
+                          padding: "8px 12px",
+                          background: "#2563eb",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          opacity: salvandoStatus ? 0.7 : 1
+                        }}
+                      >
+                        📦 Marcar como enviado
+                      </button>
+                    )}
+                  </div>
+
                   {/* Status e Pagamento */}
                   <div style={{
                     display: "grid",
@@ -754,35 +799,80 @@ function PedidosConteudo() {
                       <div style={{ fontSize: "13px", color: "#666", marginBottom: "8px", fontWeight: "600" }}>
                         Status do Pedido
                       </div>
-                      {editandoStatus ? (
-                        <div>
-                          <select
-                            value={novoStatus}
-                            onChange={(e) => setNovoStatus(e.target.value)}
-                            style={{
-                              width: "100%",
-                              padding: "10px",
-                              border: "1px solid #d1d5db",
+                      <div>
+                        {(() => {
+                          const statusInfo = getStatusColor(pedidoSelecionado.pedido.status);
+                          return (
+                            <span style={{
+                              padding: "8px 16px",
+                              background: statusInfo.bg,
+                              color: statusInfo.color,
                               borderRadius: "8px",
                               fontSize: "14px",
-                              fontWeight: "600",
-                              color: "#0a0a0a",
+                              fontWeight: "700",
+                              display: "inline-block",
                               marginBottom: "12px"
-                            }}
-                          >
-                            <option value="aguardando_pagamento">⏳ Pendente</option>
-                            <option value="pago">✓ Pago</option>
-                            <option value="enviado">📦 Enviado</option>
-                            <option value="entregue">✓ Entregue</option>
-                            <option value="cancelado">✗ Cancelado</option>
-                          </select>
-                          
-                          <div style={{ display: "flex", gap: "8px" }}>
+                            }}>
+                              {statusInfo.label}
+                            </span>
+                          );
+                        })()}
+
+                        {podeAlterar && (
+                          <>
+                            <select
+                              value={novoStatus}
+                              onChange={(e) => setNovoStatus(e.target.value)}
+                              style={{
+                                width: "100%",
+                                padding: "10px",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "8px",
+                                fontSize: "14px",
+                                fontWeight: "600",
+                                color: "#0a0a0a",
+                                marginBottom: "10px"
+                              }}
+                            >
+                              <option value="aguardando_pagamento">🟡 Pendente</option>
+                              <option value="pago">🟢 Pago</option>
+                              <option value="enviado">🔵 Enviado</option>
+                              <option value="entregue">⚫ Entregue</option>
+                              <option value="cancelado">🔴 Cancelado</option>
+                            </select>
+
+                            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "10px" }}>
+                              {[
+                                { value: "aguardando_pagamento", label: "Pendente" },
+                                { value: "pago", label: "Pago" },
+                                { value: "enviado", label: "Enviado" },
+                                { value: "entregue", label: "Entregue" },
+                                { value: "cancelado", label: "Cancelado" },
+                              ].map((s) => (
+                                <button
+                                  key={s.value}
+                                  onClick={() => setNovoStatus(s.value)}
+                                  style={{
+                                    padding: "6px 8px",
+                                    borderRadius: "8px",
+                                    border: `1px solid ${novoStatus === s.value ? "#0a0a0a" : "#d1d5db"}`,
+                                    background: novoStatus === s.value ? "#0a0a0a" : "white",
+                                    color: novoStatus === s.value ? "white" : "#374151",
+                                    fontSize: "11px",
+                                    fontWeight: 700,
+                                    cursor: "pointer"
+                                  }}
+                                >
+                                  {s.label}
+                                </button>
+                              ))}
+                            </div>
+
                             <button
                               onClick={atualizarStatusPedido}
                               disabled={salvandoStatus}
                               style={{
-                                flex: 1,
+                                width: "100%",
                                 padding: "8px 12px",
                                 background: "#10b981",
                                 color: "white",
@@ -794,71 +884,11 @@ function PedidosConteudo() {
                                 opacity: salvandoStatus ? 0.7 : 1
                               }}
                             >
-                              {salvandoStatus ? "Salvando..." : "Salvar"}
+                              {salvandoStatus ? "Salvando..." : "Salvar status"}
                             </button>
-                            <button
-                              onClick={() => {
-                                setEditandoStatus(false);
-                                setNovoStatus(pedidoSelecionado.pedido.status);
-                              }}
-                              disabled={salvandoStatus}
-                              style={{
-                                flex: 1,
-                                padding: "8px 12px",
-                                background: "#e5e7eb",
-                                color: "#374151",
-                                border: "none",
-                                borderRadius: "8px",
-                                fontSize: "13px",
-                                fontWeight: "700",
-                                cursor: "pointer"
-                              }}
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div>
-                          {(() => {
-                            const statusInfo = getStatusColor(pedidoSelecionado.pedido.status);
-                            return (
-                              <span style={{
-                                padding: "8px 16px",
-                                background: statusInfo.bg,
-                                color: statusInfo.color,
-                                borderRadius: "8px",
-                                fontSize: "14px",
-                                fontWeight: "700",
-                                display: "inline-block",
-                                marginBottom: "12px"
-                              }}>
-                                {statusInfo.label}
-                              </span>
-                            );
-                          })()}
-                          <button
-                            onClick={() => setEditandoStatus(true)}
-                            style={{
-                              display: "block",
-                              width: "100%",
-                              padding: "8px",
-                              background: "#667eea",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "8px",
-                              fontSize: "12px",
-                              fontWeight: "700",
-                              cursor: "pointer",
-                              transition: "background 0.2s"
-                            }}
-                            onMouseOver={(e) => e.currentTarget.style.background = "#5568d3"}
-                            onMouseOut={(e) => e.currentTarget.style.background = "#667eea"}
-                          >
-                            Alterar Status
-                          </button>
-                        </div>
-                      )}
+                          </>
+                        )}
+                      </div>
                     </div>
 
                     <div style={{
@@ -875,6 +905,55 @@ function PedidosConteudo() {
                     </div>
                   </div>
 
+                  {/* Timeline */}
+                  <div style={{ background: "#fafafa", padding: "20px", borderRadius: "12px", marginBottom: "24px" }}>
+                    <div style={{ fontSize: "13px", color: "#666", marginBottom: "12px", fontWeight: "600" }}>🕒 Timeline do Pedido</div>
+                    <div style={{ display: "grid", gap: "10px" }}>
+                      {(() => {
+                        const etapaAtual = getStatusEtapa(pedidoSelecionado.pedido.status);
+                        const cancelado = pedidoSelecionado.pedido.status === "cancelado";
+                        const etapas = [
+                          { key: 0, label: "Pedido criado" },
+                          { key: 1, label: "Pagamento aprovado" },
+                          { key: 2, label: "Pedido enviado" },
+                          { key: 3, label: "Pedido entregue" },
+                        ];
+                        return (
+                          <>
+                            {etapas.map((e) => {
+                              const concluida = !cancelado && etapaAtual >= e.key;
+                              return (
+                                <div key={e.key} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                  <span style={{
+                                    width: "20px",
+                                    height: "20px",
+                                    borderRadius: "999px",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "11px",
+                                    fontWeight: 700,
+                                    background: concluida ? "#10b981" : "#e5e7eb",
+                                    color: concluida ? "white" : "#6b7280"
+                                  }}>
+                                    {concluida ? "✓" : "•"}
+                                  </span>
+                                  <span style={{ fontSize: "13px", color: concluida ? "#111827" : "#6b7280", fontWeight: concluida ? 700 : 500 }}>{e.label}</span>
+                                </div>
+                              );
+                            })}
+                            {cancelado && (
+                              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                <span style={{ width: "20px", height: "20px", borderRadius: "999px", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 700, background: "#ef4444", color: "white" }}>!</span>
+                                <span style={{ fontSize: "13px", color: "#b91c1c", fontWeight: 700 }}>Pedido cancelado</span>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
                   {/* Código de Rastreio */}
                   <div style={{
                     background: "#fafafa",
@@ -885,14 +964,15 @@ function PedidosConteudo() {
                     <div style={{ fontSize: "13px", color: "#666", marginBottom: "8px", fontWeight: "600" }}>
                       📦 Código de Rastreio
                     </div>
-                    {editandoStatus ? (
+                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                       <input
                         type="text"
                         value={codigoRastreio}
                         onChange={(e) => setCodigoRastreio(e.target.value)}
-                        placeholder="Digite o código de rastreio..."
+                        placeholder="Código de rastreio"
                         style={{
-                          width: "100%",
+                          flex: 1,
+                          minWidth: "230px",
                           padding: "10px",
                           border: "1px solid #d1d5db",
                           borderRadius: "8px",
@@ -901,11 +981,26 @@ function PedidosConteudo() {
                           color: "#0a0a0a"
                         }}
                       />
-                    ) : (
-                      <div style={{ fontSize: "15px", fontWeight: "700", color: "#0a0a0a" }}>
-                        {pedidoSelecionado.pedido.codigo_rastreio || "Não informado"}
-                      </div>
-                    )}
+                      {podeAdicionarRastreio && (
+                        <button
+                          onClick={atualizarStatusPedido}
+                          disabled={salvandoStatus}
+                          style={{
+                            padding: "10px 12px",
+                            background: "#111827",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "8px",
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            opacity: salvandoStatus ? 0.7 : 1
+                          }}
+                        >
+                          Salvar
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {/* Dados do Cliente */}
@@ -1009,16 +1104,31 @@ function PedidosConteudo() {
                             borderRadius: "8px"
                           }}
                         >
-                          <div>
-                            <div style={{ fontSize: "15px", fontWeight: "600", color: "#0a0a0a" }}>
-                              {item.nome}
+                          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                            <div style={{ width: "52px", height: "52px", borderRadius: "8px", background: "#f3f4f6", border: "1px solid #e5e7eb", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              {(item as any).imagem_url ? (
+                                <img
+                                  src={(item as any).imagem_url}
+                                  alt={item.nome}
+                                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                                />
+                              ) : (
+                                <span style={{ fontSize: "20px" }}>📦</span>
+                              )}
                             </div>
-                            <div style={{ fontSize: "13px", color: "#666" }}>
-                              Quantidade: {item.quantidade}
+                            <div>
+                              <div style={{ fontSize: "15px", fontWeight: "600", color: "#0a0a0a" }}>
+                                {item.nome}
+                              </div>
+                              <div style={{ fontSize: "13px", color: "#666" }}>
+                                Qtd: {item.quantidade}
+                              </div>
                             </div>
                           </div>
-                          <div style={{ fontSize: "16px", fontWeight: "800", color: "#10b981" }}>
-                            R$ {Number(item.preco_unitario * item.quantidade).toFixed(2)}
+                          <div style={{ fontSize: "16px", fontWeight: "800", color: "#10b981", textAlign: "right" }}>
+                            <div>R$ {Number(item.preco_unitario * item.quantidade).toFixed(2)}</div>
+                            <div style={{ fontSize: "12px", color: "#6b7280", fontWeight: 600 }}>R$ {Number(item.preco_unitario).toFixed(2)} un.</div>
                           </div>
                         </div>
                       ))}
@@ -1032,40 +1142,60 @@ function PedidosConteudo() {
                     borderRadius: "16px",
                     color: "white"
                   }}>
-                    <div style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "12px",
-                      fontSize: "15px"
-                    }}>
-                      <span>Subtotal:</span>
-                      <span style={{ fontWeight: "600" }}>
-                        R$ {(Number(pedidoSelecionado.pedido.total) - Number(pedidoSelecionado.pedido.frete || 0)).toFixed(2)}
-                      </span>
-                    </div>
-                    <div style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "16px",
-                      paddingBottom: "16px",
-                      borderBottom: "1px solid rgba(255,255,255,0.2)",
-                      fontSize: "15px"
-                    }}>
-                      <span>Frete:</span>
-                      <span style={{ fontWeight: "600" }}>
-                        R$ {Number(pedidoSelecionado.pedido.frete || 0).toFixed(2)}
-                      </span>
-                    </div>
-                    <div style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: "24px",
-                      fontWeight: "900",
-                      letterSpacing: "-0.8px"
-                    }}>
-                      <span>Total:</span>
-                      <span>R$ {Number(pedidoSelecionado.pedido.total).toFixed(2)}</span>
-                    </div>
+                    {(() => {
+                      const produtosTotal = pedidoSelecionado.itens.reduce((acc, item) => acc + Number(item.subtotal || (item.preco_unitario * item.quantidade)), 0);
+                      const freteValor = Number(pedidoSelecionado.pedido.frete || 0);
+                      const desconto = Math.max(0, Number((produtosTotal + freteValor - Number(pedidoSelecionado.pedido.total)).toFixed(2)));
+                      return (
+                        <>
+                          <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            marginBottom: "12px",
+                            fontSize: "15px"
+                          }}>
+                            <span>Produtos:</span>
+                            <span style={{ fontWeight: "600" }}>
+                              R$ {produtosTotal.toFixed(2)}
+                            </span>
+                          </div>
+                          <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            marginBottom: "12px",
+                            fontSize: "15px"
+                          }}>
+                            <span>Frete:</span>
+                            <span style={{ fontWeight: "600" }}>
+                              R$ {freteValor.toFixed(2)}
+                            </span>
+                          </div>
+                          <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            marginBottom: "16px",
+                            paddingBottom: "16px",
+                            borderBottom: "1px solid rgba(255,255,255,0.2)",
+                            fontSize: "15px"
+                          }}>
+                            <span>Desconto:</span>
+                            <span style={{ fontWeight: "600" }}>
+                              {desconto > 0 ? `- R$ ${desconto.toFixed(2)}` : "R$ 0,00"}
+                            </span>
+                          </div>
+                          <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            fontSize: "24px",
+                            fontWeight: "900",
+                            letterSpacing: "-0.8px"
+                          }}>
+                            <span>Total:</span>
+                            <span>R$ {Number(pedidoSelecionado.pedido.total).toFixed(2)}</span>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               </>

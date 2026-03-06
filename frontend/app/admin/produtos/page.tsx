@@ -2,7 +2,7 @@
 
 import { API_URL } from "@/lib/api";
 import { getAdminLoginPath } from "@/lib/admin-paths";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminHeader from "../components/AdminHeader";
 import { usePermissoes } from "@/lib/usePermissoes";
@@ -413,156 +413,174 @@ function ProdutosConteudo() {
           <div className="bg-white shadow-md mb-8" style={{ padding: "clamp(16px, 4vw, 24px)", borderRadius: "clamp(12px, 2vw, 16px)" }}>
             <h2 style={{ fontSize: "clamp(18px, 4vw, 24px)", fontWeight: "600", color: "#374151", marginBottom: "16px" }}>Novo Produto</h2>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 250px), 1fr))", gap: "clamp(12px, 3vw, 16px)", marginBottom: "16px" }}>
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Nome *</label>
-              <input
-                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)", color: "#0a0a0a" }}
-                placeholder="Nome do produto"
-                value={novoNome}
-                onChange={e => setNovoNome(e.target.value)}
-              />
+            <div className="space-y-4 sm:space-y-5">
+              {/* Seção 1 - Informações */}
+              <div style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "16px" }}>
+                <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#374151", marginBottom: "12px" }}>📦 Informações do Produto</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Nome *</label>
+                    <input
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: "8px", fontSize: "14px", color: "#0a0a0a" }}
+                      placeholder="Nome do produto"
+                      value={novoNome}
+                      onChange={e => setNovoNome(e.target.value)}
+                    />
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))", gap: "12px" }}>
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Preço (R$) *</label>
+                      <input
+                        style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: "8px", fontSize: "14px", color: "#0a0a0a" }}
+                        placeholder="0,00"
+                        type="text"
+                        value={formatarPrecoExibicao(novoPreco)}
+                        onChange={e => {
+                          const numeros = e.target.value.replace(/\D/g, '');
+                          setNovoPreco(numeros);
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Estoque *</label>
+                      <input
+                        style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: "8px", fontSize: "14px", color: "#0a0a0a" }}
+                        placeholder="0"
+                        type="number"
+                        value={novoEstoque}
+                        onChange={e => setNovoEstoque(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Categoria</label>
+                    <select
+                      value={novaCategoria}
+                      onChange={(e) => setNovaCategoria(e.target.value)}
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: "8px", fontSize: "14px", fontWeight: "600", color: "#0a0a0a" }}
+                    >
+                      <option value="">Selecione uma categoria</option>
+                      {categorias.map((cat) => (
+                        <option key={cat.id} value={cat.id}>{cat.nome}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seção 2 - Imagem */}
+              <div style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "16px" }}>
+                <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#374151", marginBottom: "12px" }}>🖼 Imagem do Produto</h3>
+                <label
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    minHeight: "118px",
+                    padding: "14px",
+                    border: "2px dashed #d1d5db",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    color: "#6b7280",
+                    textAlign: "center",
+                    background: "#fafafa"
+                  }}
+                >
+                  <span style={{ fontWeight: 600, marginBottom: "4px" }}>Arraste uma imagem aqui ou clique para selecionar</span>
+                  <span style={{ fontSize: "12px" }}>{novaImagemArquivo ? `Selecionado: ${novaImagemArquivo.name}` : "PNG, JPG ou WEBP"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        setNovaImagemArquivo(e.target.files[0]);
+                        setNovaImagem("");
+                      }
+                    }}
+                  />
+                </label>
+
+                {novaImagemArquivo && (
+                  <div style={{ marginTop: "12px" }}>
+                    <p style={{ fontSize: "12px", color: "#6b7280", marginBottom: "8px" }}>Preview:</p>
+                    <img
+                      src={URL.createObjectURL(novaImagemArquivo)}
+                      alt="Preview"
+                      style={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "8px", border: "1px solid #d1d5db" }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Seção 3 - Dimensões */}
+              <div style={{ background: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "16px" }}>
+                <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#374151", marginBottom: "4px" }}>📏 Dimensões para Frete</h3>
+                <p style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "12px" }}>
+                  Campos opcionais - podem ser preenchidos depois
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))", gap: "12px" }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Peso (kg)</label>
+                    <input
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: "8px", fontSize: "14px", color: "#0a0a0a" }}
+                      placeholder="0.0"
+                      type="number"
+                      step="0.001"
+                      value={novoPeso}
+                      onChange={e => setNovoPeso(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Altura (cm)</label>
+                    <input
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: "8px", fontSize: "14px", color: "#0a0a0a" }}
+                      placeholder="0"
+                      type="number"
+                      value={novaAltura}
+                      onChange={e => setNovaAltura(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Largura (cm)</label>
+                    <input
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: "8px", fontSize: "14px", color: "#0a0a0a" }}
+                      placeholder="0"
+                      type="number"
+                      value={novaLargura}
+                      onChange={e => setNovaLargura(e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: "block", fontSize: "13px", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Comprimento (cm)</label>
+                    <input
+                      style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: "8px", fontSize: "14px", color: "#0a0a0a" }}
+                      placeholder="0"
+                      type="number"
+                      value={novoComprimento}
+                      onChange={e => setNovoComprimento(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Preço (R$) *</label>
-              <input
-                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)", color: "#0a0a0a" }}
-                placeholder="0,00"
-                type="text"
-                value={formatarPrecoExibicao(novoPreco)}
-                onChange={e => {
-                  const numeros = e.target.value.replace(/\D/g, '');
-                  setNovoPreco(numeros);
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Estoque *</label>
-              <input
-                style={{ width: "100%", padding: "clamp(8px, 2vw, 12px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(12px, 2.5vw, 14px)", color: "#0a0a0a" }}
-                placeholder="0"
-                type="number"
-                value={novoEstoque}
-                onChange={e => setNovoEstoque(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Categoria</label>
-              <select
-                value={novaCategoria}
-                onChange={(e) => setNovaCategoria(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  border: "1px solid #d1d5db",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#0a0a0a"
-                }}
-              >
-                <option value="">Selecione uma categoria</option>
-                {categorias.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.nome}</option>
-                ))}
-              </select>
-            </div>
+            <button
+              onClick={criarProduto}
+              style={{ width: "100%", marginTop: "16px", background: "#2563eb", color: "white", padding: "14px 24px", borderRadius: "10px", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}
+            >
+              ✓ Criar Produto
+            </button>
           </div>
-
-          <div style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500", color: "#374151", marginBottom: "8px" }}>Imagem do Produto</label>
-            <label style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "clamp(10px, 2.5vw, 12px)", border: "2px dashed #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", cursor: "pointer", fontSize: "clamp(12px, 2.5vw, 14px)", color: "#6b7280" }}>
-              <span>
-                {novaImagemArquivo ? `📷 ${novaImagemArquivo.name}` : "📷 Escolher Imagem"}
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={e => {
-                  if (e.target.files && e.target.files[0]) {
-                    setNovaImagemArquivo(e.target.files[0]);
-                    setNovaImagem("");
-                  }
-                }}
-              />
-            </label>
-          </div>
-
-          {novaImagemArquivo && (
-            <div style={{ marginBottom: "16px" }}>
-              <p style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#6b7280", marginBottom: "8px" }}>Preview:</p>
-              <img 
-                src={URL.createObjectURL(novaImagemArquivo)} 
-                alt="Preview" 
-                style={{ width: "clamp(80px, 20vw, 128px)", height: "clamp(80px, 20vw, 128px)", objectFit: "cover", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db" }}
-              />
-            </div>
-          )}
-
-          <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "16px", marginBottom: "16px" }}>
-            <h3 style={{ fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "600", color: "#374151", marginBottom: "4px" }}>📦 Dimensões para Cálculo de Frete</h3>
-            <p style={{ fontSize: "clamp(11px, 2.2vw, 12px)", color: "#9ca3af", marginBottom: "12px" }}>
-              Campos opcionais - podem ser preenchidos depois
-            </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 120px), 1fr))", gap: "clamp(8px, 2vw, 12px)" }}>
-              <div>
-                <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Peso (kg)</label>
-                <input
-                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
-                  placeholder="0.0"
-                  type="number"
-                  step="0.001"
-                  value={novoPeso}
-                  onChange={e => setNovoPeso(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Altura (cm)</label>
-                <input
-                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
-                  placeholder="0"
-                  type="number"
-                  value={novaAltura}
-                  onChange={e => setNovaAltura(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Largura (cm)</label>
-                <input
-                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
-                  placeholder="0"
-                  type="number"
-                  value={novaLargura}
-                  onChange={e => setNovaLargura(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Comprimento (cm)</label>
-                <input
-                  style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
-                  placeholder="0"
-                  type="number"
-                  value={novoComprimento}
-                  onChange={e => setNovoComprimento(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={criarProduto}
-            style={{ width: "100%", background: "#2563eb", color: "white", padding: "clamp(10px, 2.5vw, 14px) clamp(16px, 4vw, 24px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(12px, 2.5vw, 14px)", fontWeight: "500" }}
-          >
-            ✓ Criar Produto
-          </button>
-        </div>
         )}
 
         <div className="bg-white shadow-md mb-8" style={{ padding: "clamp(16px, 4vw, 24px)", borderRadius: "clamp(12px, 2vw, 16px)" }}>
@@ -607,261 +625,280 @@ function ProdutosConteudo() {
               {produtos.length === 0 ? "Nenhum produto cadastrado" : "Nenhum produto encontrado com esses filtros"}
             </p>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 16px)" }}>
-              {produtosPaginaAtual.map(p => (
-                <div key={p.id} style={{ border: "1px solid #e5e7eb", borderRadius: "clamp(8px, 2vw, 12px)", padding: "clamp(12px, 3vw, 16px)" }}>
-                  {editandoId === p.id ? (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 16px)" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: "clamp(8px, 2vw, 12px)" }}>
-                        <div style={{ gridColumn: "1 / -1" }}>
-                          <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Nome</label>
-                          <input
-                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
-                            value={editNome}
-                            onChange={e => setEditNome(e.target.value)}
-                          />
-                        </div>
+            <div style={{ overflowX: "auto", border: "1px solid #e5e7eb", borderRadius: "12px" }}>
+              <table style={{ width: "100%", minWidth: "880px", borderCollapse: "separate", borderSpacing: 0 }}>
+                <thead>
+                  <tr style={{ background: "#f8fafc" }}>
+                    <th style={{ textAlign: "left", padding: "12px 10px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Imagem</th>
+                    <th style={{ textAlign: "left", padding: "12px 10px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Produto</th>
+                    <th style={{ textAlign: "left", padding: "12px 10px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Preço</th>
+                    <th style={{ textAlign: "left", padding: "12px 10px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Estoque</th>
+                    <th style={{ textAlign: "left", padding: "12px 10px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Status</th>
+                    <th style={{ textAlign: "left", padding: "12px 10px", fontSize: "12px", color: "#64748b", fontWeight: 700 }}>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {produtosPaginaAtual.map((p) => {
+                    const estoqueNum = Number(p.estoque || 0);
+                    const corEstoque = estoqueNum <= 0 ? "#dc2626" : estoqueNum <= 10 ? "#ea580c" : "#16a34a";
+                    const textoEstoque = estoqueNum <= 0 ? "Sem estoque" : estoqueNum <= 10 ? `${estoqueNum} (baixo)` : `${estoqueNum} unidades`;
 
-                        <div style={{ gridColumn: "1 / -1" }}>
-                          <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Descrição</label>
-                          <textarea
-                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
-                            placeholder="Descrição do produto"
-                            rows={3}
-                            value={editDescricao}
-                            onChange={e => setEditDescricao(e.target.value)}
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Preço (R$)</label>
-                          <input
-                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
-                            type="text"
-                            placeholder="0,00"
-                            value={formatarPrecoExibicao(editPreco)}
-                            onChange={e => {
-                              const numeros = e.target.value.replace(/\D/g, '');
-                              setEditPreco(numeros);
-                            }}
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Estoque</label>
-                          <input
-                            style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
-                            type="number"
-                            value={editEstoque}
-                            onChange={e => setEditEstoque(e.target.value)}
-                          />
-                        </div>
-
-                        <div>
-                          <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Categoria</label>
-                          <select
-                            value={editandoCategoria}
-                            onChange={(e) => setEditandoCategoria(e.target.value)}
-                            style={{
-                              width: "100%",
-                              padding: "10px",
-                              border: "1px solid #d1d5db",
-                              borderRadius: "8px",
-                              fontSize: "14px",
-                              fontWeight: "600",
-                              color: "#0a0a0a"
-                            }}
-                          >
-                            <option value="">Sem categoria</option>
-                            {categorias.map((cat) => (
-                              <option key={cat.id} value={cat.id}>{cat.nome}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "8px" }}>Imagem</label>
-                        <label style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "clamp(8px, 2vw, 10px)", border: "2px dashed #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#6b7280" }}>
-                          <span>
-                            {editImagemArquivo ? `📷 ${editImagemArquivo.name}` : "📷 Alterar Imagem"}
-                          </span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            style={{ display: "none" }}
-                            onChange={e => {
-                              if (e.target.files && e.target.files[0]) {
-                                setEditImagemArquivo(e.target.files[0]);
-                              }
-                            }}
-                          />
-                        </label>
-                      </div>
-
-                      {(editImagemArquivo || editImagem) && (
-                        <div>
-                          <p style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#6b7280", marginBottom: "8px" }}>Preview da Imagem:</p>
-                          <img 
-                            src={editImagemArquivo ? URL.createObjectURL(editImagemArquivo) : editImagem} 
-                            alt="Preview" 
-                            style={{ width: "clamp(80px, 20vw, 128px)", height: "clamp(80px, 20vw, 128px)", objectFit: "cover", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db" }}
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        </div>
-                      )}
-
-                      <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "12px" }}>
-                        <h4 style={{ fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "600", color: "#374151", marginBottom: "12px" }}>📦 Dimensões</h4>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 100px), 1fr))", gap: "clamp(8px, 2vw, 12px)" }}>
-                          <div>
-                            <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Peso (kg)</label>
-                            <input
-                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
-                              placeholder="0.0"
-                              type="number"
-                              step="0.001"
-                              value={editPeso}
-                              onChange={e => setEditPeso(e.target.value)}
-                            />
-                          </div>
-
-                          <div>
-                            <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Altura (cm)</label>
-                            <input
-                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
-                              placeholder="0"
-                              type="number"
-                              value={editAltura}
-                              onChange={e => setEditAltura(e.target.value)}
-                            />
-                          </div>
-
-                          <div>
-                            <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Largura (cm)</label>
-                            <input
-                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
-                              placeholder="0"
-                              type="number"
-                              value={editLargura}
-                              onChange={e => setEditLargura(e.target.value)}
-                            />
-                          </div>
-
-                          <div>
-                            <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Comprimento (cm)</label>
-                            <input
-                              style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
-                              placeholder="0"
-                              type="number"
-                              value={editComprimento}
-                              onChange={e => setEditComprimento(e.target.value)}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(8px, 2vw, 12px)" }}>
-                        <button
-                          onClick={() => salvarEdicao(p.id)}
-                          style={{ flex: "1 1 auto", background: "#16a34a", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
+                    return (
+                      <Fragment key={p.id}>
+                        <tr
+                          style={{
+                            borderTop: "1px solid #e5e7eb",
+                            transition: "background-color 0.2s ease",
+                          }}
+                          onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#f9fafb"; }}
+                          onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
                         >
-                          ✓ Salvar
-                        </button>
-                        <button
-                          onClick={cancelarEdicao}
-                          style={{ flex: "1 1 auto", background: "#6b7280", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 16px)" }}>
-                      <div style={{ display: "flex", gap: "clamp(12px, 3vw, 16px)", flexWrap: "wrap" }}>
-                        {p.imagem_url && (
-                          <img 
-                            src={p.imagem_url} 
-                            alt={p.nome}
-                            style={{ width: "clamp(80px, 20vw, 96px)", height: "clamp(80px, 20vw, 96px)", objectFit: "cover", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "1px solid #e5e7eb" }}
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        )}
-                        
-                        <div style={{ flex: "1", minWidth: "200px" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "clamp(8px, 2vw, 12px)", marginBottom: "8px", flexWrap: "wrap" }}>
-                            <h3 style={{ fontSize: "clamp(14px, 3vw, 18px)", fontWeight: "600", color: "#1f2937" }}>{p.nome}</h3>
-                            {p.estoque === 0 ? (
-                              <span style={{ padding: "clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)", background: "#fed7aa", color: "#c2410c", fontSize: "clamp(10px, 2vw, 11px)", fontWeight: "600", borderRadius: "clamp(6px, 1.5vw, 8px)" }}>
-                                SEM ESTOQUE
-                              </span>
-                            ) : p.ativo ? (
-                              <span style={{ padding: "clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)", background: "#d1fae5", color: "#065f46", fontSize: "clamp(10px, 2vw, 11px)", fontWeight: "600", borderRadius: "clamp(6px, 1.5vw, 8px)" }}>
-                                ✓ ATIVO
+                          <td style={{ padding: "8px 10px", borderTop: "1px solid #e5e7eb" }}>
+                            {p.imagem_url ? (
+                              <img
+                                src={p.imagem_url}
+                                alt={p.nome}
+                                style={{ width: "44px", height: "44px", objectFit: "cover", borderRadius: "8px", border: "1px solid #e5e7eb" }}
+                                onError={(e) => { e.currentTarget.style.display = "none"; }}
+                              />
+                            ) : (
+                              <div style={{ width: "44px", height: "44px", borderRadius: "8px", background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px" }}>🌸</div>
+                            )}
+                          </td>
+
+                          <td style={{ padding: "8px 10px", borderTop: "1px solid #e5e7eb" }}>
+                            <p style={{ margin: 0, fontSize: "13px", fontWeight: 600, color: "#1f2937", lineHeight: 1.3 }}>{p.nome}</p>
+                            {p.categoria_nome && <p style={{ margin: "2px 0 0 0", fontSize: "11px", color: "#94a3b8" }}>{p.categoria_nome}</p>}
+                          </td>
+
+                          <td style={{ padding: "8px 10px", borderTop: "1px solid #e5e7eb", fontSize: "13px", fontWeight: 700, color: "#166534" }}>
+                            R$ {Number(p.preco).toFixed(2)}
+                          </td>
+
+                          <td style={{ padding: "8px 10px", borderTop: "1px solid #e5e7eb" }}>
+                            <span style={{ fontSize: "12px", fontWeight: 700, color: corEstoque }}>{textoEstoque}</span>
+                          </td>
+
+                          <td style={{ padding: "8px 10px", borderTop: "1px solid #e5e7eb" }}>
+                            {p.ativo ? (
+                              <span style={{ display: "inline-block", padding: "4px 9px", borderRadius: "999px", background: "#dcfce7", color: "#166534", fontSize: "11px", fontWeight: 700 }}>
+                                🟢 Ativo
                               </span>
                             ) : (
-                              <span style={{ padding: "clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px)", background: "#fee2e2", color: "#991b1b", fontSize: "clamp(10px, 2vw, 11px)", fontWeight: "600", borderRadius: "clamp(6px, 1.5vw, 8px)" }}>
-                                ✕ INATIVO
+                              <span style={{ display: "inline-block", padding: "4px 9px", borderRadius: "999px", background: "#fee2e2", color: "#991b1b", fontSize: "11px", fontWeight: 700 }}>
+                                🔴 Inativo
                               </span>
                             )}
-                          </div>
-                          <p style={{ color: "#6b7280", fontSize: "clamp(11px, 2.2vw, 13px)" }}>
-                            Preço: <span style={{ fontWeight: "500", color: "#16a34a" }}>R$ {Number(p.preco).toFixed(2)}</span>
-                          </p>
-                          <p style={{ color: "#6b7280", fontSize: "clamp(11px, 2.2vw, 13px)" }}>
-                            Estoque: <span style={{ fontWeight: "500" }}>{p.estoque} unidades</span>
-                          </p>
-                          {(p.peso_kg > 0 || p.altura_cm > 0 || p.largura_cm > 0 || p.comprimento_cm > 0) && (
-                            <div style={{ marginTop: "8px", fontSize: "clamp(10px, 2vw, 12px)", color: "#9ca3af" }}>
-                              📦 Dimensões: 
-                              {p.peso_kg > 0 && ` ${p.peso_kg}kg`}
-                              {p.altura_cm > 0 && ` | ${p.altura_cm}cm (A)`}
-                              {p.largura_cm > 0 && ` x ${p.largura_cm}cm (L)`}
-                              {p.comprimento_cm > 0 && ` x ${p.comprimento_cm}cm (C)`}
-                            </div>
-                          )}
-                          {p.imagem_url && (
-                            <p style={{ fontSize: "clamp(9px, 1.8vw, 11px)", color: "#d1d5db", marginTop: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              Imagem: {p.imagem_url}
-                            </p>
-                          )}
-                        </div>
-                      </div>
+                          </td>
 
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(8px, 2vw, 12px)", paddingTop: "clamp(8px, 2vw, 12px)", borderTop: "1px solid #e5e7eb" }}>
-                        {podeEditar && (
-                          <button
-                            onClick={() => iniciarEdicao(p)}
-                            style={{ flex: "1 1 auto", minWidth: "100px", background: "#eab308", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
-                          >
-                            Editar
-                          </button>
+                          <td style={{ padding: "8px 10px", borderTop: "1px solid #e5e7eb" }}>
+                            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", opacity: 0.92 }}>
+                              {podeEditar && (
+                                <button
+                                  onClick={() => iniciarEdicao(p)}
+                                  style={{ background: "#f59e0b", color: "white", padding: "6px 8px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "11px", fontWeight: 700 }}
+                                >
+                                  ✏ Editar
+                                </button>
+                              )}
+                              {podeGerenciarEstoque && (
+                                <button
+                                  onClick={() => alternarStatus(p.id, p.ativo)}
+                                  style={{ background: p.ativo ? "#f97316" : "#16a34a", color: "white", padding: "6px 8px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "11px", fontWeight: 700 }}
+                                >
+                                  {p.ativo ? "⏸ Inativar" : "▶ Ativar"}
+                                </button>
+                              )}
+                              {podeDeletar && (
+                                <button
+                                  onClick={() => deletarProduto(p.id)}
+                                  style={{ background: "#dc2626", color: "white", padding: "6px 8px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "11px", fontWeight: 700 }}
+                                >
+                                  🗑 Deletar
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+
+                        {editandoId === p.id && (
+                          <tr>
+                            <td colSpan={6} style={{ padding: "14px", background: "#fafafa", borderTop: "1px solid #e5e7eb", borderBottom: "1px solid #e5e7eb" }}>
+                              <div style={{ display: "flex", flexDirection: "column", gap: "clamp(12px, 3vw, 16px)" }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 200px), 1fr))", gap: "clamp(8px, 2vw, 12px)" }}>
+                                  <div style={{ gridColumn: "1 / -1" }}>
+                                    <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Nome</label>
+                                    <input
+                                      style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
+                                      value={editNome}
+                                      onChange={e => setEditNome(e.target.value)}
+                                    />
+                                  </div>
+
+                                  <div style={{ gridColumn: "1 / -1" }}>
+                                    <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Descrição</label>
+                                    <textarea
+                                      style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
+                                      placeholder="Descrição do produto"
+                                      rows={3}
+                                      value={editDescricao}
+                                      onChange={e => setEditDescricao(e.target.value)}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Preço (R$)</label>
+                                    <input
+                                      style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
+                                      type="text"
+                                      placeholder="0,00"
+                                      value={formatarPrecoExibicao(editPreco)}
+                                      onChange={e => {
+                                        const numeros = e.target.value.replace(/\D/g, '');
+                                        setEditPreco(numeros);
+                                      }}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Estoque</label>
+                                    <input
+                                      style={{ width: "100%", padding: "clamp(6px, 1.5vw, 10px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#0a0a0a" }}
+                                      type="number"
+                                      value={editEstoque}
+                                      onChange={e => setEditEstoque(e.target.value)}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Categoria</label>
+                                    <select
+                                      value={editandoCategoria}
+                                      onChange={(e) => setEditandoCategoria(e.target.value)}
+                                      style={{
+                                        width: "100%",
+                                        padding: "10px",
+                                        border: "1px solid #d1d5db",
+                                        borderRadius: "8px",
+                                        fontSize: "14px",
+                                        fontWeight: "600",
+                                        color: "#0a0a0a"
+                                      }}
+                                    >
+                                      <option value="">Sem categoria</option>
+                                      {categorias.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>{cat.nome}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label style={{ display: "block", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500", color: "#374151", marginBottom: "8px" }}>Imagem</label>
+                                  <label style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "clamp(8px, 2vw, 10px)", border: "2px dashed #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", color: "#6b7280" }}>
+                                    <span>
+                                      {editImagemArquivo ? `📷 ${editImagemArquivo.name}` : "📷 Alterar Imagem"}
+                                    </span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      style={{ display: "none" }}
+                                      onChange={e => {
+                                        if (e.target.files && e.target.files[0]) {
+                                          setEditImagemArquivo(e.target.files[0]);
+                                        }
+                                      }}
+                                    />
+                                  </label>
+                                </div>
+
+                                {(editImagemArquivo || editImagem) && (
+                                  <div>
+                                    <p style={{ fontSize: "clamp(11px, 2.2vw, 13px)", color: "#6b7280", marginBottom: "8px" }}>Preview da Imagem:</p>
+                                    <img 
+                                      src={editImagemArquivo ? URL.createObjectURL(editImagemArquivo) : editImagem} 
+                                      alt="Preview" 
+                                      style={{ width: "clamp(80px, 20vw, 128px)", height: "clamp(80px, 20vw, 128px)", objectFit: "cover", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db" }}
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  </div>
+                                )}
+
+                                <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: "12px" }}>
+                                  <h4 style={{ fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "600", color: "#374151", marginBottom: "12px" }}>📦 Dimensões</h4>
+                                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 100px), 1fr))", gap: "clamp(8px, 2vw, 12px)" }}>
+                                    <div>
+                                      <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Peso (kg)</label>
+                                      <input
+                                        style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
+                                        placeholder="0.0"
+                                        type="number"
+                                        step="0.001"
+                                        value={editPeso}
+                                        onChange={e => setEditPeso(e.target.value)}
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Altura (cm)</label>
+                                      <input
+                                        style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
+                                        placeholder="0"
+                                        type="number"
+                                        value={editAltura}
+                                        onChange={e => setEditAltura(e.target.value)}
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Largura (cm)</label>
+                                      <input
+                                        style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
+                                        placeholder="0"
+                                        type="number"
+                                        value={editLargura}
+                                        onChange={e => setEditLargura(e.target.value)}
+                                      />
+                                    </div>
+
+                                    <div>
+                                      <label style={{ display: "block", fontSize: "clamp(10px, 2vw, 12px)", fontWeight: "500", color: "#374151", marginBottom: "4px" }}>Comprimento (cm)</label>
+                                      <input
+                                        style={{ width: "100%", padding: "clamp(6px, 1.5vw, 8px)", border: "1px solid #d1d5db", borderRadius: "clamp(6px, 1.5vw, 8px)", fontSize: "clamp(10px, 2vw, 12px)", color: "#0a0a0a" }}
+                                        placeholder="0"
+                                        type="number"
+                                        value={editComprimento}
+                                        onChange={e => setEditComprimento(e.target.value)}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(8px, 2vw, 12px)" }}>
+                                  <button
+                                    onClick={() => salvarEdicao(p.id)}
+                                    style={{ flex: "1 1 auto", background: "#16a34a", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
+                                  >
+                                    ✓ Salvar
+                                  </button>
+                                  <button
+                                    onClick={cancelarEdicao}
+                                    style={{ flex: "1 1 auto", background: "#6b7280", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
+                                  >
+                                    Cancelar
+                                  </button>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
                         )}
-                        {podeGerenciarEstoque && (
-                          <button
-                            onClick={() => alternarStatus(p.id, p.ativo)}
-                            style={{ flex: "1 1 auto", minWidth: "100px", background: p.ativo ? "#f97316" : "#16a34a", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
-                          >
-                            {p.ativo ? '✕ Inativar' : '✓ Ativar'}
-                          </button>
-                        )}
-                        {podeDeletar && (
-                          <button
-                            onClick={() => deletarProduto(p.id)}
-                            style={{ flex: "1 1 auto", minWidth: "100px", background: "#dc2626", color: "white", padding: "clamp(8px, 2vw, 10px) clamp(12px, 3vw, 16px)", borderRadius: "clamp(6px, 1.5vw, 8px)", border: "none", cursor: "pointer", fontSize: "clamp(11px, 2.2vw, 13px)", fontWeight: "500" }}
-                          >
-                            Deletar
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
 
