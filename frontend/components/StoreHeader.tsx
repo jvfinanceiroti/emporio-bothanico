@@ -43,6 +43,19 @@ export function StoreHeader() {
 
   const headerBg = "bg-[#2d5a4a]";
   const headerBgDark = "bg-[#234a3d]";
+  const categoriasOrdenadas = [...categorias].sort((a, b) => {
+    const ordem: Record<string, number> = {
+      kits: 1,
+      aromas: 2,
+      banho: 3,
+      perfume: 4,
+      perfumes: 4,
+    };
+    const aPos = ordem[a.slug] ?? 999;
+    const bPos = ordem[b.slug] ?? 999;
+    if (aPos !== bPos) return aPos - bPos;
+    return a.nome.localeCompare(b.nome);
+  });
 
   return (
     <>
@@ -157,17 +170,20 @@ export function StoreHeader() {
       {/* Barra 3: Menu de categorias - scroll horizontal no mobile */}
       <div className={`${headerBgDark} text-white py-2 sm:py-2.5 px-3 sticky top-0 z-50`}>
         <nav className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto scrollbar-hide py-1 -mx-1" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-          <Link href="/produtos" className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors">Todos</Link>
+          <Link href="/#mais-vendidos" className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase rounded transition-colors flex items-center gap-1 bg-amber-300/15 text-amber-300 border border-amber-300/40">
+            Mais Vendidos
+            <span className="text-[10px]">★</span>
+          </Link>
+          <Link href="/produtos?categoria=kits" className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors">Kits</Link>
+          {categoriasOrdenadas.map((cat) => (
+            <Link key={cat.id} href={`/produtos?categoria=${cat.slug}`} className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors flex items-center gap-1">
+              {cat.nome}
+            </Link>
+          ))}
           <Link href="/promocoes" className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors flex items-center gap-1 text-amber-300">
             Promoções
             <span className="text-[10px]">🔥</span>
           </Link>
-          {categorias.map((cat) => (
-            <Link key={cat.id} href={`/produtos?categoria=${cat.slug}`} className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors flex items-center gap-1">
-              {cat.nome}
-              <svg className="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
-            </Link>
-          ))}
         </nav>
       </div>
     </>

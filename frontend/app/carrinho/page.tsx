@@ -25,9 +25,6 @@ interface OpcaoFrete {
   erro: string | null;
 }
 
-const FRETE_GRATIS_PAC = 299;
-const FRETE_GRATIS_SEDEX = 800;
-
 function getProdutoImagem(p: any) {
   const url = p?.imagem_url;
   if (url && !url.includes("placeholder")) return url;
@@ -42,6 +39,7 @@ function getProdutoImagem(p: any) {
 }
 
 export default function CarrinhoPage() {
+  const FRETE_GRATIS_MINIMO = 299;
   const router = useRouter();
   const [carrinho, setCarrinho] = useState<ItemCarrinho[]>([]);
   const [cep, setCep] = useState("");
@@ -50,6 +48,8 @@ export default function CarrinhoPage() {
   const [carregandoFrete, setCarregandoFrete] = useState(false);
   const [erroFrete, setErroFrete] = useState("");
   const [freteCalculado, setFreteCalculado] = useState(false);
+  const [animacaoQtdItemId, setAnimacaoQtdItemId] = useState<number | null>(null);
+  const [animacaoQtdBotao, setAnimacaoQtdBotao] = useState<{ id: number; delta: number } | null>(null);
 
   useEffect(() => {
     const carrinhoSalvo = JSON.parse(localStorage.getItem("carrinho") || "[]");
@@ -72,8 +72,14 @@ export default function CarrinhoPage() {
 
   const alterarQuantidade = (id: number, delta: number) => {
     const novo = carrinho.map((item) =>
-      item.id === id ? { ...item, quantidade: Math.max(1, item.quantidade + delta) } : item
+      item.id === id
+        ? { ...item, quantidade: Math.max(1, item.quantidade + delta) }
+        : item
     );
+    setAnimacaoQtdBotao({ id, delta });
+    setAnimacaoQtdItemId(id);
+    setTimeout(() => setAnimacaoQtdBotao(null), 160);
+    setTimeout(() => setAnimacaoQtdItemId((atual) => (atual === id ? null : atual)), 170);
     setCarrinho(novo);
     atualizarLocalStorage(novo);
     if (freteCalculado) {
@@ -159,15 +165,15 @@ export default function CarrinhoPage() {
   const getFreteValor = () => {
     if (!freteCalculado || opcoesFrete.length === 0) return null;
     const opcao = opcoesFrete.find(o => o.servico.toUpperCase().includes(tipoEnvio.toUpperCase())) || opcoesFrete[0];
-    const isPac = opcao.servico.toUpperCase().includes("PAC");
-    const isSedex = opcao.servico.toUpperCase().includes("SEDEX");
-    if (isPac && subtotal >= FRETE_GRATIS_PAC) return 0;
-    if (isSedex && subtotal >= FRETE_GRATIS_SEDEX) return 0;
     return opcao.preco;
   };
 
   const freteAtual = getFreteValor();
-  const total = subtotal + (freteAtual ?? 0);
+  const elegivelFreteGratis = subtotal >= FRETE_GRATIS_MINIMO;
+  const faltaParaFreteGratis = Math.max(0, FRETE_GRATIS_MINIMO - subtotal);
+  const progressoFreteGratis = Math.min(100, (subtotal / FRETE_GRATIS_MINIMO) * 100);
+  const freteComDesconto = freteAtual !== null && elegivelFreteGratis && !labelTipoEnvio.includes("RETIRADA") ? 0 : freteAtual;
+  const total = subtotal + (freteComDesconto ?? 0);
   const totalItens = carrinho.reduce((acc, i) => acc + i.quantidade, 0);
 
   const formatarCep = (v: string) => {
@@ -217,8 +223,8 @@ export default function CarrinhoPage() {
                     key={item.id}
                     className="bg-white rounded-2xl p-4 sm:p-6 border border-[var(--border)] shadow-sm hover:shadow-lg hover:border-[var(--border-strong)] transition-all"
                   >
-                    <div className="flex gap-4 sm:gap-6">
-                      <div className="w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-xl bg-gradient-to-br from-[var(--accent-light)]/30 to-[var(--warm-100)] flex items-center justify-center overflow-hidden">
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                      <div className="w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-xl bg-gradient-to-br from-[var(--accent-light)]/30 to-[var(--warm-100)] flex items-center justify-center overflow-hidden mx-auto sm:mx-0">
                         <img
                           src={getProdutoImagem(item)}
                           alt={item.nome}
@@ -231,11 +237,27 @@ export default function CarrinhoPage() {
                         <div className="text-xl font-black text-[var(--accent)] mb-4">R$ {Number(item.preco).toFixed(2).replace(".", ",")}</div>
                         <div className="flex flex-wrap items-center justify-between gap-4">
                           <div className="flex items-center rounded-xl border-2 border-[var(--border)] bg-[var(--warm-50)] overflow-hidden">
-                            <button onClick={() => alterarQuantidade(item.id, -1)} className="w-10 h-10 flex items-center justify-center text-lg font-bold hover:bg-[var(--accent-light)] transition-colors">
+                            <button
+                              onClick={() => alterarQuantidade(item.id, -1)}
+                              className={`w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center text-lg font-bold hover:bg-[var(--accent-light)] transition-all duration-150 ${
+                                animacaoQtdBotao?.id === item.id && animacaoQtdBotao?.delta < 0 ? "scale-110" : "scale-100"
+                              }`}
+                            >
                               −
                             </button>
-                            <span className="w-12 text-center font-bold text-sm">{item.quantidade}</span>
-                            <button onClick={() => alterarQuantidade(item.id, 1)} className="w-10 h-10 flex items-center justify-center text-lg font-bold hover:bg-[var(--accent-light)] transition-colors">
+                            <span
+                              className={`w-12 text-center font-bold text-sm transition-all duration-150 ease-out ${
+                                animacaoQtdItemId === item.id ? "opacity-70 -translate-y-[1px]" : "opacity-100 translate-y-0"
+                              }`}
+                            >
+                              {item.quantidade}
+                            </span>
+                            <button
+                              onClick={() => alterarQuantidade(item.id, 1)}
+                              className={`w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center text-lg font-bold hover:bg-[var(--accent-light)] transition-all duration-150 ${
+                                animacaoQtdBotao?.id === item.id && animacaoQtdBotao?.delta > 0 ? "scale-110" : "scale-100"
+                              }`}
+                            >
                               +
                             </button>
                           </div>
@@ -256,6 +278,21 @@ export default function CarrinhoPage() {
 
             <div className="lg:sticky lg:top-36">
               <div className="bg-white rounded-3xl shadow-[0_4px_40px_rgba(44,90,74,0.08)] border border-[var(--border)] p-6 sm:p-8">
+                <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--warm-50)] p-4">
+                  <p className="text-sm font-semibold text-[var(--foreground)]">
+                    {elegivelFreteGratis
+                      ? "Parabéns! Você ganhou frete grátis."
+                      : `Faltam R$ ${faltaParaFreteGratis.toFixed(2).replace(".", ",")} para ganhar frete grátis`}
+                  </p>
+                  <div className="mt-3 h-2.5 rounded-full bg-[var(--accent-light)]/60 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-[var(--accent)] transition-all duration-500"
+                      style={{ width: `${progressoFreteGratis}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-[var(--muted)] mt-2">Meta para frete grátis: R$ {FRETE_GRATIS_MINIMO.toFixed(2).replace(".", ",")}</p>
+                </div>
+
                 <h2 className="text-xl font-semibold text-[var(--foreground)] mb-6" style={{ fontFamily: "var(--font-logo)" }}>
                   Resumo do Pedido
                 </h2>
@@ -291,10 +328,8 @@ export default function CarrinhoPage() {
                   {freteCalculado && opcoesFrete.length > 0 && (
                     <div className="mt-4 space-y-2">
                       {opcoesFrete.map((opcao) => {
-                        const isPac = opcao.servico.toUpperCase().includes("PAC");
                         const isSedex = opcao.servico.toUpperCase().includes("SEDEX");
                         const isRetirada = opcao.servico.toUpperCase().includes("RETIRADA");
-                        const gratis = (isPac && subtotal >= FRETE_GRATIS_PAC) || (isSedex && subtotal >= FRETE_GRATIS_SEDEX);
                         const chaveServico = isSedex ? "SEDEX" : isRetirada ? "RETIRADA" : "PAC";
                         const selecionado = tipoEnvio.toUpperCase().includes(chaveServico);
 
@@ -327,28 +362,14 @@ export default function CarrinhoPage() {
                                 </div>
                               </div>
                               <div className="text-right">
-                                {gratis ? (
-                                  <div>
-                                    <span className="text-[var(--success)] font-bold text-sm">Grátis</span>
-                                    <span className="block text-[10px] text-[var(--muted)] line-through">
-                                      R$ {opcao.preco.toFixed(2).replace(".", ",")}
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <span className="font-bold text-sm text-[var(--foreground)]">
-                                    {isRetirada ? "Grátis" : `R$ ${opcao.preco.toFixed(2).replace(".", ",")}`}
-                                  </span>
-                                )}
+                                <span className="font-bold text-sm text-[var(--foreground)]">
+                                  {isRetirada ? "Grátis" : `R$ ${opcao.preco.toFixed(2).replace(".", ",")}`}
+                                </span>
                               </div>
                             </div>
                           </button>
                         );
                       })}
-                      {subtotal < FRETE_GRATIS_PAC && (
-                        <p className="text-[10px] text-[var(--muted)] mt-1">
-                          Frete grátis PAC acima de R$ {FRETE_GRATIS_PAC} | SEDEX acima de R$ {FRETE_GRATIS_SEDEX}
-                        </p>
-                      )}
                     </div>
                   )}
                 </div>
@@ -362,34 +383,52 @@ export default function CarrinhoPage() {
                   {freteAtual !== null && (
                     <div className="flex justify-between text-[var(--muted)]">
                       <span>Frete ({labelTipoEnvio})</span>
-                      <span className="font-semibold text-[var(--foreground)]">{freteAtual === 0 ? "Grátis" : `R$ ${freteAtual.toFixed(2).replace(".", ",")}`}</span>
+                      <span className="font-semibold text-[var(--foreground)]">
+                        {freteComDesconto === 0 ? (
+                          <>
+                            {freteAtual > 0 && <span className="text-[var(--muted)] line-through mr-2">R$ {freteAtual.toFixed(2).replace(".", ",")}</span>}
+                            Grátis
+                          </>
+                        ) : (
+                          `R$ ${freteComDesconto?.toFixed(2).replace(".", ",")}`
+                        )}
+                      </span>
                     </div>
                   )}
                 </div>
 
                 {/* Total */}
-                <div className="flex justify-between items-center py-4 border-t-2 border-[var(--border)] mb-6">
+                <div className="flex justify-between items-center py-4 px-3 rounded-2xl border-2 border-[var(--accent-light)] bg-[var(--accent-light)]/20 mb-6">
                   <span className="text-lg font-bold text-[var(--foreground)]">Total</span>
-                  <span className="text-2xl sm:text-3xl font-black text-[var(--accent)]" style={{ fontFamily: "var(--font-logo)" }}>
+                  <span className="text-3xl sm:text-4xl font-black text-[var(--accent)]" style={{ fontFamily: "var(--font-logo)" }}>
                     R$ {total.toFixed(2).replace(".", ",")}
                   </span>
                 </div>
 
                 <button
                   onClick={() => router.push("/checkout")}
-                  className="w-full py-5 rounded-2xl bg-[var(--accent)] text-white font-bold text-lg hover:bg-[var(--accent-hover)] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg"
+                  className="w-full py-5 rounded-2xl bg-[var(--accent)] text-white font-bold text-lg hover:bg-[var(--accent-hover)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-[0_8px_20px_rgba(44,90,74,0.25)] hover:shadow-[0_12px_26px_rgba(44,90,74,0.28)]"
                 >
                   Finalizar Compra
                 </button>
+                <p className="text-xs text-[var(--muted)] text-center mt-2">Seu carrinho está reservado por alguns minutos.</p>
+
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {[
+                    { icon: "🚚", texto: "Envio rápido" },
+                    { icon: "🔒", texto: "Compra segura" },
+                    { icon: "↩️", texto: "Troca facilitada" },
+                  ].map((item) => (
+                    <div key={item.texto} className="rounded-xl border border-[var(--border)] bg-[var(--warm-50)] px-3 py-2 text-xs font-medium text-[var(--foreground)] text-center">
+                      <span className="mr-1">{item.icon}</span>
+                      {item.texto}
+                    </div>
+                  ))}
+                </div>
+
                 <Link href="/produtos" className="block text-center text-[var(--muted)] font-medium mt-4 hover:text-[var(--accent)] transition-colors">
                   ← Continuar comprando
                 </Link>
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                {["🚚 Envio rápido", "🔒 Compra segura", "↩️ Troca fácil"].map((t, i) => (
-                  <span key={i} className="text-xs text-[var(--muted)] font-medium">{t}</span>
-                ))}
               </div>
             </div>
           </div>

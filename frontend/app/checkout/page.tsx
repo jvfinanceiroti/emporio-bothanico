@@ -41,8 +41,6 @@ export default function CheckoutPage() {
   const [retiradaNaLoja, setRetiradaNaLoja] = useState(false);
   const [tipoEnvio, setTipoEnvio] = useState<"pac" | "sedex" | "retirada">("pac");
   const [carregandoCep, setCarregandoCep] = useState(false);
-  const FRETE_GRATIS_PAC = 299;
-  const FRETE_GRATIS_SEDEX = 800;
   const [prazoPac, setPrazoPac] = useState<number | null>(null);
   const [prazoSedex, setPrazoSedex] = useState<number | null>(null);
   const [carregandoFrete, setCarregandoFrete] = useState(false);
@@ -431,10 +429,15 @@ export default function CheckoutPage() {
   };
 
   const subtotal = carrinho.reduce((acc, item) => acc + (Number(item.preco) * (item.quantidade || 1)), 0);
-  const valorFretePac = subtotal >= FRETE_GRATIS_PAC ? 0 : (fretePac ?? 0);
-  const valorFreteSedex = subtotal >= FRETE_GRATIS_SEDEX ? 0 : (freteSedex ?? 0);
+  const valorFretePac = fretePac ?? 0;
+  const valorFreteSedex = freteSedex ?? 0;
   const frete = tipoEnvio === "retirada" ? 0 : (tipoEnvio === "pac" ? valorFretePac : valorFreteSedex);
   const total = subtotal + frete;
+  const etapaAtual = mostrarPagamento
+    ? 3
+    : (cep.replace(/\D/g, "").length === 8 || !!endereco || !!cidade || !!estado)
+    ? 2
+    : 1;
 
   // carrinho já está agrupado, não precisa reagrupar
   const totalItens = carrinho.reduce((acc, item) => acc + (item.quantidade || 1), 0);
@@ -503,7 +506,7 @@ export default function CheckoutPage() {
         <StoreHeader />
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <main className="checkout-main max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         {/* Breadcrumbs */}
         <nav className="text-sm text-[var(--muted)] mb-8">
           <Link href="/" className="hover:text-[var(--accent)]">Home</Link>
@@ -514,6 +517,41 @@ export default function CheckoutPage() {
           <span className="mx-2">›</span>
           <span className="text-[var(--foreground)] font-medium">Checkout</span>
         </nav>
+
+        {/* Progresso */}
+        <div className="bg-white rounded-2xl border border-[var(--border)] px-4 sm:px-6 py-4 mb-6 sm:mb-8">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 items-center">
+            {[
+              { n: 1, label: "Dados" },
+              { n: 2, label: "Entrega" },
+              { n: 3, label: "Pagamento" },
+            ].map((step) => {
+              const ativo = step.n === etapaAtual;
+              const concluido = step.n < etapaAtual;
+              return (
+                <div key={step.n} className="flex items-center gap-2 sm:gap-3">
+                  <div
+                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-all ${
+                      ativo || concluido
+                        ? "bg-[var(--accent)] text-white"
+                        : "bg-[var(--warm-50)] text-[var(--muted)] border border-[var(--border)]"
+                    }`}
+                  >
+                    {concluido ? "✓" : step.n}
+                  </div>
+                  <div className="min-w-0">
+                    <p className={`text-xs sm:text-sm font-semibold ${ativo ? "text-[var(--foreground)]" : "text-[var(--muted)]"}`}>
+                      {step.label}
+                    </p>
+                    <div className="h-1.5 mt-1 rounded-full bg-[var(--accent-light)]/60 overflow-hidden">
+                      <div className={`h-full rounded-full transition-all duration-300 ${ativo || concluido ? "bg-[var(--accent)] w-full" : "bg-transparent w-0"}`} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="grid lg:grid-cols-[1fr_400px] gap-8 lg:gap-12 items-start">
           {/* FORMULÁRIO */}
@@ -608,6 +646,9 @@ export default function CheckoutPage() {
                     onFocus={(e) => e.currentTarget.style.borderColor = "#0a0a0a"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)"}
                   />
+                  <p style={{ marginTop: "6px", fontSize: "12px", color: "#777" }}>
+                    Preenchemos o endereço automaticamente. Você pode editar os campos.
+                  </p>
                 </div>
 
                 <div>
@@ -1108,8 +1149,7 @@ export default function CheckoutPage() {
                           PAC {prazoPac && <span style={{ fontWeight: "400", fontSize: "11px", color: "#888" }}>({prazoPac} {prazoPac === 1 ? "dia útil" : "dias úteis"})</span>}
                         </div>
                         <div style={{ fontSize: "clamp(12px, 2.8vw, 13px)", color: "#666" }}>
-                          {subtotal >= FRETE_GRATIS_PAC ? "Grátis" : `R$ ${(fretePac ?? 0).toFixed(2).replace(".", ",")}`}
-                          {subtotal >= FRETE_GRATIS_PAC && <span style={{ display: "block", fontSize: "11px", color: "var(--success)" }}>Compra acima de R$ 299</span>}
+                          {`R$ ${(fretePac ?? 0).toFixed(2).replace(".", ",")}`}
                         </div>
                       </button>
                       )}
@@ -1133,8 +1173,7 @@ export default function CheckoutPage() {
                           SEDEX {prazoSedex && <span style={{ fontWeight: "400", fontSize: "11px", color: "#888" }}>({prazoSedex} {prazoSedex === 1 ? "dia útil" : "dias úteis"})</span>}
                         </div>
                         <div style={{ fontSize: "clamp(12px, 2.8vw, 13px)", color: "#666" }}>
-                          {subtotal >= FRETE_GRATIS_SEDEX ? "Grátis" : `R$ ${(freteSedex ?? 0).toFixed(2).replace(".", ",")}`}
-                          {subtotal >= FRETE_GRATIS_SEDEX && <span style={{ display: "block", fontSize: "11px", color: "var(--success)" }}>Compra acima de R$ 800</span>}
+                          {`R$ ${(freteSedex ?? 0).toFixed(2).replace(".", ",")}`}
                         </div>
                       </button>
                       )}
@@ -1170,17 +1209,41 @@ export default function CheckoutPage() {
               <div style={{
                 marginTop: "clamp(12px, 3vw, 16px)",
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "clamp(6px, 1.5vw, 8px)",
+                gap: "6px",
                 fontSize: "clamp(12px, 2.8vw, 13px)",
                 color: "#999",
                 flexWrap: "wrap"
               }}>
-                <svg style={{ width: "clamp(14px, 3.5vw, 16px)", height: "clamp(14px, 3.5vw, 16px)", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span style={{ whiteSpace: "nowrap" }}>Compra 100% segura</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "clamp(6px, 1.5vw, 8px)" }}>
+                  <svg style={{ width: "clamp(14px, 3.5vw, 16px)", height: "clamp(14px, 3.5vw, 16px)", flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span style={{ whiteSpace: "nowrap", fontWeight: 700 }}>Pagamento 100% seguro</span>
+                </div>
+                <span>Seus dados são protegidos por criptografia.</span>
+              </div>
+
+              <div style={{ marginTop: "14px" }}>
+                <p style={{ fontSize: "12px", color: "#777", textAlign: "center", marginBottom: "8px", fontWeight: 600 }}>
+                  Pagamentos aceitos
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "8px" }}>
+                  <span style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "10px", minHeight: "40px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <img src="https://cdn.simpleicons.org/visa/1A1F71" alt="Visa" style={{ width: "34px", height: "20px", objectFit: "contain" }} />
+                  </span>
+                  <span style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "10px", minHeight: "40px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <img src="https://cdn.simpleicons.org/mastercard/EB001B" alt="Mastercard" style={{ width: "34px", height: "20px", objectFit: "contain" }} />
+                  </span>
+                  <span style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "10px", minHeight: "40px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <img src="https://cdn.simpleicons.org/pix/32BCAD" alt="Pix" style={{ width: "34px", height: "20px", objectFit: "contain" }} />
+                  </span>
+                  <span style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: "10px", minHeight: "40px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", color: "#666", fontWeight: 700 }}>
+                    BOLETO
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -1961,6 +2024,27 @@ export default function CheckoutPage() {
                 >
                   {processandoCartao ? "Processando..." : `Pagar R$ ${total.toFixed(2)}`}
                 </button>
+
+                <div style={{
+                  marginTop: "12px",
+                  padding: "12px 14px",
+                  borderRadius: "10px",
+                  border: "1px solid rgba(45, 90, 74, 0.2)",
+                  background: "rgba(45, 90, 74, 0.06)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  flexWrap: "wrap",
+                  textAlign: "center"
+                }}>
+                  <span style={{ fontSize: "14px", fontWeight: 700, color: "#1f4135", whiteSpace: "nowrap" }}>
+                    🔒 Pagamento protegido
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#5f6d66" }}>
+                    Seus dados são criptografados e seguros.
+                  </span>
+                </div>
               </div>
               )
             ) : (
@@ -2281,6 +2365,18 @@ export default function CheckoutPage() {
       )}
 
       <style jsx>{`
+        .checkout-main input,
+        .checkout-main select,
+        .checkout-main textarea {
+          transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease !important;
+        }
+        .checkout-main input:focus,
+        .checkout-main select:focus,
+        .checkout-main textarea:focus {
+          border-color: var(--accent) !important;
+          box-shadow: 0 0 0 3px rgba(45, 90, 74, 0.14) !important;
+        }
+
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
