@@ -11,7 +11,13 @@ export default function AdminHeader() {
   const pathname = usePathname();
   const { permissoes, temPermissao, isAdmin } = usePermissoes();
   const [nomeUsuario, setNomeUsuario] = useState("");
-  const [logoSrc, setLogoSrc] = useState("/logo-admin.png");
+  const logoSources = [
+    "https://www.emporiobothanico.com.br/logo-admin.png",
+    "https://www.emporiobothanico.com.br/logo.png",
+    "/logo-admin.png",
+    "/logo.png",
+  ];
+  const [logoSrcIndex, setLogoSrcIndex] = useState(0);
 
   useEffect(() => {
     const usuarioStr = localStorage.getItem("usuario");
@@ -80,10 +86,10 @@ export default function AdminHeader() {
           minWidth: "min(200px, 100%)"
         }}>
           <img 
-            src={logoSrc}
+            src={logoSources[logoSrcIndex]}
             alt="Empório Bothânico"
             onError={() => {
-              if (logoSrc !== "/logo.png") setLogoSrc("/logo.png");
+              setLogoSrcIndex((prev) => Math.min(prev + 1, logoSources.length - 1));
             }}
             style={{ 
               height: "clamp(44px, 10vw, 58px)", 
