@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PROD_API_FALLBACK = "https://emporio-bothanico.onrender.com";
+const PROD_API_URL = "https://emporio-bothanico.onrender.com";
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (process.env.NODE_ENV === "production" ? PROD_API_FALLBACK : "http://localhost:3001");
-const LOGIN_TIMEOUT_MS = 10_000;
+  process.env.NODE_ENV === "production"
+    ? PROD_API_URL
+    : process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+// Instância free do Render pode demorar ~50s para acordar.
+const LOGIN_TIMEOUT_MS = 70_000;
 
 export async function POST(request: NextRequest) {
   try {

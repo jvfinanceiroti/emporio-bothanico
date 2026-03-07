@@ -21,9 +21,15 @@ export function middleware(request: NextRequest) {
   // Se acessar pelo subdomínio do painel, reescreve para /admin
   if (host.startsWith("painel.") || host === ADMIN_SUBDOMAIN) {
     const pathname = url.pathname;
+    const isStaticAsset = /\.(png|jpg|jpeg|svg|webp|ico|gif|css|js|map|txt|xml)$/i.test(pathname);
 
     // NUNCA reescrever /api, /_next, etc - passa direto
-    if (pathname.startsWith("/api") || pathname.startsWith("/_next") || pathname.startsWith("/favicon")) {
+    if (
+      pathname.startsWith("/api") ||
+      pathname.startsWith("/_next") ||
+      pathname.startsWith("/favicon") ||
+      isStaticAsset
+    ) {
       return NextResponse.next();
     }
 
