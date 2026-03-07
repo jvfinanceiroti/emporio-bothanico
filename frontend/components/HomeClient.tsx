@@ -71,14 +71,7 @@ export function HomeClient({ produtosIniciais = [] }: { produtosIniciais?: any[]
   const getProdutoImagem = (p: any) => {
     const url = p?.imagem_url;
     if (url && !url.includes("placeholder")) return url;
-    const n = (p?.nome || "").toLowerCase();
-    if (n.includes("essência") || n.includes("essencia")) return "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&q=80";
-    if (n.includes("refil") || n.includes("sabonete líquido")) return "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&q=80";
-    if (n.includes("difusor")) return "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&q=80";
-    if (n.includes("sabonete") && n.includes("lavanda")) return "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=400&q=80";
-    if (n.includes("vela") || n.includes("baunilha")) return "https://images.unsplash.com/photo-1602874801006-4e41187f7f36?w=400&q=80";
-    if (n.includes("spray") || n.includes("eucalipto") || n.includes("home spray")) return "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400&q=80";
-    return "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=400&q=80";
+    return "/logo.png";
   };
 
   return (
@@ -178,7 +171,7 @@ export function HomeClient({ produtosIniciais = [] }: { produtosIniciais?: any[]
                       src={getProdutoImagem(produto)}
                       alt={produto.nome}
                       className="w-full h-full object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = getProdutoImagem(produto); }}
+                      onError={(e) => { (e.target as HTMLImageElement).src = "/logo.png"; }}
                     />
                   </div>
                   <h3 className="text-sm sm:text-base font-semibold text-[var(--foreground)] line-clamp-2 min-h-[2.8rem]">{produto.nome}</h3>
