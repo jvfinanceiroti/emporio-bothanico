@@ -17,7 +17,8 @@ CREATE INDEX IF NOT EXISTS idx_produtos_categoria ON produtos(categoria_id);
 
 -- Inserir categorias padrão
 INSERT INTO categorias (nome, slug, descricao) VALUES
-  ('Perfume', 'perfume', 'Perfumes e fragrâncias exclusivas'),
-  ('Aromas', 'aromas', 'Aromatizadores e difusores'),
-  ('Banho', 'banho', 'Produtos para banho e cuidados pessoais')
+  ('Essências', 'essencia', 'Essências e fragrâncias exclusivas'),
+  ('Delicadezas e Presentes', 'delicadezas-e-presentes', 'Delicadezas, presentes e cuidados especiais'),
+  ('Aromaterapia', 'aromaterapia', 'Aromaterapia, difusores e bem-estar'),
+  ('Kits', 'kits', 'Kits especiais para presente e autocuidado')
 ON CONFLICT (slug) DO NOTHING;

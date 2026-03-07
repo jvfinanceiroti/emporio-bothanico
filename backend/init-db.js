@@ -126,9 +126,10 @@ async function initDatabase() {
       `);
       await pool.query(`
         INSERT INTO categorias (nome, slug, descricao) VALUES
-          ('Perfume', 'perfume', 'Perfumes e fragrâncias'),
-          ('Aromas', 'aromas', 'Aromatizadores e difusores'),
-          ('Banho', 'banho', 'Produtos para banho')
+          ('Essências', 'essencia', 'Essências e fragrâncias exclusivas'),
+          ('Delicadezas e Presentes', 'delicadezas-e-presentes', 'Delicadezas, presentes e cuidados especiais'),
+          ('Aromaterapia', 'aromaterapia', 'Aromaterapia, difusores e bem-estar'),
+          ('Kits', 'kits', 'Kits especiais para presente e autocuidado')
         ON CONFLICT (slug) DO NOTHING;
       `);
     } catch (err) {

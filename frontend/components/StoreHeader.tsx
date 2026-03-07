@@ -45,11 +45,14 @@ export function StoreHeader() {
   const headerBgDark = "bg-[#234a3d]";
   const categoriasOrdenadas = [...categorias].sort((a, b) => {
     const ordem: Record<string, number> = {
-      kits: 1,
-      aromas: 2,
-      banho: 3,
-      perfume: 4,
-      perfumes: 4,
+      essencia: 1,
+      "delicadezas-e-presentes": 2,
+      aromaterapia: 3,
+      kits: 4,
+      aromas: 3,
+      banho: 2,
+      perfume: 1,
+      perfumes: 1,
     };
     const aPos = ordem[a.slug] ?? 999;
     const bPos = ordem[b.slug] ?? 999;
@@ -174,7 +177,6 @@ export function StoreHeader() {
             Mais Vendidos
             <span className="text-[10px]">★</span>
           </Link>
-          <Link href="/produtos?categoria=kits" className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors">Kits</Link>
           {categoriasOrdenadas.map((cat) => (
             <Link key={cat.id} href={`/produtos?categoria=${cat.slug}`} className="px-3 py-1.5 text-xs sm:text-sm font-semibold uppercase hover:bg-white/10 rounded transition-colors flex items-center gap-1">
               {cat.nome}

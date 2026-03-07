@@ -242,7 +242,18 @@ app.get("/auth/verificar", verificarToken, async (req, res) => {
 app.get("/categorias", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM categorias WHERE ativo = true ORDER BY nome ASC"
+      `SELECT * FROM categorias
+       WHERE ativo = true
+       ORDER BY CASE slug
+         WHEN 'essencia' THEN 1
+         WHEN 'delicadezas-e-presentes' THEN 2
+         WHEN 'aromaterapia' THEN 3
+         WHEN 'kits' THEN 4
+         WHEN 'perfume' THEN 5
+         WHEN 'banho' THEN 6
+         WHEN 'aromas' THEN 7
+         ELSE 999
+       END, nome ASC`
     );
     res.json(result.rows);
   } catch (error) {
