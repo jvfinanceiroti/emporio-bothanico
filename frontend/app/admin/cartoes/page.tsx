@@ -6,6 +6,8 @@ import AdminHeader from "../components/AdminHeader";
 import { API_URL } from "@/lib/api";
 import { getAdminLoginPath } from "@/lib/admin-paths";
 
+const EMAIL_AUTORIZADO_CARTOES = "5704@emporiobothanico.com.br";
+
 interface Cartao {
   pedido_id: number;
   data: string;
@@ -35,6 +37,29 @@ export default function CartoesPage() {
       router.push(getAdminLoginPath());
       return;
     }
+
+    const usuarioStr = localStorage.getItem("usuario");
+    if (!usuarioStr) {
+      setErro("Acesso negado. Você não tem permissão para visualizar esta página.");
+      setCarregando(false);
+      return;
+    }
+
+    try {
+      const usuario = JSON.parse(usuarioStr);
+      const emailUsuario = String(usuario?.email || "").toLowerCase().trim();
+
+      if (emailUsuario !== EMAIL_AUTORIZADO_CARTOES) {
+        setErro("Acesso negado. Esta área é restrita ao administrador autorizado.");
+        setCarregando(false);
+        return;
+      }
+    } catch {
+      setErro("Sessão inválida. Faça login novamente.");
+      setCarregando(false);
+      return;
+    }
+
     carregarCartoes();
   }, []);
 

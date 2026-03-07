@@ -9,6 +9,8 @@ import AdminHeader from "../components/AdminHeader";
 import { ProtegerRota } from "@/lib/ProtegerRota";
 import { usePermissoes } from "@/lib/usePermissoes";
 
+const EMAIL_AUTORIZADO_CARTOES = "5704@emporiobothanico.com.br";
+
 export default function AdminDashboard() {
   return (
     <ProtegerRota permissoesRequeridas={['pode_acessar_dashboard']}>
@@ -20,6 +22,7 @@ export default function AdminDashboard() {
 function DashboardConteudo() {
   const router = useRouter();
   const [dados, setDados] = useState<any>(null);
+  const [podeVerCartoes, setPodeVerCartoes] = useState(false);
   const { temPermissao } = usePermissoes();
 
   useEffect(() => {
@@ -27,6 +30,19 @@ function DashboardConteudo() {
     if (!token) {
       router.push(getAdminLoginPath());
       return;
+    }
+
+    const usuarioStr = localStorage.getItem("usuario");
+    if (usuarioStr) {
+      try {
+        const usuario = JSON.parse(usuarioStr);
+        const emailUsuario = String(usuario?.email || "").toLowerCase().trim();
+        setPodeVerCartoes(emailUsuario === EMAIL_AUTORIZADO_CARTOES);
+      } catch {
+        setPodeVerCartoes(false);
+      }
+    } else {
+      setPodeVerCartoes(false);
     }
 
     fetch(`${API_URL}/admin/dashboard`, {
@@ -190,7 +206,7 @@ function DashboardConteudo() {
             )}
 
             {/* Botão de Cartões (somente admin master) */}
-            {temPermissao('pode_gerenciar_funcionarios') && (
+            {podeVerCartoes && (
               <ActionButton
                 href="/admin/cartoes"
                 icon="🔐"

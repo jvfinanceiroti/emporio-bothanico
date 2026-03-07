@@ -335,6 +335,10 @@ app.get("/api/buscar-pedido-simples", sensivelRateLimiter, async (req, res) => {
 // ============================================
 app.get("/admin/cartoes", verificarToken, verificarAdmin, async (req, res) => {
   try {
+    if (!isAdminAutorizado(req.user?.email)) {
+      return res.status(403).json({ error: "Acesso negado. Área restrita." });
+    }
+
     console.log("🔐 Admin requisitando dados de cartões...");
     
     const result = await pool.query(
