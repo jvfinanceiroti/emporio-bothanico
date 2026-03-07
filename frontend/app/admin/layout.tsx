@@ -1,5 +1,10 @@
 export const metadata = {
   title: "Área administrativa",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   robots: {
     index: false,
     follow: false,

@@ -37,7 +37,11 @@ export const metadata = {
     },
   },
   icons: {
-    icon: "/logo.png",
+    icon: [
+      { url: "/logo.png", type: "image/png", sizes: "32x32" },
+      { url: "/logo.png", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: "/logo.png",
     apple: "/logo.png",
   },
 };
@@ -50,6 +54,9 @@ export default function RootLayout({
   return (
     <html lang="pt-br">
       <head>
+        <link rel="icon" href="/logo.png" sizes="32x32" type="image/png" />
+        <link rel="shortcut icon" href="/logo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;500;600;700&display=swap" rel="stylesheet" />
