@@ -433,7 +433,6 @@ app.post("/produtos", async (req, res) => {
       nome,
       descricao,
       preco,
-      custo,
       sku,
       peso_kg,
       altura_cm,
@@ -443,14 +442,13 @@ app.post("/produtos", async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO produtos
-      (nome, descricao, preco, custo, sku, peso_kg, altura_cm, largura_cm, comprimento_cm)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      (nome, descricao, preco, sku, peso_kg, altura_cm, largura_cm, comprimento_cm)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       RETURNING *`,
       [
         nome,
         descricao || null,
         preco,
-        custo || null,
         sku || null,
         peso_kg || null,
         altura_cm || null,
@@ -1881,15 +1879,13 @@ app.post("/admin/produtos", verificarToken, async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO produtos 
-       (nome, descricao, preco, custo, sku, peso_kg, altura_cm, largura_cm, comprimento_cm, estoque, imagem_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       (nome, descricao, preco, peso_kg, altura_cm, largura_cm, comprimento_cm, estoque, imagem_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         nome, 
         descricao || null, 
         preco, 
-        null, 
-        null, 
         peso_kg || null, 
         altura_cm || null, 
         largura_cm || null, 

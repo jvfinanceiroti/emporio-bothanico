@@ -40,6 +40,16 @@ async function initDatabase() {
       );
     `);
 
+    // Garantir coluna custo em bases antigas (evita erro em query legada)
+    try {
+      await pool.query(`
+        ALTER TABLE produtos
+        ADD COLUMN IF NOT EXISTS custo DECIMAL(10, 2);
+      `);
+    } catch (err) {
+      console.log("⚠️ Coluna custo não pôde ser garantida:", err.message);
+    }
+
     // Criar tabela de pedidos
     await pool.query(`
       CREATE TABLE IF NOT EXISTS pedidos (
