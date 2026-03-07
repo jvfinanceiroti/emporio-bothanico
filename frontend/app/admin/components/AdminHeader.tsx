@@ -11,7 +11,6 @@ export default function AdminHeader() {
   const pathname = usePathname();
   const { permissoes, temPermissao, isAdmin } = usePermissoes();
   const [nomeUsuario, setNomeUsuario] = useState("");
-  const [logoComErro, setLogoComErro] = useState(false);
 
   useEffect(() => {
     const usuarioStr = localStorage.getItem("usuario");
@@ -79,38 +78,16 @@ export default function AdminHeader() {
           flexShrink: 0,
           minWidth: "min(200px, 100%)"
         }}>
-          {logoComErro ? (
-            <div
-              style={{
-                width: "clamp(40px, 10vw, 50px)",
-                height: "clamp(40px, 10vw, 50px)",
-                borderRadius: "999px",
-                background: "linear-gradient(135deg, #2d5a4a, #667eea)",
-                color: "white",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "clamp(12px, 3vw, 15px)",
-                fontWeight: 700,
-                flexShrink: 0,
-              }}
-              aria-label="Empório Bothânico"
-            >
-              EB
-            </div>
-          ) : (
-            <img 
-              src="/logo.png" 
-              alt="Logo" 
-              onError={() => setLogoComErro(true)}
-              style={{ 
-                height: "clamp(40px, 10vw, 50px)", 
-                width: "clamp(40px, 10vw, 50px)",
-                objectFit: "contain",
-                flexShrink: 0
-              }}
-            />
-          )}
+          <img 
+            src="/logo.png" 
+            alt="Empório Bothânico"
+            style={{ 
+              height: "clamp(40px, 10vw, 50px)", 
+              width: "clamp(40px, 10vw, 50px)",
+              objectFit: "contain",
+              flexShrink: 0
+            }}
+          />
           <div>
             <h1 style={{
               fontSize: "clamp(16px, 4vw, 24px)",
@@ -146,7 +123,7 @@ export default function AdminHeader() {
           flexWrap: "wrap"
         }}>
           <a
-            href="/"
+            href="https://www.emporiobothanico.com.br/"
             target="_blank"
             rel="noopener noreferrer"
             style={{
