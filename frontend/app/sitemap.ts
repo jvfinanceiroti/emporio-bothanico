@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { API_URL } from "@/lib/api";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://emporiobothanico.com.br";
+const SITEMAP_FETCH_TIMEOUT_MS = 4000;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE_URL.replace(/\/$/, "");
@@ -59,8 +60,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Produtos dinâmicos
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
   try {
-    const res = await fetch(`${API_URL}/produtos`);
+    // Em produção, evita travar build se API_URL cair para localhost
+    // por variável de ambiente ausente.
+    if (process.env.NODE_ENV === "production" && API_URL.includes("localhost")) {
+      return paginas;
+    }
+
+    const controller = new AbortController();
+    timeoutId = setTimeout(() => controller.abort(), SITEMAP_FETCH_TIMEOUT_MS);
+    const res = await fetch(`${API_URL}/produtos`, { signal: controller.signal });
+    if (!res.ok) return paginas;
+
     const produtos = await res.json();
     const lista = Array.isArray(produtos) ? produtos : [];
 
@@ -76,5 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [...paginas, ...urlsProdutos];
   } catch {
     return paginas;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 }
