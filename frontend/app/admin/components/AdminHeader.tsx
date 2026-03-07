@@ -145,6 +145,32 @@ export default function AdminHeader() {
           gap: "clamp(12px, 3vw, 16px)",
           flexWrap: "wrap"
         }}>
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: "#2d5a4a",
+              color: "white",
+              border: "none",
+              padding: "clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 24px)",
+              borderRadius: "clamp(6px, 1.5vw, 8px)",
+              cursor: "pointer",
+              fontWeight: "600",
+              fontSize: "clamp(12px, 3vw, 14px)",
+              transition: "all 0.2s",
+              minHeight: "44px",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center"
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = "#234a3d"}
+            onMouseOut={(e) => e.currentTarget.style.background = "#2d5a4a"}
+          >
+            Ver Loja
+          </a>
           <button
             onClick={handleLogout}
             style={{
