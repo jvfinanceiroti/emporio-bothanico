@@ -23,5 +23,5 @@ INSERT INTO categorias (nome, slug, descricao) VALUES
   ('Delicadezas e Presentes', 'delicadezas-e-presentes', 'Delicadezas, presentes e cuidados especiais'),
   ('Aromaterapia', 'aromaterapia', 'Aromaterapia, difusores e bem-estar'),
   ('Kits', 'kits', 'Kits especiais para presente e autocuidado'),
-  ('Perfume', 'perfume', 'Perfumes e fragrâncias exclusivas')
+  ('Perfumes', 'perfume', 'Perfumes e fragrâncias exclusivas')
 ON CONFLICT (slug) DO NOTHING;

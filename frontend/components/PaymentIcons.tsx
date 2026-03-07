@@ -2,11 +2,10 @@
 
 /** Ícones de métodos de pagamento organizados para desktop/mobile */
 const iconBox = "flex items-center justify-center h-11 rounded-xl p-2 shadow-sm transition-transform hover:scale-105 bg-white";
-const textBox = "flex items-center justify-center h-11 rounded-xl px-3 bg-white text-stone-700 text-xs font-semibold";
 
 export function PaymentIcons() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-5 max-w-5xl mx-auto">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 max-w-4xl mx-auto">
       {/* Visa - azul oficial */}
       <span className={`${iconBox} w-full`} title="Visa">
         <img
@@ -51,8 +50,6 @@ export function PaymentIcons() {
         </svg>
       </span>
 
-      <span className={textBox} title="Cartão de crédito">Cartão de crédito</span>
-      <span className={textBox} title="Cartão de débito">Cartão de débito</span>
     </div>
   );
 }

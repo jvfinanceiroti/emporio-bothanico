@@ -79,11 +79,11 @@ export default function AdminHeader() {
           minWidth: "min(200px, 100%)"
         }}>
           <img 
-            src="/logo.png" 
+            src="/logo-admin.png" 
             alt="Empório Bothânico"
             style={{ 
-              height: "clamp(40px, 10vw, 50px)", 
-              width: "clamp(40px, 10vw, 50px)",
+              height: "clamp(44px, 10vw, 58px)", 
+              width: "clamp(44px, 10vw, 58px)",
               objectFit: "contain",
               flexShrink: 0
             }}
