@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const PROD_API_FALLBACK = "https://emporio-bothanico.onrender.com";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "production" ? PROD_API_FALLBACK : "http://localhost:3001");
+const LOGIN_TIMEOUT_MS = 10_000;
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,11 +16,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.redirect(new URL("/admin/login?erro=Email+e+senha+obrigat%C3%B3rios", request.url), 303);
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), LOGIN_TIMEOUT_MS);
     const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, senha }),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     const data = await res.json().catch(() => ({}));
 
@@ -38,6 +46,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(redirectUrl, 303);
   } catch (error) {
     console.error("admin-login error:", error);
-    return NextResponse.redirect(new URL("/admin/login?erro=Erro+ao+conectar", request.url), 303);
+    const isAbortError = error instanceof Error && error.name === "AbortError";
+    const msg = isAbortError ? "Servidor+demorou+para+responder" : "Erro+ao+conectar";
+    return NextResponse.redirect(new URL(`/admin/login?erro=${msg}`, request.url), 303);
   }
 }

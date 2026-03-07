@@ -1,8 +1,12 @@
 import { getAdminLoginPath } from "./admin-paths";
 
 // Configuração central da API
-// Usa variável de ambiente em produção, localhost em desenvolvimento
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// Usa variável de ambiente quando disponível.
+// Fallback em produção aponta para API oficial para evitar cair em localhost no Vercel.
+const PROD_API_FALLBACK = "https://emporio-bothanico.onrender.com";
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === "production" ? PROD_API_FALLBACK : "http://localhost:3001");
 
 // Helper para fazer requests públicos
 export async function apiRequest(endpoint: string, options?: RequestInit) {
