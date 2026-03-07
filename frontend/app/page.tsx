@@ -6,6 +6,7 @@ const SSR_FETCH_TIMEOUT_MS = 4500;
 
 async function getProdutosIniciais() {
   const url = `${API_URL}/produtos`;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
   try {
     // Em produção, se API_URL cair para localhost por variável ausente,
     // não bloqueia o build da home.
@@ -15,20 +16,30 @@ async function getProdutosIniciais() {
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), SSR_FETCH_TIMEOUT_MS);
+    timeoutId = setTimeout(() => controller.abort(), SSR_FETCH_TIMEOUT_MS);
     const res = await fetch(url, {
       next: { revalidate: 60 },
       signal: controller.signal,
     });
-    clearTimeout(timeoutId);
 
     if (!res.ok) return [];
     const data = await res.json();
     const arr = Array.isArray(data) ? data : [];
     return arr.filter((p: any) => p.ativo !== false && (p.estoque ?? 0) > 0);
   } catch (err) {
+    const isAbortError =
+      err instanceof Error &&
+      (err.name === "AbortError" || err.message.toLowerCase().includes("aborted"));
+
+    if (isAbortError) {
+      // Timeout no preload SSR não deve poluir log de build.
+      return [];
+    }
+
     console.error("Erro SSR produtos:", err);
     return [];
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 }
 
