@@ -19,6 +19,25 @@ export interface Permissoes {
   pode_acessar_dashboard: boolean;
 }
 
+const CACHE_TTL_MS = 60_000;
+const REQUEST_TIMEOUT_MS = 8_000;
+
+let permissoesCache: Permissoes | null = null;
+let permissoesCacheTs = 0;
+let inFlightRequest: Promise<Permissoes | null> | null = null;
+
+const getPermissoesCache = (): Permissoes | null => {
+  const agora = Date.now();
+  if (!permissoesCache) return null;
+  if (agora - permissoesCacheTs > CACHE_TTL_MS) return null;
+  return permissoesCache;
+};
+
+const setPermissoesCache = (permissoes: Permissoes | null) => {
+  permissoesCache = permissoes;
+  permissoesCacheTs = Date.now();
+};
+
 export function usePermissoes() {
   const [permissoes, setPermissoes] = useState<Permissoes | null>(null);
   const [carregando, setCarregando] = useState(true);
@@ -31,25 +50,55 @@ export function usePermissoes() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
+        setPermissoes(null);
         setCarregando(false);
         return;
       }
 
-      const response = await fetch(`${API_URL}/auth/permissoes`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const cacheValido = getPermissoesCache();
+      if (cacheValido) {
+        setPermissoes(cacheValido);
+        setCarregando(false);
+        return;
+      }
 
-      if (response.ok) {
-        const data = await response.json();
-        setPermissoes(data);
-      } else {
-        console.warn('⚠️ Falha ao carregar permissões, mas não é crítico');
+      if (!inFlightRequest) {
+        inFlightRequest = (async () => {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+          try {
+            const response = await fetch(`${API_URL}/auth/permissoes`, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              },
+              signal: controller.signal
+            });
+
+            if (!response.ok) {
+              console.warn('⚠️ Falha ao carregar permissões, status:', response.status);
+              return null;
+            }
+
+            const data = await response.json();
+            setPermissoesCache(data);
+            return data;
+          } finally {
+            clearTimeout(timeoutId);
+          }
+        })();
+      }
+
+      const permissoesAtualizadas = await inFlightRequest;
+      setPermissoes(permissoesAtualizadas);
+      if (!permissoesAtualizadas) {
+        setPermissoesCache(null);
       }
     } catch (error) {
       console.error('Erro ao carregar permissões:', error);
+      setPermissoes(null);
     } finally {
+      inFlightRequest = null;
       setCarregando(false);
     }
   };
