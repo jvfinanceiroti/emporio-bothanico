@@ -44,20 +44,10 @@ export function StoreHeader() {
   const headerBg = "bg-[#2d5a4a]";
   const headerBgDark = "bg-[#234a3d]";
   const categoriasOrdenadas = [...categorias].sort((a, b) => {
-    const ordem: Record<string, number> = {
-      essencia: 1,
-      "delicadezas-e-presentes": 2,
-      aromaterapia: 3,
-      kits: 4,
-      aromas: 3,
-      banho: 2,
-      perfume: 1,
-      perfumes: 1,
-    };
-    const aPos = ordem[a.slug] ?? 999;
-    const bPos = ordem[b.slug] ?? 999;
-    if (aPos !== bPos) return aPos - bPos;
-    return a.nome.localeCompare(b.nome);
+    const aIsKits = a.slug === "kits";
+    const bIsKits = b.slug === "kits";
+    if (aIsKits !== bIsKits) return aIsKits ? 1 : -1;
+    return a.nome.localeCompare(b.nome, "pt-BR");
   });
 
   return (
