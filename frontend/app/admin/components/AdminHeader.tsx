@@ -11,6 +11,7 @@ export default function AdminHeader() {
   const pathname = usePathname();
   const { permissoes, temPermissao, isAdmin } = usePermissoes();
   const [nomeUsuario, setNomeUsuario] = useState("");
+  const [logoSrc, setLogoSrc] = useState("/logo-admin.png");
 
   useEffect(() => {
     const usuarioStr = localStorage.getItem("usuario");
@@ -79,8 +80,11 @@ export default function AdminHeader() {
           minWidth: "min(200px, 100%)"
         }}>
           <img 
-            src="/logo-admin.png" 
+            src={logoSrc}
             alt="Empório Bothânico"
+            onError={() => {
+              if (logoSrc !== "/logo.png") setLogoSrc("/logo.png");
+            }}
             style={{ 
               height: "clamp(44px, 10vw, 58px)", 
               width: "clamp(44px, 10vw, 58px)",
