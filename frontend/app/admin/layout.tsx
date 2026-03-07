@@ -1,9 +1,11 @@
+const ADMIN_FAVICON_URL = "/logo.png?v=20260307b";
+
 export const metadata = {
   title: "Área administrativa",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: ADMIN_FAVICON_URL,
+    shortcut: ADMIN_FAVICON_URL,
+    apple: ADMIN_FAVICON_URL,
   },
   robots: {
     index: false,
