@@ -34,7 +34,38 @@ function ProdutosContent() {
   const [termoBusca, setTermoBusca] = useState(searchParams.get("q") || "");
   const [carrinho, setCarrinho] = useState<any[]>([]);
   const [produtoAdicionadoId, setProdutoAdicionadoId] = useState<number | null>(null);
-  const FETCH_TIMEOUT_MS = 12_000;
+  const FETCH_TIMEOUT_MS = 15_000;
+  const CATEGORIAS_CACHE_KEY = "produtos_page_categorias_cache_v1";
+  const CATEGORIAS_CACHE_TTL_MS = 10 * 60 * 1000;
+  const PRODUTOS_CACHE_PREFIX = "produtos_page_cache_v1:";
+  const PRODUTOS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+  const fetchJsonComTimeout = async (url: string, timeoutMs: number) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      if (!res.ok) return [];
+      return await res.json();
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  };
+
+  const esperar = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const fetchComRetry = async (url: string, timeoutMs: number, tentativas = 2) => {
+    let ultimoErro: unknown = null;
+    for (let i = 0; i < tentativas; i++) {
+      try {
+        return await fetchJsonComTimeout(url, timeoutMs);
+      } catch (erro) {
+        ultimoErro = erro;
+        if (i < tentativas - 1) await esperar(1200);
+      }
+    }
+    throw ultimoErro;
+  };
 
   useEffect(() => {
     const salvo = localStorage.getItem("carrinho");
@@ -49,37 +80,79 @@ function ProdutosContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-    fetch(`${API_URL}/categorias`, { signal: controller.signal })
-      .then(res => (res.ok ? res.json() : []))
-      .then((rows) => setCategorias(Array.isArray(rows) ? rows : []))
-      .catch(() => {})
-      .finally(() => clearTimeout(timeoutId));
+    let cancelado = false;
+
+    try {
+      const raw = localStorage.getItem(CATEGORIAS_CACHE_KEY);
+      if (raw) {
+        const cache = JSON.parse(raw);
+        const valido = Date.now() - Number(cache?.ts || 0) < CATEGORIAS_CACHE_TTL_MS;
+        if (valido && Array.isArray(cache?.rows)) {
+          setCategorias(cache.rows);
+        }
+      }
+    } catch {}
+
+    (async () => {
+      try {
+        const rows = await fetchComRetry(`${API_URL}/categorias`, FETCH_TIMEOUT_MS, 2);
+        const lista = Array.isArray(rows) ? rows : [];
+        if (cancelado) return;
+        setCategorias(lista);
+        try {
+          localStorage.setItem(CATEGORIAS_CACHE_KEY, JSON.stringify({ ts: Date.now(), rows: lista }));
+        } catch {}
+      } catch {}
+    })();
+
     return () => {
-      clearTimeout(timeoutId);
-      controller.abort();
+      cancelado = true;
     };
   }, []);
 
   useEffect(() => {
+    let cancelado = false;
     setCarregando(true);
     const url = categoriaSelecionada 
       ? `${API_URL}/produtos?categoria=${categoriaSelecionada}` 
       : `${API_URL}/produtos`;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-    fetch(url, { signal: controller.signal })
-      .then(res => (res.ok ? res.json() : []))
-      .then(data => setProdutos(Array.isArray(data) ? data : []))
-      .catch(() => setProdutos([]))
-      .finally(() => {
-        clearTimeout(timeoutId);
-        setCarregando(false);
-      });
+    const cacheKey = `${PRODUTOS_CACHE_PREFIX}${categoriaSelecionada || "todos"}`;
+
+    try {
+      const raw = localStorage.getItem(cacheKey);
+      if (raw) {
+        const cache = JSON.parse(raw);
+        const valido = Date.now() - Number(cache?.ts || 0) < PRODUTOS_CACHE_TTL_MS;
+        if (valido && Array.isArray(cache?.rows)) {
+          setProdutos(cache.rows);
+          setCarregando(false);
+        }
+      }
+    } catch {}
+
+    const watchdogId = setTimeout(() => {
+      if (!cancelado) setCarregando(false);
+    }, FETCH_TIMEOUT_MS + 3000);
+
+    (async () => {
+      try {
+        const data = await fetchComRetry(url, FETCH_TIMEOUT_MS, 2);
+        const lista = Array.isArray(data) ? data : [];
+        if (cancelado) return;
+        setProdutos(lista);
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), rows: lista }));
+        } catch {}
+      } catch {
+        if (!cancelado) setProdutos([]);
+      } finally {
+        if (!cancelado) setCarregando(false);
+      }
+    })();
+
     return () => {
-      clearTimeout(timeoutId);
-      controller.abort();
+      cancelado = true;
+      clearTimeout(watchdogId);
     };
   }, [categoriaSelecionada]);
 
