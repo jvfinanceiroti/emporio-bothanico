@@ -21,29 +21,62 @@ export function HomeClient({ produtosIniciais = [] }: { produtosIniciais?: any[]
   const [carregando, setCarregando] = useState(produtosIniciais.length === 0);
   const [carrinho, setCarrinho] = useState<any[]>([]);
   const [ultimoAdicionadoId, setUltimoAdicionadoId] = useState<number | null>(null);
+  const PRODUTOS_CACHE_KEY = "home_produtos_cache_v1";
+  const PRODUTOS_CACHE_TTL_MS = 5 * 60 * 1000;
+  const PRODUTOS_TIMEOUT_MS = 12_000;
 
   useEffect(() => {
     if (produtosIniciais.length > 0) {
       setCarregando(false);
       return;
     }
-    setCarregando(true);
-    fetch(`${API_URL}/produtos`)
+    let tinhaCache = false;
+    try {
+      const raw = localStorage.getItem(PRODUTOS_CACHE_KEY);
+      if (raw) {
+        const cache = JSON.parse(raw);
+        const valido = Date.now() - Number(cache?.ts || 0) < PRODUTOS_CACHE_TTL_MS;
+        if (valido && Array.isArray(cache?.rows) && cache.rows.length > 0) {
+          setProdutos(cache.rows);
+          setCarregando(false);
+          tinhaCache = true;
+        }
+      }
+    } catch {}
+
+    if (!tinhaCache) setCarregando(true);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), PRODUTOS_TIMEOUT_MS);
+
+    fetch(`${API_URL}/produtos`, { signal: controller.signal })
       .then(res => {
         if (!res.ok) throw new Error(`API ${res.status}`);
         return res.json();
       })
       .then(data => {
         const arr = Array.isArray(data) ? data : [];
-        setProdutos(arr.filter((p: any) => p.ativo !== false && (p.estoque ?? 0) > 0));
+        const filtrados = arr.filter((p: any) => p.ativo !== false && (p.estoque ?? 0) > 0);
+        setProdutos(filtrados);
+        try {
+          localStorage.setItem(PRODUTOS_CACHE_KEY, JSON.stringify({ ts: Date.now(), rows: filtrados }));
+        } catch {}
       })
       .catch(err => {
         console.error("Erro ao carregar produtos:", err);
-        setProdutos([]);
+        if (!tinhaCache) setProdutos([]);
       })
-      .finally(() => setCarregando(false));
+      .finally(() => {
+        clearTimeout(timeoutId);
+        setCarregando(false);
+      });
     const salvo = localStorage.getItem("carrinho");
     if (salvo) setCarrinho(JSON.parse(salvo));
+
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [produtosIniciais.length]);
 
   useEffect(() => {

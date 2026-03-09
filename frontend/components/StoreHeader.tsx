@@ -10,6 +10,9 @@ export function StoreHeader() {
   const [totalItens, setTotalItens] = useState(0);
   const [busca, setBusca] = useState("");
   const [categorias, setCategorias] = useState<{ id: number; nome: string; slug: string }[]>([]);
+  const CATEGORIAS_CACHE_KEY = "categorias_cache_v1";
+  const CATEGORIAS_CACHE_TTL_MS = 10 * 60 * 1000;
+  const CATEGORIAS_TIMEOUT_MS = 10_000;
 
   useEffect(() => {
     const update = () => {
@@ -26,10 +29,36 @@ export function StoreHeader() {
   }, []);
 
   useEffect(() => {
-    fetch(`${API_URL}/categorias`)
-      .then((r) => r.json())
-      .then(setCategorias)
-      .catch(() => {});
+    try {
+      const raw = localStorage.getItem(CATEGORIAS_CACHE_KEY);
+      if (raw) {
+        const cache = JSON.parse(raw);
+        const valido = Date.now() - Number(cache?.ts || 0) < CATEGORIAS_CACHE_TTL_MS;
+        if (valido && Array.isArray(cache?.rows)) {
+          setCategorias(cache.rows);
+        }
+      }
+    } catch {}
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), CATEGORIAS_TIMEOUT_MS);
+
+    fetch(`${API_URL}/categorias`, { signal: controller.signal })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows) => {
+        const lista = Array.isArray(rows) ? rows : [];
+        setCategorias(lista);
+        try {
+          localStorage.setItem(CATEGORIAS_CACHE_KEY, JSON.stringify({ ts: Date.now(), rows: lista }));
+        } catch {}
+      })
+      .catch(() => {})
+      .finally(() => clearTimeout(timeoutId));
+
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {

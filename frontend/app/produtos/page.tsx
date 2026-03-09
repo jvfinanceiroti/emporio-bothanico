@@ -34,6 +34,7 @@ function ProdutosContent() {
   const [termoBusca, setTermoBusca] = useState(searchParams.get("q") || "");
   const [carrinho, setCarrinho] = useState<any[]>([]);
   const [produtoAdicionadoId, setProdutoAdicionadoId] = useState<number | null>(null);
+  const FETCH_TIMEOUT_MS = 12_000;
 
   useEffect(() => {
     const salvo = localStorage.getItem("carrinho");
@@ -48,7 +49,17 @@ function ProdutosContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    fetch(`${API_URL}/categorias`).then(res => res.json()).then(setCategorias).catch(() => {});
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    fetch(`${API_URL}/categorias`, { signal: controller.signal })
+      .then(res => (res.ok ? res.json() : []))
+      .then((rows) => setCategorias(Array.isArray(rows) ? rows : []))
+      .catch(() => {})
+      .finally(() => clearTimeout(timeoutId));
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, []);
 
   useEffect(() => {
@@ -56,7 +67,20 @@ function ProdutosContent() {
     const url = categoriaSelecionada 
       ? `${API_URL}/produtos?categoria=${categoriaSelecionada}` 
       : `${API_URL}/produtos`;
-    fetch(url).then(res => res.json()).then(data => setProdutos(data || [])).catch(() => setProdutos([])).finally(() => setCarregando(false));
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    fetch(url, { signal: controller.signal })
+      .then(res => (res.ok ? res.json() : []))
+      .then(data => setProdutos(Array.isArray(data) ? data : []))
+      .catch(() => setProdutos([]))
+      .finally(() => {
+        clearTimeout(timeoutId);
+        setCarregando(false);
+      });
+    return () => {
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [categoriaSelecionada]);
 
   const adicionarAoCarrinho = (produto: Produto) => {

@@ -40,6 +40,9 @@ Thumbs.db
 *.pem
 .vercel
 
+# Local backups (never commit)
+backend/backups/
+
 # Ngrok
 ngrok.exe
 ngrok.yml
