@@ -1875,12 +1875,13 @@ app.post("/upload", verificarToken, upload.single("imagem"), (req, res) => {
 // criar produto admin
 app.post("/admin/produtos", verificarToken, async (req, res) => {
   try {
-    const { nome, descricao, preco, estoque, imagem_url, peso_kg, altura_cm, largura_cm, comprimento_cm } = req.body;
+    const { nome, descricao, preco, estoque, imagem_url, peso_kg, altura_cm, largura_cm, comprimento_cm, categoria_id } = req.body;
+    const categoriaId = categoria_id ? Number(categoria_id) : null;
 
     const result = await pool.query(
       `INSERT INTO produtos 
-       (nome, descricao, preco, peso_kg, altura_cm, largura_cm, comprimento_cm, estoque, imagem_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       (nome, descricao, preco, peso_kg, altura_cm, largura_cm, comprimento_cm, estoque, imagem_url, categoria_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
       [
         nome, 
@@ -1891,7 +1892,8 @@ app.post("/admin/produtos", verificarToken, async (req, res) => {
         largura_cm || null, 
         comprimento_cm || null, 
         estoque,
-        imagem_url || null
+        imagem_url || null,
+        categoriaId
       ]
     );
 
@@ -1905,13 +1907,14 @@ app.post("/admin/produtos", verificarToken, async (req, res) => {
 app.put("/admin/produtos/:id", verificarToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { nome, descricao, preco, estoque, imagem_url, peso_kg, altura_cm, largura_cm, comprimento_cm } = req.body;
+    const { nome, descricao, preco, estoque, imagem_url, peso_kg, altura_cm, largura_cm, comprimento_cm, categoria_id } = req.body;
+    const categoriaId = categoria_id ? Number(categoria_id) : null;
 
     await pool.query(
       `UPDATE produtos
-       SET nome=$1, descricao=$2, preco=$3, estoque=$4, imagem_url=$5, peso_kg=$6, altura_cm=$7, largura_cm=$8, comprimento_cm=$9
-       WHERE id=$10`,
-      [nome, descricao || null, preco, estoque, imagem_url || null, peso_kg || null, altura_cm || null, largura_cm || null, comprimento_cm || null, id]
+       SET nome=$1, descricao=$2, preco=$3, estoque=$4, imagem_url=$5, peso_kg=$6, altura_cm=$7, largura_cm=$8, comprimento_cm=$9, categoria_id=$10
+       WHERE id=$11`,
+      [nome, descricao || null, preco, estoque, imagem_url || null, peso_kg || null, altura_cm || null, largura_cm || null, comprimento_cm || null, categoriaId, id]
     );
 
     res.json({ ok: true });
