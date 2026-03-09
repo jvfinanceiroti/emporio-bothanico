@@ -43,9 +43,10 @@ export function StoreHeader() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), CATEGORIAS_TIMEOUT_MS);
 
-    fetch(`${API_URL}/categorias`, { signal: controller.signal })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((rows) => {
+    fetch(`${API_URL}/catalogo?include=categorias`, { signal: controller.signal })
+      .then((r) => (r.ok ? r.json() : { categorias: [] }))
+      .then((payload) => {
+        const rows = Array.isArray(payload) ? payload : payload?.categorias;
         const lista = Array.isArray(rows) ? rows : [];
         setCategorias(lista);
         try {

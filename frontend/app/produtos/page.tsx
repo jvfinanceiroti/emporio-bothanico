@@ -25,6 +25,11 @@ interface Categoria {
   descricao?: string;
 }
 
+interface CatalogoResponse {
+  categorias?: Categoria[];
+  produtos?: Produto[];
+}
+
 function ProdutosContent() {
   const searchParams = useSearchParams();
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -40,12 +45,12 @@ function ProdutosContent() {
   const PRODUTOS_CACHE_PREFIX = "produtos_page_cache_v1:";
   const PRODUTOS_CACHE_TTL_MS = 5 * 60 * 1000;
 
-  const fetchJsonComTimeout = async (url: string, timeoutMs: number) => {
+  const fetchJsonComTimeout = async <T,>(url: string, timeoutMs: number): Promise<T> => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const res = await fetch(url, { signal: controller.signal });
-      if (!res.ok) return [];
+      if (!res.ok) throw new Error(`Erro HTTP ${res.status}`);
       return await res.json();
     } finally {
       clearTimeout(timeoutId);
@@ -54,11 +59,11 @@ function ProdutosContent() {
 
   const esperar = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const fetchComRetry = async (url: string, timeoutMs: number, tentativas = 2) => {
+  const fetchComRetry = async <T,>(url: string, timeoutMs: number, tentativas = 2): Promise<T> => {
     let ultimoErro: unknown = null;
     for (let i = 0; i < tentativas; i++) {
       try {
-        return await fetchJsonComTimeout(url, timeoutMs);
+        return await fetchJsonComTimeout<T>(url, timeoutMs);
       } catch (erro) {
         ultimoErro = erro;
         if (i < tentativas - 1) await esperar(1200);
@@ -81,42 +86,22 @@ function ProdutosContent() {
 
   useEffect(() => {
     let cancelado = false;
+    setCarregando(true);
+    const url = categoriaSelecionada
+      ? `${API_URL}/catalogo?categoria=${encodeURIComponent(categoriaSelecionada)}`
+      : `${API_URL}/catalogo`;
+    const cacheKey = `${PRODUTOS_CACHE_PREFIX}${categoriaSelecionada || "todos"}`;
 
     try {
-      const raw = localStorage.getItem(CATEGORIAS_CACHE_KEY);
-      if (raw) {
-        const cache = JSON.parse(raw);
-        const valido = Date.now() - Number(cache?.ts || 0) < CATEGORIAS_CACHE_TTL_MS;
-        if (valido && Array.isArray(cache?.rows)) {
-          setCategorias(cache.rows);
+      const rawCategorias = localStorage.getItem(CATEGORIAS_CACHE_KEY);
+      if (rawCategorias) {
+        const cacheCategorias = JSON.parse(rawCategorias);
+        const validoCategorias = Date.now() - Number(cacheCategorias?.ts || 0) < CATEGORIAS_CACHE_TTL_MS;
+        if (validoCategorias && Array.isArray(cacheCategorias?.rows)) {
+          setCategorias(cacheCategorias.rows);
         }
       }
     } catch {}
-
-    (async () => {
-      try {
-        const rows = await fetchComRetry(`${API_URL}/categorias`, FETCH_TIMEOUT_MS, 2);
-        const lista = Array.isArray(rows) ? rows : [];
-        if (cancelado) return;
-        setCategorias(lista);
-        try {
-          localStorage.setItem(CATEGORIAS_CACHE_KEY, JSON.stringify({ ts: Date.now(), rows: lista }));
-        } catch {}
-      } catch {}
-    })();
-
-    return () => {
-      cancelado = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelado = false;
-    setCarregando(true);
-    const url = categoriaSelecionada 
-      ? `${API_URL}/produtos?categoria=${categoriaSelecionada}` 
-      : `${API_URL}/produtos`;
-    const cacheKey = `${PRODUTOS_CACHE_PREFIX}${categoriaSelecionada || "todos"}`;
 
     try {
       const raw = localStorage.getItem(cacheKey);
@@ -136,12 +121,15 @@ function ProdutosContent() {
 
     (async () => {
       try {
-        const data = await fetchComRetry(url, FETCH_TIMEOUT_MS, 2);
-        const lista = Array.isArray(data) ? data : [];
+        const data = await fetchComRetry<CatalogoResponse>(url, FETCH_TIMEOUT_MS, 2);
+        const listaCategorias = Array.isArray(data?.categorias) ? data.categorias : [];
+        const listaProdutos = Array.isArray(data?.produtos) ? data.produtos : [];
         if (cancelado) return;
-        setProdutos(lista);
+        setCategorias(listaCategorias);
+        setProdutos(listaProdutos);
         try {
-          localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), rows: lista }));
+          localStorage.setItem(CATEGORIAS_CACHE_KEY, JSON.stringify({ ts: Date.now(), rows: listaCategorias }));
+          localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), rows: listaProdutos }));
         } catch {}
       } catch {
         if (!cancelado) setProdutos([]);

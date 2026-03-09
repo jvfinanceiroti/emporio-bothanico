@@ -255,6 +255,63 @@ app.get("/categorias", async (req, res) => {
   }
 });
 
+// CATÁLOGO (categorias + produtos em 1 request)
+app.get("/catalogo", async (req, res) => {
+  const { categoria } = req.query;
+  const includeRaw = String(req.query.include || "categorias,produtos").toLowerCase();
+  const includeCategorias = includeRaw.includes("categorias");
+  const includeProdutos = includeRaw.includes("produtos");
+
+  try {
+    const categoriasPromise = includeCategorias
+      ? pool
+          .query(
+            `SELECT * FROM categorias
+             WHERE ativo = true
+             ORDER BY
+               CASE WHEN slug = 'kits' THEN 1 ELSE 0 END ASC,
+               LOWER(nome) ASC`
+          )
+          .then((r) => r.rows)
+          .catch(() => [])
+      : Promise.resolve([]);
+
+    const produtosPromise = includeProdutos
+      ? (async () => {
+          try {
+            let query = `
+              SELECT p.*, c.nome as categoria_nome, c.slug as categoria_slug
+              FROM produtos p
+              LEFT JOIN categorias c ON p.categoria_id = c.id
+              WHERE p.ativo = true
+            `;
+            const params = [];
+            if (categoria) {
+              query += " AND c.slug = $1";
+              params.push(categoria);
+            }
+            query += " ORDER BY p.id DESC";
+            const result = await pool.query(query, params);
+            return result.rows;
+          } catch {
+            const fallback = await pool.query(
+              "SELECT * FROM produtos WHERE ativo = true ORDER BY id DESC"
+            );
+            return fallback.rows;
+          }
+        })()
+      : Promise.resolve([]);
+
+    const [categorias, produtos] = await Promise.all([categoriasPromise, produtosPromise]);
+
+    res.set("Cache-Control", "public, max-age=60");
+    res.json({ categorias, produtos });
+  } catch (error) {
+    console.error("Erro /catalogo:", error);
+    res.status(500).json({ error: "Erro ao buscar catálogo" });
+  }
+});
+
 // LISTAR PRODUTOS (COM FILTRO POR CATEGORIA)
 app.get("/produtos", async (req, res) => {
   try {
