@@ -5,6 +5,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { StoreHeader } from "@/components/StoreHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -352,6 +353,8 @@ function ProdutoContent() {
           />
         </div>
       )}
+
+      <SiteFooter />
     </div>
   );
 }
@@ -364,6 +367,7 @@ export default function ProdutoPage() {
         <div className="flex-1 flex items-center justify-center py-32">
           <div className="w-16 h-16 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin" />
         </div>
+        <SiteFooter />
       </div>
     }>
       <ProdutoContent />
