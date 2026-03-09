@@ -160,29 +160,29 @@ function ProdutoContent() {
         </nav>
 
         {/* Card principal - Produto */}
-        <div className="bg-white rounded-3xl shadow-[0_4px_40px_rgba(44,90,74,0.08)] border border-[var(--border)] overflow-hidden mb-12 sm:mb-14">
-          <div className="grid lg:grid-cols-2 gap-0">
-            {/* Coluna imagem */}
-            <div className="relative bg-gradient-to-br from-[var(--accent-light)]/30 to-[var(--warm-100)] p-6 sm:p-8 lg:p-10 flex flex-col justify-center min-h-[360px] sm:min-h-[520px]">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(45,90,74,0.03)_0%,transparent_70%)]" />
-              <div className="relative z-10 w-full h-full flex flex-col items-center">
-                <button
-                  type="button"
-                  onClick={() => setLightboxAberto(true)}
-                  className="group relative w-full max-w-[620px] rounded-3xl bg-white/45 p-5 sm:p-7 border border-white/50 shadow-[0_20px_40px_rgba(0,0,0,0.08)] overflow-hidden"
-                  aria-label="Ampliar imagem do produto"
-                >
-                  <div className="absolute top-4 right-4 text-[11px] uppercase tracking-wider font-semibold text-[var(--accent)] bg-white/85 rounded-full px-3 py-1">Clique para ampliar</div>
-                  <img
-                    src={imgUrl}
-                    alt={produto.nome}
-                    className="max-w-full max-h-[360px] sm:max-h-[460px] object-contain drop-shadow-2xl transition-transform duration-500 ease-out group-hover:scale-110"
-                    onError={(e) => { (e.target as HTMLImageElement).src = getProdutoImagem(produto); }}
-                  />
-                </button>
+        <div className="mb-12 sm:mb-14">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(420px,520px)_1fr] gap-8 lg:gap-16 items-start">
+              {/* Coluna imagem */}
+              <div className="w-full">
+                <div className="bg-white p-6 sm:p-8 lg:p-10 rounded-[20px] shadow-[0_20px_40px_rgba(0,0,0,0.08)] border border-[var(--border)] flex items-center justify-center overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setLightboxAberto(true)}
+                    className="group w-full flex items-center justify-center"
+                    aria-label="Ampliar imagem do produto"
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={produto.nome}
+                      className="w-full max-w-[420px] h-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+                      onError={(e) => { (e.target as HTMLImageElement).src = getProdutoImagem(produto); }}
+                    />
+                  </button>
+                </div>
 
                 {galeriaImagens.length > 1 && (
-                  <div className="mt-4 sm:mt-5 w-full max-w-[620px] flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
+                  <div className="mt-4 w-full flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
                     {galeriaImagens.map((img, idx) => (
                       <button
                         key={`${img}-${idx}`}
@@ -197,64 +197,71 @@ function ProdutoContent() {
                   </div>
                 )}
               </div>
-              {estoque <= 5 && estoque > 0 && (
-                <span className="absolute top-6 left-6 px-4 py-2 bg-[var(--accent)] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg">Últimas {estoque} unidades</span>
-              )}
-              {estoque === 0 && (
-                <span className="absolute top-6 left-6 px-4 py-2 bg-red-500 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-lg">Esgotado</span>
-              )}
-            </div>
 
-            {/* Coluna detalhes */}
-            <div className="p-8 sm:p-10 lg:p-14 flex flex-col">
-              <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.25em] mb-3" style={{ fontFamily: "var(--font-tagline)" }}>Empório Bothânico</p>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-[var(--foreground)] leading-tight mb-4" style={{ fontFamily: "var(--font-logo)" }}>
-                {produto.nome}
-              </h1>
-              {produto.descricao && (
-                <p className="text-[var(--muted)] text-base leading-relaxed mb-6">{produto.descricao}</p>
-              )}
-              {produto.sku && (
-                <p className="text-sm text-[var(--muted)] mb-4">SKU: {produto.sku}</p>
-              )}
+              {/* Coluna detalhes */}
+              <div className="w-full max-w-[520px]">
+                <p className="text-[12px] tracking-[2px] uppercase opacity-60 text-[var(--foreground)] mb-3">Empório Botânico</p>
 
-              {/* Preço + Estoque */}
-              <div className="mt-auto">
-                <div className="inline-block bg-gradient-to-r from-[var(--accent-light)] to-[var(--accent-warm)] rounded-2xl px-6 py-5 mb-5 border border-[var(--border)]/60">
-                  <div className="text-4xl sm:text-5xl font-black text-[var(--accent)] leading-none" style={{ fontFamily: "var(--font-logo)" }}>
+                <h1 className="text-[clamp(28px,4vw,32px)] font-semibold leading-[1.2] text-[var(--foreground)] mb-4 max-w-[520px]">
+                  {produto.nome}
+                </h1>
+
+                {produto.descricao && (
+                  <p className="text-[15px] leading-[1.7] text-[#555] max-w-[520px] mb-6">
+                    {produto.descricao}
+                  </p>
+                )}
+
+                <div className="inline-block bg-[#f3f7f5] px-6 py-6 rounded-2xl mb-5">
+                  <div className="text-[clamp(30px,4vw,36px)] font-semibold leading-none text-[#1f4d3a]">
                     R$ {Number(produto.preco).toFixed(2).replace(".", ",")}
                   </div>
                   <p className="text-sm text-[var(--muted)] mt-2">ou 3x de R$ {(Number(produto.preco) / 3).toFixed(2).replace(".", ",")} sem juros</p>
                 </div>
-                <div className={`flex items-center gap-2 text-sm font-semibold mb-6 ${estoque >= 30 ? "text-[var(--success)]" : estoque > 0 ? "text-[var(--warning)]" : "text-red-500"}`}>
-                  <span className={`w-3 h-3 rounded-full ${estoque >= 30 ? "bg-[var(--success)]" : estoque > 0 ? "bg-[var(--warning)]" : "bg-red-500"}`} />
+
+                <div className="mb-6">
                   {estoque <= 0 ? (
-                    "Produto indisponível"
+                    <div className="inline-flex items-center gap-2 text-sm font-semibold text-red-500">
+                      <span className="w-2 h-2 rounded-full bg-red-500" />
+                      Produto indisponível
+                    </div>
+                  ) : estoque === 1 ? (
+                    <div className="inline-flex items-center gap-2 text-sm font-semibold text-orange-500">
+                      <span className="w-2 h-2 rounded-full bg-orange-500" />
+                      Apenas 1 unidade disponível
+                    </div>
                   ) : estoque < 30 ? (
-                    <span className="inline-flex items-center gap-1">⚠️ Apenas {estoque} unidades disponíveis</span>
+                    <div className="inline-flex items-center gap-2 text-sm font-semibold text-orange-500">
+                      <span className="w-2 h-2 rounded-full bg-orange-500" />
+                      Apenas {estoque} unidades disponíveis
+                    </div>
                   ) : (
-                    `${estoque} unidades em estoque`
+                    <div className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--success)]">
+                      <span className="w-2 h-2 rounded-full bg-[var(--success)]" />
+                      {estoque} unidades em estoque
+                    </div>
                   )}
                 </div>
 
-                {/* Quantidade + Botão */}
                 {estoque > 0 && (
                   <div className="mb-6">
                     <label className="block text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-3">Quantidade</label>
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="flex items-center rounded-xl border-2 border-[var(--border)] overflow-hidden bg-[var(--warm-50)]">
-                        <button
-                          onClick={diminuirQuantidade}
-                          className={`w-12 h-12 flex items-center justify-center text-xl font-bold text-[var(--foreground)] hover:bg-[var(--accent-light)] transition-all duration-150 ${botaoQtdAtivo === "-" ? "scale-110" : "scale-100"}`}
-                        >−</button>
-                        <span className={`w-14 text-center text-lg font-bold transition-all duration-150 ease-out ${quantidadeAnimando ? "opacity-70 -translate-y-[1px]" : "opacity-100 translate-y-0"}`}>
-                          {quantidade}
-                        </span>
-                        <button
-                          onClick={aumentarQuantidade}
-                          className={`w-12 h-12 flex items-center justify-center text-xl font-bold text-[var(--foreground)] hover:bg-[var(--accent-light)] transition-all duration-150 ${botaoQtdAtivo === "+" ? "scale-110" : "scale-100"}`}
-                        >+</button>
-                      </div>
+                    <div className="inline-flex items-center rounded-xl border border-[var(--border)] bg-white overflow-hidden">
+                      <button
+                        onClick={diminuirQuantidade}
+                        className={`h-10 w-10 flex items-center justify-center text-lg font-semibold text-[var(--foreground)] hover:bg-[var(--accent-light)] transition-all ${botaoQtdAtivo === "-" ? "scale-105" : "scale-100"}`}
+                      >
+                        -
+                      </button>
+                      <span className={`h-10 w-12 flex items-center justify-center text-base font-semibold transition-all ${quantidadeAnimando ? "opacity-70" : "opacity-100"}`}>
+                        {quantidade}
+                      </span>
+                      <button
+                        onClick={aumentarQuantidade}
+                        className={`h-10 w-10 flex items-center justify-center text-lg font-semibold text-[var(--foreground)] hover:bg-[var(--accent-light)] transition-all ${botaoQtdAtivo === "+" ? "scale-105" : "scale-100"}`}
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
                 )}
@@ -262,26 +269,25 @@ function ProdutoContent() {
                 <button
                   onClick={adicionarAoCarrinho}
                   disabled={produto.estoque <= 0}
-                  className={`w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 ${
+                  className={`w-full h-14 rounded-[28px] font-semibold text-base flex items-center justify-center gap-3 transition-all ${
                     estoque > 0
-                      ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+                      ? "bg-[#1f4d3a] text-white hover:bg-[#183f30] shadow-[0_12px_24px_rgba(31,77,58,0.25)]"
                       : "bg-gray-200 text-gray-500 cursor-not-allowed"
                   }`}
                 >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/></svg>
-                  {estoque > 0 ? "Adicionar ao Carrinho" : "Indisponível"}
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/></svg>
+                  {estoque > 0 ? "Adicionar ao carrinho" : "Indisponível"}
                 </button>
-                {estoque > 0 && <p className="text-center text-xs text-[var(--muted)] mt-2">Pagamento protegido</p>}
 
                 {estoque > 0 && (
-                  <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
                       { icon: "🚚", titulo: "Envio para todo Brasil" },
                       { icon: "🔒", titulo: "Compra segura" },
                       { icon: "↩️", titulo: "Troca facilitada" },
                       { icon: "💚", titulo: "100% original" },
                     ].map((item) => (
-                      <div key={item.titulo} className="rounded-xl border border-[var(--border)] bg-[var(--warm-50)]/75 px-3 py-2.5 text-sm text-[var(--foreground)] flex items-center gap-2">
+                      <div key={item.titulo} className="rounded-xl border border-[var(--border)] bg-white px-3 py-2.5 text-sm text-[var(--foreground)] flex items-center gap-2 shadow-[0_6px_14px_rgba(0,0,0,0.04)]">
                         <span>{item.icon}</span>
                         <span className="font-medium">{item.titulo}</span>
                       </div>
@@ -289,7 +295,7 @@ function ProdutoContent() {
                   </div>
                 )}
 
-                <Link href="/produtos" className="block text-center text-[var(--muted)] font-medium mt-5 hover:text-[var(--accent)] transition-colors">
+                <Link href="/produtos" className="block text-center text-[var(--muted)] font-medium mt-6 hover:text-[var(--accent)] transition-colors">
                   ← Continuar comprando
                 </Link>
               </div>
