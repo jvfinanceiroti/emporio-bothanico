@@ -119,6 +119,12 @@ app.get("/", (req, res) => {
   res.send("API Loja rodando 🚀");
 });
 
+// Endpoint leve para aquecer instância em background
+app.get("/warmup", (_req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.json({ ok: true, ts: Date.now() });
+});
+
 // 📸 UPLOAD DE IMAGEM PARA CLOUDINARY (rate limited)
 app.post("/upload", sensivelRateLimiter, async (req, res) => {
   try {

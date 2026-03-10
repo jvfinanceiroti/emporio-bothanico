@@ -1,6 +1,7 @@
 import "./globals.css";
 import { WhatsAppButtonExceptAdmin } from "@/components/WhatsAppButtonExceptAdmin";
 import { JsonLdHome } from "@/components/JsonLd";
+import { ApiWarmup } from "@/components/ApiWarmup";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://emporiobothanico.com.br";
 const FAVICON_URL = "/logo.png?v=20260307b";
@@ -64,6 +65,7 @@ export default function RootLayout({
       </head>
       <body>
         <JsonLdHome />
+        <ApiWarmup />
         <main>{children}</main>
         <WhatsAppButtonExceptAdmin />
       </body>
