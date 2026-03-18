@@ -65,12 +65,68 @@ function ProdutoContent() {
   const [lightboxAberto, setLightboxAberto] = useState(false);
   const [quantidadeAnimando, setQuantidadeAnimando] = useState(false);
   const [botaoQtdAtivo, setBotaoQtdAtivo] = useState<"+" | "-" | null>(null);
+  const [erroCarregamento, setErroCarregamento] = useState<string | null>(null);
+  const FETCH_TIMEOUT_MS = 15_000;
+
+  const fetchJsonComTimeout = async <T,>(url: string, timeoutMs: number): Promise<T> => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { signal: controller.signal });
+      if (!res.ok) throw new Error(`Erro HTTP ${res.status}`);
+      return await res.json();
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  };
+
+  const esperar = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const fetchComRetry = async <T,>(url: string, timeoutMs: number, tentativas = 2): Promise<T> => {
+    let ultimoErro: unknown = null;
+    for (let i = 0; i < tentativas; i++) {
+      try {
+        return await fetchJsonComTimeout<T>(url, timeoutMs);
+      } catch (erro) {
+        ultimoErro = erro;
+        if (i < tentativas - 1) await esperar(1200);
+      }
+    }
+    throw ultimoErro;
+  };
 
   useEffect(() => {
     if (!params?.id) return;
-    fetch(`${API_URL}/produtos/${params.id}`)
-      .then((res) => res.json())
-      .then((data) => setProduto(data));
+    let cancelado = false;
+    const id = String(params.id);
+    setErroCarregamento(null);
+
+    try {
+      const raw = localStorage.getItem(`produto_cache_v1:${id}`);
+      if (raw) {
+        const cache = JSON.parse(raw);
+        if (cache?.row) setProduto(cache.row);
+      }
+    } catch {}
+
+    (async () => {
+      try {
+        const data = await fetchComRetry<any>(`${API_URL}/produtos/${id}`, FETCH_TIMEOUT_MS, 2);
+        if (cancelado) return;
+        setProduto(data);
+        try {
+          localStorage.setItem(`produto_cache_v1:${id}`, JSON.stringify({ ts: Date.now(), row: data }));
+        } catch {}
+      } catch {
+        if (!cancelado) {
+          setErroCarregamento("Não foi possível carregar o produto agora. Tente novamente em instantes.");
+        }
+      }
+    })();
+
+    return () => {
+      cancelado = true;
+    };
   }, [params]);
 
   useEffect(() => {
@@ -78,16 +134,40 @@ function ProdutoContent() {
     const galeria = getGaleriaImagens(produto);
     setImagemAtiva(galeria[0]);
     setQuantidade(1);
+    let cancelado = false;
 
-    fetch(`${API_URL}/produtos`)
-      .then((res) => res.json())
-      .then((lista: any[]) => {
-        const outros = (lista || []).filter((p) => p.id !== produto.id && p.ativo !== false);
-        const mesmaCategoria = outros.filter((p) => p.categoria_id === produto.categoria_id);
-        const restante = outros.filter((p) => p.categoria_id !== produto.categoria_id);
-        setProdutosRelacionados([...mesmaCategoria, ...restante].slice(0, 4));
-      })
-      .catch(() => setProdutosRelacionados([]));
+    const preencherRelacionados = (lista: any[]) => {
+      const outros = (lista || []).filter((p) => p.id !== produto.id && p.ativo !== false);
+      const mesmaCategoria = outros.filter((p) => p.categoria_id === produto.categoria_id);
+      const restante = outros.filter((p) => p.categoria_id !== produto.categoria_id);
+      setProdutosRelacionados([...mesmaCategoria, ...restante].slice(0, 4));
+    };
+
+    try {
+      const raw = localStorage.getItem("produtos_page_cache_v1:todos");
+      if (raw) {
+        const cache = JSON.parse(raw);
+        if (Array.isArray(cache?.rows)) preencherRelacionados(cache.rows);
+      }
+    } catch {}
+
+    (async () => {
+      try {
+        const payload = await fetchComRetry<{ produtos?: any[] }>(`${API_URL}/catalogo?include=produtos`, FETCH_TIMEOUT_MS, 2);
+        const lista = Array.isArray(payload?.produtos) ? payload.produtos : [];
+        if (cancelado) return;
+        preencherRelacionados(lista);
+        try {
+          localStorage.setItem("produtos_page_cache_v1:todos", JSON.stringify({ ts: Date.now(), rows: lista }));
+        } catch {}
+      } catch {
+        if (!cancelado) setProdutosRelacionados([]);
+      }
+    })();
+
+    return () => {
+      cancelado = true;
+    };
   }, [produto]);
 
   const adicionarAoCarrinho = () => {
@@ -127,9 +207,25 @@ function ProdutoContent() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#f8f6f3] to-white flex flex-col">
         <StoreHeader />
-        <div className="flex-1 flex items-center justify-center py-32">
-          <div className="w-16 h-16 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin" />
-        </div>
+        {erroCarregamento ? (
+          <div className="flex-1 flex items-center justify-center py-20 px-4">
+            <div className="max-w-md w-full bg-white border border-[var(--border)] rounded-2xl p-6 text-center">
+              <p className="text-[var(--foreground)] font-semibold mb-3">Produto indisponível no momento</p>
+              <p className="text-[var(--muted)] text-sm mb-5">{erroCarregamento}</p>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="px-5 py-2.5 rounded-xl bg-[var(--accent)] text-white font-semibold hover:bg-[var(--accent-hover)] transition-colors"
+              >
+                Tentar novamente
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center py-32">
+            <div className="w-16 h-16 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin" />
+          </div>
+        )}
       </div>
     );
   }

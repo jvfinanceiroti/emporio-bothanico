@@ -9,7 +9,15 @@ export function StoreHeader() {
   const router = useRouter();
   const [totalItens, setTotalItens] = useState(0);
   const [busca, setBusca] = useState("");
-  const [categorias, setCategorias] = useState<{ id: number; nome: string; slug: string }[]>([]);
+  const [categorias, setCategorias] = useState<{ id: number; nome: string; slug: string }[]>([
+    { id: -1, nome: "Aromas", slug: "aromas" },
+    { id: -2, nome: "Aromaterapia", slug: "aromaterapia" },
+    { id: -3, nome: "Banho", slug: "banho" },
+    { id: -4, nome: "Delicadezas e Presentes", slug: "delicadezas-e-presentes" },
+    { id: -5, nome: "Essências", slug: "essencias" },
+    { id: -6, nome: "Perfumes", slug: "perfumes" },
+    { id: -7, nome: "Kits", slug: "kits" },
+  ]);
   const CATEGORIAS_CACHE_KEY = "categorias_cache_v1";
   const CATEGORIAS_CACHE_TTL_MS = 10 * 60 * 1000;
   const CATEGORIAS_TIMEOUT_MS = 10_000;
