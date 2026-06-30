@@ -14,25 +14,27 @@ import {
 } from "lucide-react";
 import type { Categoria } from "@/lib/catalogo";
 
-const IMG_V = "v4";
+const IMG_V = "v6";
 
 const CATEGORIAS_CONFIG: {
   slug: string;
   nome: string;
   imagem: string;
+  objectPosition: string;
   icon: typeof Droplets;
 }[] = [
-  { slug: "aromas", nome: "Aromas", imagem: `/categorias/aromas.jpg?${IMG_V}`, icon: Droplets },
-  { slug: "aromaterapia", nome: "Aromaterapia", imagem: `/categorias/aromaterapia.jpg?${IMG_V}`, icon: Flower2 },
-  { slug: "banho", nome: "Banho", imagem: `/categorias/banho.jpg?${IMG_V}`, icon: Bath },
+  { slug: "aromas", nome: "Aromas", imagem: `/categorias/aromas.jpg?${IMG_V}`, objectPosition: "center center", icon: Droplets },
+  { slug: "aromaterapia", nome: "Aromaterapia", imagem: `/categorias/aromaterapia.jpg?${IMG_V}`, objectPosition: "42% center", icon: Flower2 },
+  { slug: "banho", nome: "Banho", imagem: `/categorias/banho.jpg?${IMG_V}`, objectPosition: "center 40%", icon: Bath },
   {
     slug: "delicadezas-e-presentes",
     nome: "Delicadezas e Presentes",
     imagem: `/categorias/presentes.jpg?${IMG_V}`,
+    objectPosition: "center center",
     icon: Gift,
   },
-  { slug: "essencias", nome: "Essências", imagem: `/categorias/essencias.jpg?${IMG_V}`, icon: Leaf },
-  { slug: "perfumes", nome: "Perfumes", imagem: `/categorias/perfumes.jpg?${IMG_V}`, icon: Sparkles },
+  { slug: "essencias", nome: "Essências", imagem: `/categorias/essencias.jpg?${IMG_V}`, objectPosition: "55% center", icon: Leaf },
+  { slug: "perfumes", nome: "Perfumes", imagem: `/categorias/perfumes.jpg?${IMG_V}`, objectPosition: "center center", icon: Sparkles },
 ];
 
 function resolverCategorias(categorias: Categoria[]) {
@@ -81,7 +83,7 @@ export function HomeCategories({ categorias }: { categorias: Categoria[] }) {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {lista.map((cat, i) => {
             const Icon = cat.icon;
             return (
@@ -91,19 +93,20 @@ export function HomeCategories({ categorias }: { categorias: Categoria[] }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-30px" }}
                 transition={{ duration: 0.4, delay: i * 0.04 }}
+                className="isolate"
               >
                 <Link
                   href={cat.href}
-                  className="group flex overflow-hidden rounded-[14px] bg-[#0F241B] h-[168px] sm:h-[176px] shadow-[0_2px_16px_rgba(15,36,27,0.1)]"
+                  className="group grid grid-cols-[minmax(0,46%)_minmax(0,1fr)] overflow-hidden rounded-[14px] bg-[#0F241B] h-[172px] sm:h-[180px] shadow-[0_2px_16px_rgba(15,36,27,0.1)]"
                 >
-                  {/* Painel verde sólido — texto */}
-                  <div className="w-[47%] shrink-0 flex flex-col justify-between p-5 sm:p-6 bg-[#0F241B]">
-                    <div className="w-9 h-9 rounded-full border border-[#C79A54]/55 flex items-center justify-center text-[#C79A54]">
+                  {/* Painel verde — texto */}
+                  <div className="relative z-10 flex flex-col justify-between p-5 sm:p-6 bg-[#0F241B] min-w-0">
+                    <div className="w-9 h-9 rounded-full border border-[#C79A54]/55 flex items-center justify-center text-[#C79A54] shrink-0">
                       <Icon className="w-[15px] h-[15px]" strokeWidth={1.5} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <h3
-                        className="text-[1.15rem] sm:text-[1.22rem] text-[#F5F2ED] font-normal leading-[1.2] mb-2"
+                        className="text-[1.12rem] sm:text-[1.2rem] text-[#F5F2ED] font-normal leading-[1.2] mb-2"
                         style={{ fontFamily: "var(--font-display)" }}
                       >
                         {cat.nome}
@@ -115,14 +118,22 @@ export function HomeCategories({ categorias }: { categorias: Categoria[] }) {
                     </div>
                   </div>
 
-                  {/* Foto — 100% visível, blend só na borda */}
-                  <div className="relative flex-1 overflow-hidden">
+                  {/* Foto — container isolado, sem vazar */}
+                  <div className="relative min-w-0 min-h-0 h-full overflow-hidden bg-[#1a3328]">
                     <img
                       src={cat.imagem}
                       alt=""
-                      className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-600 group-hover:scale-[1.05]"
+                      loading="lazy"
+                      decoding="async"
+                      className="block w-full h-full object-cover transition-transform duration-600 group-hover:scale-[1.04]"
+                      style={{ objectPosition: cat.objectPosition }}
                     />
-                    <div className="absolute inset-y-0 left-0 w-10 sm:w-12 bg-gradient-to-r from-[#0F241B] to-transparent pointer-events-none" />
+                    <div
+                      className="absolute inset-y-0 left-0 w-8 pointer-events-none"
+                      style={{
+                        background: "linear-gradient(to right, #0F241B 0%, transparent 100%)",
+                      }}
+                    />
                   </div>
                 </Link>
               </motion.div>
@@ -130,13 +141,13 @@ export function HomeCategories({ categorias }: { categorias: Categoria[] }) {
           })}
         </div>
 
-        {/* CTA — verde sólido, sem foto suja */}
+        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}
-          className="mt-4 sm:mt-5 rounded-[14px] bg-[#0F241B] px-6 sm:px-8 lg:px-10 py-6 sm:py-7 flex flex-col lg:flex-row items-start lg:items-center gap-5 lg:gap-10"
+          className="mt-5 sm:mt-6 rounded-[14px] bg-[#0F241B] px-6 sm:px-8 lg:px-10 py-6 sm:py-7 flex flex-col lg:flex-row items-start lg:items-center gap-5 lg:gap-10"
         >
           <div className="w-11 h-11 sm:w-12 sm:h-12 shrink-0 rounded-full border border-[#C79A54]/55 flex items-center justify-center text-[#C79A54]">
             <Star className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={1.5} />

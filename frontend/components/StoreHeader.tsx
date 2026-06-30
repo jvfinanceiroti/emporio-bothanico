@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,31 +53,34 @@ export function StoreHeader() {
     return () => window.removeEventListener("carrinho-changed", update);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isHome) {
       setScrolled(false);
       return;
     }
 
     const getScrollY = () =>
-      window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+      Math.max(
+        window.scrollY || 0,
+        document.documentElement.scrollTop || 0,
+        document.body.scrollTop || 0
+      );
 
-    const onScroll = () => {
-      const y = getScrollY();
-      setScrolled((prev) => {
-        if (y <= 10) return false;
-        if (y >= 48) return true;
-        return prev;
-      });
+    const updateScrolled = () => {
+      setScrolled(getScrollY() > 24);
     };
 
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    updateScrolled();
+    requestAnimationFrame(updateScrolled);
+
+    window.addEventListener("scroll", updateScrolled, { passive: true });
+    window.addEventListener("resize", updateScrolled);
+    window.addEventListener("pageshow", updateScrolled);
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("scroll", updateScrolled);
+      window.removeEventListener("resize", updateScrolled);
+      window.removeEventListener("pageshow", updateScrolled);
     };
   }, [isHome, pathname]);
 

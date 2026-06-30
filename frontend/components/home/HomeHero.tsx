@@ -73,7 +73,7 @@ export function HomeHero() {
       {/* Conteúdo — alinhamento preservado */}
       <motion.div
         style={{ opacity: contentOpacity, y: reducedMotion ? 0 : contentY }}
-        className="relative z-10 h-full flex flex-col justify-center px-5 sm:px-8 lg:px-14 xl:px-20 pt-28 sm:pt-32 pb-[148px] sm:pb-[156px]"
+        className="relative z-10 h-full flex flex-col justify-start px-5 sm:px-8 lg:px-14 xl:px-20 pt-[var(--lux-header-offset)] pb-[148px] sm:pb-[156px]"
       >
         <div className="max-w-[520px]">
           <motion.p

@@ -8,10 +8,8 @@ import { getProdutoImagemPadrao, type Produto, type Categoria } from "@/lib/cata
 import { HomeHero } from "@/components/home/HomeHero";
 import { HomeBestSellers } from "@/components/home/HomeBestSellers";
 import { HomeCategories } from "@/components/home/HomeCategories";
-import { HomeBenefits } from "@/components/home/HomeBenefits";
 import { HomeTestimonials } from "@/components/home/HomeTestimonials";
 import { HomeInstagram } from "@/components/home/HomeInstagram";
-import { HomeNewsletter } from "@/components/home/HomeNewsletter";
 
 export function HomeClient({
   produtosIniciais = [],
@@ -64,11 +62,8 @@ export function HomeClient({
 
       {categoriasExibir.length > 0 && <HomeCategories categorias={categoriasExibir} />}
 
-      <HomeBenefits />
-
       <HomeTestimonials />
       <HomeInstagram />
-      <HomeNewsletter />
 
       <div className="bg-[var(--lux-deep)]">
         <SiteFooter />
