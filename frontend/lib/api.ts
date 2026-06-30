@@ -1,8 +1,9 @@
 import { getAdminLoginPath } from "./admin-paths";
 
 const FALLBACK_API_URL = "https://emporio-bothanico.onrender.com";
+const LOCAL_API_URL = "http://localhost:3001";
 
-/** URL do backend Express (Render ou local). */
+/** URL principal do backend Express (Render ou local). */
 export function getBackendUrl(): string {
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, "");
@@ -10,7 +11,21 @@ export function getBackendUrl(): string {
   if (process.env.NODE_ENV === "production") {
     return FALLBACK_API_URL;
   }
-  return "http://localhost:3001";
+  return LOCAL_API_URL;
+}
+
+/** URLs a tentar em ordem — útil quando o backend local não está rodando. */
+export function getBackendUrlsToTry(): string[] {
+  const urls: string[] = [];
+  const primary = getBackendUrl();
+  urls.push(primary);
+
+  if (process.env.NODE_ENV !== "production") {
+    if (primary !== LOCAL_API_URL) urls.push(LOCAL_API_URL);
+    if (primary !== FALLBACK_API_URL) urls.push(FALLBACK_API_URL);
+  }
+
+  return [...new Set(urls)];
 }
 
 /** @deprecated Use getBackendUrl() — mantido para compatibilidade. */

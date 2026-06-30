@@ -12,10 +12,10 @@ export default function AdminHeader() {
   const { permissoes, temPermissao, isAdmin } = usePermissoes();
   const [nomeUsuario, setNomeUsuario] = useState("");
   const logoSources = [
+    "/logo-admin.png?v=20260630t",
+    "/logo.png?v=20260630t",
     "https://www.emporiobothanico.com.br/logo-admin.png",
     "https://www.emporiobothanico.com.br/logo.png",
-    "/logo-admin.png",
-    "/logo.png",
   ];
   const [logoSrcIndex, setLogoSrcIndex] = useState(0);
 
@@ -92,8 +92,8 @@ export default function AdminHeader() {
               setLogoSrcIndex((prev) => Math.min(prev + 1, logoSources.length - 1));
             }}
             style={{ 
-              height: "clamp(44px, 10vw, 58px)", 
-              width: "clamp(44px, 10vw, 58px)",
+              height: "clamp(52px, 10vw, 68px)", 
+              width: "clamp(52px, 10vw, 68px)",
               objectFit: "contain",
               flexShrink: 0
             }}

@@ -1,4 +1,4 @@
-import { getBackendUrl } from "./api";
+import { getBackendUrlsToTry } from "./api";
 
 export interface Produto {
   id: number;
@@ -37,7 +37,18 @@ export interface CatalogoOptions {
 
 const DEFAULT_TIMEOUT_MS = 25_000;
 const DEFAULT_RETRIES = 3;
+const DEV_TIMEOUT_MS = 8_000;
+const DEV_RETRIES = 1;
 const RETRY_DELAY_MS = 1_500;
+
+const CATALOGO_VAZIO: CatalogoResponse = { categorias: [], produtos: [] };
+
+function normalizarCatalogo(data: CatalogoResponse | null | undefined): CatalogoResponse {
+  return {
+    categorias: Array.isArray(data?.categorias) ? data.categorias : [],
+    produtos: Array.isArray(data?.produtos) ? data.produtos : [],
+  };
+}
 const REVALIDATE_SECONDS = 60;
 
 const CATALOG_CACHE_PREFIX = "catalogo_cache_v2:";
@@ -116,21 +127,32 @@ async function fetchJsonComRetry<T>(
   throw ultimoErro;
 }
 
-/** Busca catálogo diretamente no backend (SSR / API routes). */
+/** Busca catálogo diretamente no backend (SSR / API routes). Nunca lança erro. */
 export async function fetchCatalogoBackend(
   options: CatalogoOptions = {}
 ): Promise<CatalogoResponse> {
   const query = buildCatalogoQuery(options);
-  const url = `${getBackendUrl()}/catalogo${query}`;
-  const data = await fetchJsonComRetry<CatalogoResponse>(url, {
-    timeoutMs: options.timeoutMs,
-    retries: options.retries,
-    next: { revalidate: REVALIDATE_SECONDS },
-  });
-  return {
-    categorias: Array.isArray(data?.categorias) ? data.categorias : [],
-    produtos: Array.isArray(data?.produtos) ? data.produtos : [],
-  };
+  const isDev = process.env.NODE_ENV !== "production";
+  const timeoutMs = options.timeoutMs ?? (isDev ? DEV_TIMEOUT_MS : DEFAULT_TIMEOUT_MS);
+  const retries = options.retries ?? (isDev ? DEV_RETRIES : DEFAULT_RETRIES);
+
+  for (const base of getBackendUrlsToTry()) {
+    try {
+      const data = await fetchJsonComRetry<CatalogoResponse>(`${base}/catalogo${query}`, {
+        timeoutMs,
+        retries,
+        next: { revalidate: REVALIDATE_SECONDS },
+      });
+      const normalizado = normalizarCatalogo(data);
+      if (normalizado.produtos.length > 0 || normalizado.categorias.length > 0) {
+        return normalizado;
+      }
+    } catch {
+      // tenta próxima URL
+    }
+  }
+
+  return CATALOGO_VAZIO;
 }
 
 /** Busca catálogo via rota interna do Next (cliente). */
@@ -139,14 +161,16 @@ export async function fetchCatalogoClient(
 ): Promise<CatalogoResponse> {
   const query = buildCatalogoQuery(options);
   const url = `/api/catalogo${query}`;
-  const data = await fetchJsonComRetry<CatalogoResponse>(url, {
-    timeoutMs: options.timeoutMs ?? 20_000,
-    retries: options.retries ?? 2,
-  });
-  return {
-    categorias: Array.isArray(data?.categorias) ? data.categorias : [],
-    produtos: Array.isArray(data?.produtos) ? data.produtos : [],
-  };
+
+  try {
+    const data = await fetchJsonComRetry<CatalogoResponse>(url, {
+      timeoutMs: options.timeoutMs ?? 20_000,
+      retries: options.retries ?? 2,
+    });
+    return normalizarCatalogo(data);
+  } catch {
+    return CATALOGO_VAZIO;
+  }
 }
 
 /** Busca catálogo com fallback de cache local (cliente). */

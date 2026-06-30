@@ -1,4 +1,4 @@
-const ADMIN_FAVICON_URL = "/logo.png?v=20260307b";
+const ADMIN_FAVICON_URL = "/logo.png?v=20260630t";
 
 export const metadata = {
   title: "Área administrativa",

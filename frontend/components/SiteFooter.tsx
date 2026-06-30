@@ -15,7 +15,7 @@ export function SiteFooter() {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12 mb-12 lg:mb-14">
           <div>
-            <img src="/logo.png" alt="Logo" className="h-12 w-12 mb-4 invert opacity-90 mx-auto sm:mx-0" />
+            <img src="/logo.png?v=20260630t" alt="Empório Bothânico" className="h-16 w-16 sm:h-[72px] sm:w-[72px] mb-4 mx-auto sm:mx-0 object-contain" />
             <h3 className="text-xl font-semibold mb-3 text-center sm:text-left" style={{ fontFamily: "var(--font-logo)" }}>Empório Bothânico</h3>
             <p className="text-white/70 text-sm leading-relaxed text-center sm:text-left">
               Fragrâncias exclusivas e produtos de banho premium que transformam seu dia a dia. Qualidade, cuidado e aromas únicos.

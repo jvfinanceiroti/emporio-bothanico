@@ -66,9 +66,9 @@ export default function PromocoesPage() {
             className="flex items-center gap-2 no-underline text-white hover:opacity-90"
           >
             <img
-              src="/logo.png"
+              src="/logo.png?v=20260630t"
               alt="Empório Bothânico"
-              className="h-9 w-9 sm:h-11 sm:w-11 object-contain brightness-0 invert"
+              className="h-11 w-11 sm:h-14 sm:w-14 object-contain"
             />
             <div>
               <h1

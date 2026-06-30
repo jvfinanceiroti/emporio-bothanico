@@ -26,7 +26,7 @@ export default async function LoginPage({
       <div className="admin-login-page">
         <div className="admin-login-card">
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "2rem" }}>
-            <img src={`${SITE_URL}/logo.png`} alt="Empório Bothânico" style={{ width: 64, height: 64, marginBottom: "1rem" }} />
+            <img src="/logo.png?v=20260630t" alt="Empório Bothânico" style={{ width: 80, height: 80, marginBottom: "1rem", objectFit: "contain" }} />
             <h1 className="admin-login-title">Empório Bothânico</h1>
             <p className="admin-login-subtitle">Área Administrativa</p>
           </div>
