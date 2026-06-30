@@ -2,6 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const pool = require("./db");
+const { warmupPool } = pool;
+const catalogoService = require("./services/catalogo");
 const multer = require("multer");
 const path = require("path");
 const bcrypt = require("bcrypt");
@@ -119,10 +121,18 @@ app.get("/", (req, res) => {
   res.send("API Loja rodando 🚀");
 });
 
-// Endpoint leve para aquecer instância em background
-app.get("/warmup", (_req, res) => {
+// Endpoint para aquecer instância e conexão com o banco
+app.get("/warmup", async (_req, res) => {
   res.set("Cache-Control", "no-store");
-  res.json({ ok: true, ts: Date.now() });
+  try {
+    const [poolOk, dbOk] = await Promise.all([
+      warmupPool(),
+      catalogoService.pingDatabase(),
+    ]);
+    res.json({ ok: poolOk && dbOk, db: dbOk, ts: Date.now() });
+  } catch (err) {
+    res.status(503).json({ ok: false, error: err.message, ts: Date.now() });
+  }
 });
 
 // 📸 UPLOAD DE IMAGEM PARA CLOUDINARY (rate limited)
@@ -247,16 +257,11 @@ app.get("/auth/verificar", verificarToken, async (req, res) => {
 // LISTAR CATEGORIAS (retorna vazio se tabela não existir)
 app.get("/categorias", async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT * FROM categorias
-       WHERE ativo = true
-       ORDER BY
-         CASE WHEN slug = 'kits' THEN 1 ELSE 0 END ASC,
-         LOWER(nome) ASC`
-    );
-    res.json(result.rows);
+    const categorias = await catalogoService.listarCategorias();
+    res.set("Cache-Control", "public, max-age=60");
+    res.json(categorias);
   } catch (error) {
-    console.warn("Tabela categorias ainda não existe:", error.message);
+    console.warn("Erro /categorias:", error.message);
     res.json([]);
   }
 });
@@ -267,51 +272,17 @@ app.get("/catalogo", async (req, res) => {
   const includeRaw = String(req.query.include || "categorias,produtos").toLowerCase();
   const includeCategorias = includeRaw.includes("categorias");
   const includeProdutos = includeRaw.includes("produtos");
+  const comEstoque = req.query.com_estoque === "true";
 
   try {
-    const categoriasPromise = includeCategorias
-      ? pool
-          .query(
-            `SELECT * FROM categorias
-             WHERE ativo = true
-             ORDER BY
-               CASE WHEN slug = 'kits' THEN 1 ELSE 0 END ASC,
-               LOWER(nome) ASC`
-          )
-          .then((r) => r.rows)
-          .catch(() => [])
-      : Promise.resolve([]);
-
-    const produtosPromise = includeProdutos
-      ? (async () => {
-          try {
-            let query = `
-              SELECT p.*, c.nome as categoria_nome, c.slug as categoria_slug
-              FROM produtos p
-              LEFT JOIN categorias c ON p.categoria_id = c.id
-              WHERE p.ativo = true
-            `;
-            const params = [];
-            if (categoria) {
-              query += " AND c.slug = $1";
-              params.push(categoria);
-            }
-            query += " ORDER BY p.id DESC";
-            const result = await pool.query(query, params);
-            return result.rows;
-          } catch {
-            const fallback = await pool.query(
-              "SELECT * FROM produtos WHERE ativo = true ORDER BY id DESC"
-            );
-            return fallback.rows;
-          }
-        })()
-      : Promise.resolve([]);
-
-    const [categorias, produtos] = await Promise.all([categoriasPromise, produtosPromise]);
-
+    const payload = await catalogoService.buscarCatalogo({
+      categoria: categoria || undefined,
+      includeCategorias,
+      includeProdutos,
+      comEstoque,
+    });
     res.set("Cache-Control", "public, max-age=60");
-    res.json({ categorias, produtos });
+    res.json(payload);
   } catch (error) {
     console.error("Erro /catalogo:", error);
     res.status(500).json({ error: "Erro ao buscar catálogo" });
@@ -322,33 +293,13 @@ app.get("/catalogo", async (req, res) => {
 app.get("/produtos", async (req, res) => {
   try {
     const { categoria } = req.query;
-    let result;
-
-    try {
-      // Query com categorias (se tabela existir)
-      let query = `
-        SELECT p.*, c.nome as categoria_nome, c.slug as categoria_slug
-        FROM produtos p
-        LEFT JOIN categorias c ON p.categoria_id = c.id
-        WHERE p.ativo = true
-      `;
-      const params = [];
-      if (categoria) {
-        query += " AND c.slug = $1";
-        params.push(categoria);
-      }
-      query += " ORDER BY p.id DESC";
-      result = await pool.query(query, params);
-    } catch (err) {
-      // Fallback: tabela categorias pode não existir ainda
-      console.warn("Usando fallback de produtos (sem categorias):", err.message);
-      result = await pool.query(
-        "SELECT * FROM produtos WHERE ativo = true ORDER BY id DESC"
-      );
-    }
-
+    const comEstoque = req.query.com_estoque === "true";
+    const produtos = await catalogoService.listarProdutos({
+      categoria: categoria || undefined,
+      comEstoque,
+    });
     res.set("Cache-Control", "public, max-age=60");
-    res.json(result.rows);
+    res.json(produtos);
   } catch (error) {
     console.error("Erro /produtos:", error);
     res.status(500).json({ error: "Erro ao buscar produtos" });
@@ -487,6 +438,7 @@ app.get("/admin/cartoes", verificarToken, verificarAdmin, async (req, res) => {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
+  warmupPool().catch(() => {});
 });
 
 // 🔥 CRIAR PRODUTO
@@ -532,16 +484,15 @@ app.post("/produtos", async (req, res) => {
 app.get("/produtos/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
-    const result = await pool.query(
-      "SELECT * FROM produtos WHERE id = $1",
-      [id]
-    );
-
-    res.json(result.rows[0]);
+    const produto = await catalogoService.buscarProdutoPorId(id);
+    if (!produto) {
+      return res.status(404).json({ error: "Produto não encontrado" });
+    }
+    res.set("Cache-Control", "public, max-age=60");
+    res.json(produto);
   } catch (error) {
     console.error(error);
-    res.status(500).send("Erro ao buscar produto");
+    res.status(500).json({ error: "Erro ao buscar produto" });
   }
 });
 
@@ -1960,6 +1911,7 @@ app.post("/admin/produtos", verificarToken, async (req, res) => {
       ]
     );
 
+    catalogoService.invalidarCacheCatalogo();
     res.json(result.rows[0]);
   } catch (error) {
     console.error("Erro ao criar produto:", error);
@@ -1980,6 +1932,7 @@ app.put("/admin/produtos/:id", verificarToken, async (req, res) => {
       [nome, descricao || null, preco, estoque, imagem_url || null, peso_kg || null, altura_cm || null, largura_cm || null, comprimento_cm || null, categoriaId, id]
     );
 
+    catalogoService.invalidarCacheCatalogo();
     res.json({ ok: true });
   } catch (error) {
     console.error("Erro ao editar produto:", error);
@@ -1998,6 +1951,7 @@ app.patch("/admin/produtos/:id/status", verificarToken, async (req, res) => {
       [ativo, id]
     );
 
+    catalogoService.invalidarCacheCatalogo();
     res.json({ ok: true });
   } catch (error) {
     console.error("Erro ao alterar status:", error);
@@ -2014,6 +1968,7 @@ app.delete("/admin/produtos/:id", verificarToken, async (req, res) => {
     [id]
   );
 
+  catalogoService.invalidarCacheCatalogo();
   res.json({ ok: true });
 });
 

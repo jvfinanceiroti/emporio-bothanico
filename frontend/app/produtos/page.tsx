@@ -3,74 +3,21 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { API_URL } from "@/lib/api";
 import { StoreHeader } from "@/components/StoreHeader";
 import { PaymentIcons } from "@/components/PaymentIcons";
-
-interface Produto {
-  id: number;
-  nome: string;
-  preco: number;
-  imagem_url?: string;
-  estoque: number;
-  categoria_nome?: string;
-  categoria_slug?: string;
-  descricao?: string;
-}
-
-interface Categoria {
-  id: number;
-  nome: string;
-  slug: string;
-  descricao?: string;
-}
-
-interface CatalogoResponse {
-  categorias?: Categoria[];
-  produtos?: Produto[];
-}
+import { useCatalogo } from "@/hooks/useCatalogo";
+import { getProdutoImagemPadrao, type Produto } from "@/lib/catalogo";
 
 function ProdutosContent() {
   const searchParams = useSearchParams();
-  const [produtos, setProdutos] = useState<Produto[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(searchParams.get("categoria") || null);
-  const [carregando, setCarregando] = useState(true);
   const [termoBusca, setTermoBusca] = useState(searchParams.get("q") || "");
   const [carrinho, setCarrinho] = useState<any[]>([]);
   const [produtoAdicionadoId, setProdutoAdicionadoId] = useState<number | null>(null);
-  const FETCH_TIMEOUT_MS = 15_000;
-  const CATEGORIAS_CACHE_KEY = "produtos_page_categorias_cache_v1";
-  const CATEGORIAS_CACHE_TTL_MS = 10 * 60 * 1000;
-  const PRODUTOS_CACHE_PREFIX = "produtos_page_cache_v1:";
-  const PRODUTOS_CACHE_TTL_MS = 5 * 60 * 1000;
 
-  const fetchJsonComTimeout = async <T,>(url: string, timeoutMs: number): Promise<T> => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const res = await fetch(url, { signal: controller.signal });
-      if (!res.ok) throw new Error(`Erro HTTP ${res.status}`);
-      return await res.json();
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
-
-  const esperar = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-  const fetchComRetry = async <T,>(url: string, timeoutMs: number, tentativas = 2): Promise<T> => {
-    let ultimoErro: unknown = null;
-    for (let i = 0; i < tentativas; i++) {
-      try {
-        return await fetchJsonComTimeout<T>(url, timeoutMs);
-      } catch (erro) {
-        ultimoErro = erro;
-        if (i < tentativas - 1) await esperar(1200);
-      }
-    }
-    throw ultimoErro;
-  };
+  const { produtos, categorias, carregando } = useCatalogo({
+    categoria: categoriaSelecionada,
+  });
 
   useEffect(() => {
     const salvo = localStorage.getItem("carrinho");
@@ -83,66 +30,6 @@ function ProdutosContent() {
     if (q) setTermoBusca(q);
     if (cat) setCategoriaSelecionada(cat);
   }, [searchParams]);
-
-  useEffect(() => {
-    let cancelado = false;
-    setCarregando(true);
-    const url = categoriaSelecionada
-      ? `${API_URL}/catalogo?categoria=${encodeURIComponent(categoriaSelecionada)}`
-      : `${API_URL}/catalogo`;
-    const cacheKey = `${PRODUTOS_CACHE_PREFIX}${categoriaSelecionada || "todos"}`;
-
-    try {
-      const rawCategorias = localStorage.getItem(CATEGORIAS_CACHE_KEY);
-      if (rawCategorias) {
-        const cacheCategorias = JSON.parse(rawCategorias);
-        const validoCategorias = Date.now() - Number(cacheCategorias?.ts || 0) < CATEGORIAS_CACHE_TTL_MS;
-        if (validoCategorias && Array.isArray(cacheCategorias?.rows)) {
-          setCategorias(cacheCategorias.rows);
-        }
-      }
-    } catch {}
-
-    try {
-      const raw = localStorage.getItem(cacheKey);
-      if (raw) {
-        const cache = JSON.parse(raw);
-        const valido = Date.now() - Number(cache?.ts || 0) < PRODUTOS_CACHE_TTL_MS;
-        if (valido && Array.isArray(cache?.rows)) {
-          setProdutos(cache.rows);
-          setCarregando(false);
-        }
-      }
-    } catch {}
-
-    const watchdogId = setTimeout(() => {
-      if (!cancelado) setCarregando(false);
-    }, FETCH_TIMEOUT_MS + 3000);
-
-    (async () => {
-      try {
-        const data = await fetchComRetry<CatalogoResponse>(url, FETCH_TIMEOUT_MS, 2);
-        const listaCategorias = Array.isArray(data?.categorias) ? data.categorias : [];
-        const listaProdutos = Array.isArray(data?.produtos) ? data.produtos : [];
-        if (cancelado) return;
-        setCategorias(listaCategorias);
-        setProdutos(listaProdutos);
-        try {
-          localStorage.setItem(CATEGORIAS_CACHE_KEY, JSON.stringify({ ts: Date.now(), rows: listaCategorias }));
-          localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), rows: listaProdutos }));
-        } catch {}
-      } catch {
-        if (!cancelado) setProdutos([]);
-      } finally {
-        if (!cancelado) setCarregando(false);
-      }
-    })();
-
-    return () => {
-      cancelado = true;
-      clearTimeout(watchdogId);
-    };
-  }, [categoriaSelecionada]);
 
   const adicionarAoCarrinho = (produto: Produto) => {
     const novo = [...carrinho];
@@ -170,18 +57,7 @@ function ProdutosContent() {
 
   const categoriaAtual = categorias.find(c => c.slug === categoriaSelecionada);
 
-  const getProdutoImagem = (p: Produto | any) => {
-    const url = p?.imagem_url;
-    if (url && !url.includes("placeholder")) return url;
-    const n = (p?.nome || "").toLowerCase();
-    if (n.includes("essência") || n.includes("essencia")) return "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&q=85";
-    if (n.includes("refil") && n.includes("sabonete")) return "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&q=85";
-    if (n.includes("difusor")) return "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&q=85";
-    if (n.includes("sabonete") && (n.includes("lavanda") || n.includes("artesanal"))) return "https://images.unsplash.com/photo-1595425970377-c9703cf48b6d?w=500&q=85";
-    if (n.includes("vela") || n.includes("baunilha")) return "https://images.unsplash.com/photo-1602874801006-4e41187f7f36?w=500&q=85";
-    if (n.includes("spray") || n.includes("eucalipto") || n.includes("home spray")) return "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=85";
-    return "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=85";
-  };
+  const getProdutoImagem = getProdutoImagemPadrao;
 
   return (
     <div className="min-h-screen bg-[#f5f5f4] overflow-x-hidden">

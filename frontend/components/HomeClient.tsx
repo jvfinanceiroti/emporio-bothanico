@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { API_URL } from "@/lib/api";
 import { StoreHeader } from "@/components/StoreHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ProdutosCarousel } from "./ProdutosCarousel";
+import { useCatalogo } from "@/hooks/useCatalogo";
+import { getProdutoImagemPadrao, type Produto, type Categoria } from "@/lib/catalogo";
 
 const AVALIACOES_GOOGLE = [
   { nome: "Ana Paula Morais", iniciais: "AP", texto: "Que loja maravilhosa, cheirosa, cheia de detalhes, tudo encanta! Mas eu preciso destacar o conhecimento que a Nayara tem sobre os aromas, e suas aplicações! Coloquei um aroma na minha empresa e todos os dias é uma chuva de elogios.", extra: "Local Guide • Google" },
@@ -16,75 +17,27 @@ const AVALIACOES_GOOGLE = [
   { nome: "Paulo H.", iniciais: "PH", texto: "Produtos excelentes e entrega rápida. Comprei online e superou as expectativas. Embalagem linda, como presente. Parabéns à equipe!", extra: "Avaliação Google" },
 ];
 
-export function HomeClient({ produtosIniciais = [] }: { produtosIniciais?: any[] }) {
-  const [produtos, setProdutos] = useState<any[]>(produtosIniciais);
-  const [carregando, setCarregando] = useState(produtosIniciais.length === 0);
+export function HomeClient({
+  produtosIniciais = [],
+  categoriasIniciais = [],
+}: {
+  produtosIniciais?: Produto[];
+  categoriasIniciais?: Categoria[];
+}) {
+  const { produtos, carregando } = useCatalogo(
+    { includeCategorias: false },
+    produtosIniciais,
+    categoriasIniciais
+  );
   const [carrinho, setCarrinho] = useState<any[]>([]);
   const [ultimoAdicionadoId, setUltimoAdicionadoId] = useState<number | null>(null);
-  const PRODUTOS_CACHE_KEY = "home_produtos_cache_v1";
-  const PRODUTOS_CACHE_TTL_MS = 5 * 60 * 1000;
-  const PRODUTOS_TIMEOUT_MS = 12_000;
-
-  useEffect(() => {
-    if (produtosIniciais.length > 0) {
-      setCarregando(false);
-      return;
-    }
-    let tinhaCache = false;
-    try {
-      const raw = localStorage.getItem(PRODUTOS_CACHE_KEY);
-      if (raw) {
-        const cache = JSON.parse(raw);
-        const valido = Date.now() - Number(cache?.ts || 0) < PRODUTOS_CACHE_TTL_MS;
-        if (valido && Array.isArray(cache?.rows) && cache.rows.length > 0) {
-          setProdutos(cache.rows);
-          setCarregando(false);
-          tinhaCache = true;
-        }
-      }
-    } catch {}
-
-    if (!tinhaCache) setCarregando(true);
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), PRODUTOS_TIMEOUT_MS);
-
-    fetch(`${API_URL}/produtos`, { signal: controller.signal })
-      .then(res => {
-        if (!res.ok) throw new Error(`API ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        const arr = Array.isArray(data) ? data : [];
-        const filtrados = arr.filter((p: any) => p.ativo !== false && (p.estoque ?? 0) > 0);
-        setProdutos(filtrados);
-        try {
-          localStorage.setItem(PRODUTOS_CACHE_KEY, JSON.stringify({ ts: Date.now(), rows: filtrados }));
-        } catch {}
-      })
-      .catch(err => {
-        console.error("Erro ao carregar produtos:", err);
-        if (!tinhaCache) setProdutos([]);
-      })
-      .finally(() => {
-        clearTimeout(timeoutId);
-        setCarregando(false);
-      });
-    const salvo = localStorage.getItem("carrinho");
-    if (salvo) setCarrinho(JSON.parse(salvo));
-
-    return () => {
-      clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [produtosIniciais.length]);
 
   useEffect(() => {
     const salvo = localStorage.getItem("carrinho");
     if (salvo) setCarrinho(JSON.parse(salvo));
   }, []);
 
-  const adicionarAoCarrinho = (produto: any, e: React.MouseEvent) => {
+  const adicionarAoCarrinho = (produto: Produto, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const novo = [...carrinho];
@@ -98,14 +51,8 @@ export function HomeClient({ produtosIniciais = [] }: { produtosIniciais?: any[]
     setTimeout(() => setUltimoAdicionadoId(null), 1800);
   };
 
-  const totalItens = carrinho.reduce((acc: number, i: any) => acc + (i.quantidade || 1), 0);
   const maisVendidos = produtos.slice(0, 8);
-
-  const getProdutoImagem = (p: any) => {
-    const url = p?.imagem_url;
-    if (url && !url.includes("placeholder")) return url;
-    return "/logo.png";
-  };
+  const getProdutoImagem = getProdutoImagemPadrao;
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -195,33 +142,40 @@ export function HomeClient({ produtosIniciais = [] }: { produtosIniciais?: any[]
             <Link href="/produtos" className="hidden sm:inline-flex items-center text-sm font-semibold text-[var(--accent)] hover:underline">Ver todos</Link>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {maisVendidos.map((produto) => (
-              <div key={produto.id} className="store-card p-3 sm:p-4 rounded-2xl bg-white">
-                <Link href={`/produto/${produto.id}`} className="block">
-                  <div className="aspect-square rounded-xl bg-[var(--warm-100)] overflow-hidden mb-3 sm:mb-4">
-                    <img
-                      src={getProdutoImagem(produto)}
-                      alt={produto.nome}
-                      className="w-full h-full object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).src = "/logo.png"; }}
-                    />
+          {carregando && maisVendidos.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-12 h-12 border-4 border-[var(--accent-light)] border-t-[var(--accent)] rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-[var(--muted)]">Carregando produtos...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {maisVendidos.map((produto) => (
+                <div key={produto.id} className="store-card p-3 sm:p-4 rounded-2xl bg-white">
+                  <Link href={`/produto/${produto.id}`} className="block">
+                    <div className="aspect-square rounded-xl bg-[var(--warm-100)] overflow-hidden mb-3 sm:mb-4">
+                      <img
+                        src={getProdutoImagem(produto)}
+                        alt={produto.nome}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).src = "/logo.png"; }}
+                      />
+                    </div>
+                    <h3 className="text-sm sm:text-base font-semibold text-[var(--foreground)] line-clamp-2 min-h-[2.8rem]">{produto.nome}</h3>
+                    <p className="text-lg sm:text-xl font-black text-[var(--accent)] mt-1 mb-3">R$ {Number(produto.preco).toFixed(2).replace(".", ",")}</p>
+                  </Link>
+                  <div className="flex flex-col gap-2">
+                    <Link href={`/produto/${produto.id}`} className="btn-primary w-full text-xs sm:text-sm py-2.5">Comprar</Link>
+                    <button
+                      onClick={(e) => adicionarAoCarrinho(produto, e)}
+                      className="w-full px-3 py-2.5 rounded-xl border-2 border-[var(--border-strong)] text-[var(--accent)] font-semibold text-xs sm:text-sm hover:bg-[var(--accent-light)] transition-colors"
+                    >
+                      {ultimoAdicionadoId === produto.id ? "Adicionado ✓" : "Adicionar ao carrinho"}
+                    </button>
                   </div>
-                  <h3 className="text-sm sm:text-base font-semibold text-[var(--foreground)] line-clamp-2 min-h-[2.8rem]">{produto.nome}</h3>
-                  <p className="text-lg sm:text-xl font-black text-[var(--accent)] mt-1 mb-3">R$ {Number(produto.preco).toFixed(2).replace(".", ",")}</p>
-                </Link>
-                <div className="flex flex-col gap-2">
-                  <Link href={`/produto/${produto.id}`} className="btn-primary w-full text-xs sm:text-sm py-2.5">Comprar</Link>
-                  <button
-                    onClick={(e) => adicionarAoCarrinho(produto, e)}
-                    className="w-full px-3 py-2.5 rounded-xl border-2 border-[var(--border-strong)] text-[var(--accent)] font-semibold text-xs sm:text-sm hover:bg-[var(--accent-light)] transition-colors"
-                  >
-                    {ultimoAdicionadoId === produto.id ? "Adicionado ✓" : "Adicionar ao carrinho"}
-                  </button>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

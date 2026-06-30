@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const PROD_API_URL = "https://emporio-bothanico.onrender.com";
-const API_URL =
-  process.env.NODE_ENV === "production"
-    ? PROD_API_URL
-    : process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { getBackendUrl } from "@/lib/api";
 // Instância free do Render pode demorar ~50s para acordar.
 const LOGIN_TIMEOUT_MS = 70_000;
 
@@ -20,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), LOGIN_TIMEOUT_MS);
-    const res = await fetch(`${API_URL}/auth/login`, {
+    const res = await fetch(`${getBackendUrl()}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, senha }),
