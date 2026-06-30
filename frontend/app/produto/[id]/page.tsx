@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { StoreHeader } from "@/components/StoreHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { DescricaoExpandivel } from "@/components/produtos/DescricaoExpandivel";
 
 export const dynamic = "force-dynamic";
 
@@ -304,9 +305,11 @@ function ProdutoContent() {
                 </h1>
 
                 {produto.descricao && (
-                  <p className="text-[15px] leading-[1.7] text-[#555] max-w-[520px] mb-6">
-                    {produto.descricao}
-                  </p>
+                  <DescricaoExpandivel
+                    texto={produto.descricao}
+                    limite={200}
+                    className="max-w-[520px] mb-6 [&_p]:text-[15px] [&_p]:leading-[1.7] [&_p]:text-[#555]"
+                  />
                 )}
 
                 <div className="inline-block bg-[#f3f7f5] px-6 py-6 rounded-2xl mb-5">

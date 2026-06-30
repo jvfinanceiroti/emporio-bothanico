@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Heart, ShoppingBag, Check } from "lucide-react";
 import type { Produto } from "@/lib/catalogo";
+import { DescricaoExpandivel } from "@/components/produtos/DescricaoExpandivel";
 
 interface ProdutoCardCatalogProps {
   produto: Produto;
@@ -50,7 +51,9 @@ export function ProdutoCardCatalog({
               <Heart className={`w-4 h-4 ${favorito ? "fill-[var(--lux-gold)] text-[var(--lux-gold)]" : ""}`} strokeWidth={1.5} />
             </button>
           </div>
-          {produto.descricao && <p className="text-xs text-[var(--lux-warm-gray)] line-clamp-2 mt-1">{produto.descricao}</p>}
+          {produto.descricao && (
+            <DescricaoExpandivel texto={produto.descricao} className="mt-1" />
+          )}
           <p className="text-xl text-[var(--lux-deep)] mt-2" style={{ fontFamily: "var(--font-display)" }}>R$ {preco}</p>
           <div className="mt-auto pt-3 flex gap-2">
             <button

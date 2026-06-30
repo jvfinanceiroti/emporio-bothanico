@@ -54,11 +54,32 @@ export function StoreHeader() {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 48);
+    if (!isHome) {
+      setScrolled(false);
+      return;
+    }
+
+    const getScrollY = () =>
+      window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+
+    const onScroll = () => {
+      const y = getScrollY();
+      setScrolled((prev) => {
+        if (y <= 10) return false;
+        if (y >= 48) return true;
+        return prev;
+      });
+    };
+
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    window.addEventListener("resize", onScroll);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [isHome, pathname]);
 
   useEffect(() => {
     setMenuAberto(false);
